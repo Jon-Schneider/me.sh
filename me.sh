@@ -69,6 +69,7 @@ function install_atom_packages {
 	apm install swift-debugger
 	apm install minimap
 	apm install atom-terminal
+	apm instal autocomplete-clang
 	message "Finished Installing Atom Packages"
 }
 
