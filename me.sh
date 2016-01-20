@@ -66,7 +66,6 @@ function install_gems {
 function install_atom_packages {
 	message "Installing Atom Packages"
 	apm install language-swift
-	apm install language-swift
 	apm install swift-debugger
 	apm install minimap
 	apm install atom-terminal
