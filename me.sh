@@ -36,7 +36,6 @@ function install_casks {
 	brew cask install dash
 	brew cask install deploymate
 	brew cask install disk-inventory-x
-	brew cask install dropbox
 	brew cask install dukto
 	brew cask install evernote
 	brew cask install gimp
@@ -44,6 +43,7 @@ function install_casks {
 	brew cask install libreoffice
 	brew cask install macdown
 	# brew cask install minecraft
+	brew cask install owncloud
 	brew cask install slack
 	brew cask install sonic-visualiser
 	brew cask install textwrangler
