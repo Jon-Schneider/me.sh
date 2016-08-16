@@ -44,6 +44,7 @@ function install_casks {
 	brew cask install macdown
 	# brew cask install minecraft
 	brew cask install owncloud
+	brew cask install qlmarkdown
 	brew cask install slack
 	brew cask install sonic-visualiser
 	brew cask install textwrangler
