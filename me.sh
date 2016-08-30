@@ -97,10 +97,11 @@ message "Finished Installing Cask"
 install_casks
 
 # Ruby and Rails
-#message "Installing RVM"
-#gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
-#\curl -sSL https://get.rvm.io | bash -s stable --ruby
-#message "Finished Installing RVM"
+
+message "Installing RVM"
+\curl -sSL https://get.rvm.io | bash -s stable --ruby --rails
+source "/Users/$USER/.rvm/scripts/rvm"
+message "Finished Installing RVM"
 
 install_gems
 
