@@ -58,6 +58,7 @@ function install_casks {
 # Install Rubygems
 function install_gems {
 	message "Installing Rubygems"
+	rvm use ruby
 	gem install cocoapods #sudo for system dir, non-sudo for RVM install
 	gem install rails #sudo for system dir, non-sudo for RVM install
 	message "Rubygems install completed"
@@ -99,8 +100,10 @@ install_casks
 # Ruby and Rails
 
 message "Installing RVM"
-\curl -sSL https://get.rvm.io | bash -s stable --ruby --rails
-source "/Users/$USER/.rvm/scripts/rvm"
+\curl -sSL https://get.rvm.io | bash -s stable
+rvm install ruby
+rvm install jruby
+rvm install rbx
 message "Finished Installing RVM"
 
 install_gems
