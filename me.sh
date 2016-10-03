@@ -112,4 +112,7 @@ install_pip_packages
 
 install_atom_packages
 
+# Configure TextWrangler to navigate between tabs in display order, not open order
+defaults write com.barebones.textwrangler SurfNextPreviousInDisplayOrder -bool YES
+
 message "Configuration Complete! Now you are Jon too!"
