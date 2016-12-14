@@ -10,6 +10,11 @@ function message {
 	printf "${G}$1${NC}\n"
 }
 
+# Set up global .gitignore
+
+cp ./.gitignore ~/.gitignore_global
+git config --global core.excludesfile ~/.gitignore_global
+
 # Install packages managed by Homebrew
 function install_brews {
 	message "Installing your brews"
