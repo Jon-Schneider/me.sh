@@ -1,7 +1,9 @@
 # I am Jon (and so can you!)
 
 # Prerequisites
-# You must open Xcode, agree to the license, and install the dev tools prior to using Homebrew.
+# You must install the Xcode Command Line tools prior to using homebrew. 
+# You can do this by installing and opening Xcode, agreeing to the license, and installing the dev tools prior to using 
+# Homebrew. Or you can run 'xcode-select --install' in the Terminal to install just the tools.
 # To avoid configuration issues with Homebrew and Cask I recommend uninstalling and reinstalling Brew
 
 function message {
@@ -21,6 +23,7 @@ function install_brews {
 	brew update
 	brew doctor
 	brew install carthage
+	brew install mas
 	brew install mysql
 	brew install postgresql
 	brew install python
@@ -45,6 +48,7 @@ function install_casks {
 	brew cask install evernote
 	brew cask install gimp
 	brew cask install google-chrome
+	# brew cask install kindle
 	brew cask install libreoffice
 	brew cask install macdown
 	# brew cask install minecraft
@@ -54,10 +58,20 @@ function install_casks {
 	brew cask install sonic-visualiser
 	brew cask install textwrangler
 	# brew cask install torbrowser
+	brew cask install the-unarchiver
 	brew cask install transmission
 	brew cask install virtualbox
 	brew cask install vlc
 	message "Finished Installing Casks"
+}
+
+# Install Mac App Store Apps
+function install_mas {
+	mas install 497799835 # Xcode
+	mas install 407963104 # Pixelmator
+	mas install 784801555 # OneNote
+	mas install 427475982 # BreakTime
+	mas install 803453959 # Slack
 }
 
 # Install Rubygems
@@ -94,6 +108,9 @@ ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/
 message "Homebrew install completed"
 
 install_brews
+
+# Mac App Store Apps
+install_mas
 
 # Cask
 message "Installing Cask"
