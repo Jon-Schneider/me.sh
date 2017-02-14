@@ -102,6 +102,14 @@ function install_pip_packages {
 	message "Finished Installing Pip Packages"
 }
 
+# Install Finder QuickLook Previews
+
+## QLMobi - Kindle Books
+cd "Downloads"
+curl -fsSL -o QLMobi.zip $(curl https://api.github.com/repos/bfabiszewski/QLMobi/releases | grep browser_download_url | head -n 1 | cut -d '"' -f 4)
+unzip QLMobi.zip
+cp -R QLMobi.qlgenerator ~/Library/QuickLook
+
 # Brew
 message "Installing Homebrew"
 ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
