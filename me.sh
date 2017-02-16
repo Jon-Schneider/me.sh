@@ -54,6 +54,7 @@ function install_casks {
 	# brew cask install minecraft
 	brew cask install owncloud
 	brew cask install qlmarkdown
+	brew cask install qlmobi
 	brew cask install slack
 	brew cask install sonic-visualiser
 	brew cask install textwrangler
@@ -101,14 +102,6 @@ function install_pip_packages {
 	pip install grip
 	message "Finished Installing Pip Packages"
 }
-
-# Install Finder QuickLook Previews
-
-## QLMobi - Kindle Books
-cd "Downloads"
-curl -fsSL -o QLMobi.zip $(curl https://api.github.com/repos/bfabiszewski/QLMobi/releases | grep browser_download_url | head -n 1 | cut -d '"' -f 4)
-unzip QLMobi.zip
-cp -R QLMobi.qlgenerator ~/Library/QuickLook
 
 # Brew
 message "Installing Homebrew"
