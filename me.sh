@@ -72,7 +72,6 @@ function install_mas {
 	mas install 407963104 # Pixelmator
 	mas install 784801555 # OneNote
 	mas install 427475982 # BreakTime
-	mas install 803453959 # Slack
 }
 
 # Install Rubygems
