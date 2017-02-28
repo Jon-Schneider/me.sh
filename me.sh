@@ -22,6 +22,7 @@ function install_brews {
 	message "Installing your brews"
 	brew update
 	brew doctor
+	brew install appledoc
 	brew install carthage
 	brew install mas
 	brew install mysql
