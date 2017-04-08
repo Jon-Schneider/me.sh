@@ -1,8 +1,8 @@
 # I am Jon (and so can you!)
 
 # Prerequisites
-# You must install the Xcode Command Line tools prior to using homebrew. 
-# You can do this by installing and opening Xcode, agreeing to the license, and installing the dev tools prior to using 
+# You must install the Xcode Command Line tools prior to using homebrew.
+# You can do this by installing and opening Xcode, agreeing to the license, and installing the dev tools prior to using
 # Homebrew. Or you can run 'xcode-select --install' in the Terminal to install just the tools.
 # To avoid configuration issues with Homebrew and Cask I recommend uninstalling and reinstalling Brew
 
@@ -70,6 +70,7 @@ function install_casks {
 # Install Mac App Store Apps
 function install_mas {
 	mas install 497799835 # Xcode
+	mas install 585829637 # Todoist
 	mas install 407963104 # Pixelmator
 	mas install 784801555 # OneNote
 	mas install 427475982 # BreakTime
