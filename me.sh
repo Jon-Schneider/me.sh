@@ -56,7 +56,6 @@ function install_casks {
 	brew cask install owncloud
 	brew cask install qlmarkdown
 	brew cask install qlmobi
-	brew cask install slack
 	brew cask install sonic-visualiser
 	brew cask install textwrangler
 	# brew cask install torbrowser
@@ -72,6 +71,7 @@ function install_mas {
 	mas install 497799835 # Xcode
 	mas install 585829637 # Todoist
 	mas install 407963104 # Pixelmator
+	mas install 568494494 # Pocket
 	mas install 784801555 # OneNote
 	mas install 427475982 # BreakTime
 }
