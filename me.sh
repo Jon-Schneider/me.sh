@@ -1,10 +1,11 @@
-# I am Jon (and so can you!)
+#!/bin/bash
 
 # Prerequisites
 # You must install the Xcode Command Line tools prior to using homebrew.
-# You can do this by installing and opening Xcode, agreeing to the license, and installing the dev tools prior to using
-# Homebrew. Or you can run 'xcode-select --install' in the Terminal to install just the tools.
-# To avoid configuration issues with Homebrew and Cask I recommend uninstalling and reinstalling Brew
+# You can do this by installing and opening Xcode, agreeing to the license, and installing the dev
+# tools prior to using Homebrew. Or you can run 'xcode-select --install' in the Terminal to install
+# just the tools. To avoid configuration issues with Homebrew and Cask I recommend uninstalling and
+# reinstalling Brew
 
 function message {
 	G='\033[0;32m'
@@ -27,7 +28,6 @@ function install_brews {
 	brew install mas
 	brew install mysql
 	brew install postgresql
-	brew install python
 	message "Brews install completed"
 }
 
@@ -35,19 +35,14 @@ function install_brews {
 function install_casks {
 	message "Installing Casks"
 	# Personal commented out
-	brew cask install android-studio
+	# brew cask install android-studio
 	brew cask install atom
-	brew cask install audacity
 	# brew cask install calibre
 	brew cask install ccleaner
 	brew cask install coconutbattery
 	brew cask install cyberduck
-	brew cask install dash
 	brew cask install deploymate
 	brew cask install disk-inventory-x
-	brew cask install dukto
-	brew cask install evernote
-	brew cask install gimp
 	brew cask install google-chrome
 	# brew cask install kindle
 	brew cask install libreoffice
@@ -56,12 +51,10 @@ function install_casks {
 	brew cask install owncloud
 	brew cask install qlmarkdown
 	brew cask install qlmobi
-	brew cask install sonic-visualiser
 	brew cask install textwrangler
 	# brew cask install torbrowser
 	brew cask install the-unarchiver
 	brew cask install transmission
-	brew cask install virtualbox
 	brew cask install vlc
 	message "Finished Installing Casks"
 }
@@ -69,7 +62,7 @@ function install_casks {
 # Install Mac App Store Apps
 function install_mas {
 	mas install 497799835 # Xcode
-	mas install 585829637 # Todoist
+	mas install 410628904 # Wunderlist
 	mas install 407963104 # Pixelmator
 	mas install 568494494 # Pocket
 	mas install 784801555 # OneNote
@@ -96,14 +89,6 @@ function install_atom_packages {
 	message "Finished Installing Atom Packages"
 }
 
-# Install Pip Packages
-function install_pip_packages {
-	message "Installing Pip Packages"
-	pip install -U pip
-	pip install grip
-	message "Finished Installing Pip Packages"
-}
-
 # Brew
 message "Installing Homebrew"
 ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
@@ -126,8 +111,8 @@ install_casks
 message "Installing RVM"
 \curl -sSL https://get.rvm.io | bash -s stable
 rvm install ruby
-rvm install jruby
-rvm install rbx
+# rvm install jruby
+# rvm install rbx
 message "Finished Installing RVM"
 
 install_gems
@@ -139,4 +124,4 @@ install_atom_packages
 # Configure TextWrangler to navigate between tabs in display order, not open order
 defaults write com.barebones.textwrangler SurfNextPreviousInDisplayOrder -bool YES
 
-message "Configuration Complete! Now you are Jon too!"
+message "Configuration Complete"
