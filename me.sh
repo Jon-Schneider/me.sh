@@ -74,6 +74,7 @@ function install_gems {
 	message "Installing Rubygems"
 	rvm use ruby
 	gem install cocoapods #sudo for system dir, non-sudo for RVM install
+	gem install jekyll
 	gem install rails #sudo for system dir, non-sudo for RVM install
 	message "Rubygems install completed"
 }
