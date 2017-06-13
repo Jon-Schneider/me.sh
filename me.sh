@@ -123,8 +123,9 @@ install_pip_packages
 
 install_atom_packages
 
-# Configure TextWrangler to navigate between tabs in display order, not open order
-defaults write com.barebones.textwrangler SurfNextPreviousInDisplayOrder -bool YES
+defaults write com.barebones.textwrangler SurfNextPreviousInDisplayOrder -bool YES # Configure TextWrangler to navigate between tabs in display order, not open order
+defaults write com.barebones.textwrangler EditorSoftWrap -bool YES
+defaults write com.barebones.textwrangler SoftWrapStyle -integer 2
 
 # Configure OS to show hidden files in Finder
 defaults write com.apple.Finder AppleShowAllFiles true
