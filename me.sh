@@ -111,6 +111,7 @@ install_casks
 
 message "Installing RVM"
 \curl -sSL https://get.rvm.io | bash -s stable
+source /Users/jon/.rvm/scripts/rvm # Required to run rvm commands
 rvm install ruby
 # rvm install jruby
 # rvm install rbx
@@ -124,5 +125,9 @@ install_atom_packages
 
 # Configure TextWrangler to navigate between tabs in display order, not open order
 defaults write com.barebones.textwrangler SurfNextPreviousInDisplayOrder -bool YES
+
+# Configure OS to show hidden files in Finder
+defaults write com.apple.Finder AppleShowAllFiles true
+killall Finder
 
 message "Configuration Complete"
