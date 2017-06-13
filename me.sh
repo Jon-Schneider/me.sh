@@ -51,6 +51,7 @@ function install_casks {
 	brew cask install owncloud
 	brew cask install qlmarkdown
 	brew cask install qlmobi
+	brew cask install rescuetime
 	# brew cask install torbrowser
 	brew cask install the-unarchiver
 	brew cask install transmission
