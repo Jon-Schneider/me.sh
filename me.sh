@@ -51,7 +51,6 @@ function install_casks {
 	brew cask install owncloud
 	brew cask install qlmarkdown
 	brew cask install qlmobi
-	brew cask install textwrangler
 	# brew cask install torbrowser
 	brew cask install the-unarchiver
 	brew cask install transmission
@@ -62,6 +61,7 @@ function install_casks {
 # Install Mac App Store Apps
 function install_mas {
 	mas install 497799835 # Xcode
+	mas install 404010395 # TextWrangler
 	mas install 410628904 # Wunderlist
 	mas install 407963104 # Pixelmator
 	mas install 568494494 # Pocket
