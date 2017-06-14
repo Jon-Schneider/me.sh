@@ -43,6 +43,7 @@ function install_casks {
 	brew cask install cyberduck
 	brew cask install deploymate
 	brew cask install disk-inventory-x
+	brew cask install flux
 	brew cask install google-chrome
 	# brew cask install kindle
 	brew cask install libreoffice
