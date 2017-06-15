@@ -134,4 +134,7 @@ defaults write com.barebones.textwrangler EditingWindowShowPageGuide -bool NO
 defaults write com.apple.Finder AppleShowAllFiles true
 killall Finder
 
+# Set Screenshot Save Location
+defaults write com.apple.screencapture location ~/Downloads
+
 message "Configuration Complete"
