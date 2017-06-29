@@ -48,7 +48,6 @@ function install_casks {
 	# brew cask install kindle
 	brew cask install libreoffice
 	brew cask install macdown
-	# brew cask install minecraft
 	brew cask install nextcloud
 	brew cask install qlmarkdown
 	brew cask install qlmobi
@@ -56,7 +55,6 @@ function install_casks {
 	# brew cask install torbrowser
 	brew cask install the-unarchiver
 	brew cask install transmission
-	brew cask install vlc
 	message "Finished Installing Casks"
 }
 
