@@ -37,6 +37,7 @@ function install_casks {
 	# Personal commented out
 	# brew cask install android-studio
 	brew cask install atom
+	brew cask install bbedit
 	# brew cask install calibre
 	brew cask install ccleaner
 	brew cask install coconutbattery
@@ -61,7 +62,6 @@ function install_casks {
 # Install Mac App Store Apps
 function install_mas {
 	mas install 497799835 # Xcode
-	mas install 404010395 # TextWrangler
 	mas install 410628904 # Wunderlist
 	mas install 407963104 # Pixelmator
 	mas install 568494494 # Pocket
@@ -123,10 +123,10 @@ install_pip_packages
 
 install_atom_packages
 
-defaults write com.barebones.textwrangler SurfNextPreviousInDisplayOrder -bool YES # Configure TextWrangler to navigate between tabs in display order, not open order
-defaults write com.barebones.textwrangler EditorSoftWrap -bool YES
-defaults write com.barebones.textwrangler SoftWrapStyle -integer 2
-defaults write com.barebones.textwrangler EditingWindowShowPageGuide -bool NO
+defaults write com.barebones.bbedit SurfNextPreviousInDisplayOrder -bool YES # Configure BBedit to navigate between tabs in display order, not open order
+defaults write com.barebones.bbedit EditorSoftWrap -bool YES
+defaults write com.barebones.bbedit SoftWrapStyle -integer 2
+defaults write com.barebones.bbedit EditingWindowShowPageGuide -bool NO
 
 # Configure OS to show hidden files in Finder
 defaults write com.apple.Finder AppleShowAllFiles true
