@@ -135,4 +135,7 @@ killall Finder
 # Set Screenshot Save Location
 defaults write com.apple.screencapture location ~/Downloads
 
+# Copy Atom Keymap file to default Location
+cp -v keymap.cson ~/.atom
+
 message "Configuration Complete"
