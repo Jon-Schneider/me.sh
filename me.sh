@@ -138,4 +138,8 @@ defaults write com.apple.screencapture location ~/Downloads
 # Copy Atom Keymap file to default Location
 cp -v keymap.cson ~/.atom
 
+# Set up .vimrc and .vim
+mkdir -p ~/.vim/.backup ~/.vim/.tmp ~/.vim/.undo
+cp .vimrc ~/
+
 message "Configuration Complete"
