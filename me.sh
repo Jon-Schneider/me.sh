@@ -42,6 +42,7 @@ function install_casks {
 	brew cask install ccleaner
 	brew cask install coconutbattery
 	brew cask install cyberduck
+	brew cask install dash
 	brew cask install deploymate
 	brew cask install disk-inventory-x
 	brew cask install epubquicklook
