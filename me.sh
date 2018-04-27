@@ -145,6 +145,6 @@ mkdir -p ~/.vim/.backup ~/.vim/.tmp ~/.vim/.undo
 cp .vimrc ~/
 
 # Add '~/bin' to PATH
-echo export "PATH=\"\$PATH:$HOME/bin\"" >> .bash_profile
+sed -i '' -e '$a\' ~/.bash_profile && echo export "PATH=\"\$PATH:\$HOME/bin\"" >> ~/.bash_profile
 
 message "Configuration Complete"
