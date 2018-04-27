@@ -144,4 +144,7 @@ cp -v keymap.cson ~/.atom
 mkdir -p ~/.vim/.backup ~/.vim/.tmp ~/.vim/.undo
 cp .vimrc ~/
 
+# Add '~/bin' to PATH
+echo export "PATH=\"\$PATH:$HOME/bin\"" >> .bash_profile
+
 message "Configuration Complete"
