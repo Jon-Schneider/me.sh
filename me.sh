@@ -28,6 +28,7 @@ function install_brews {
 	brew install mas
 	brew install mysql
 	brew install postgresql
+	brew install yarn
 	message "Brews install completed"
 }
 
