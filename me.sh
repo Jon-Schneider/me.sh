@@ -59,6 +59,7 @@ function install_casks {
 	# brew cask install torbrowser
 	brew cask install the-unarchiver
 	brew cask install transmission
+	brew cask install visual-studio-code
 	message "Finished Installing Casks"
 }
 
