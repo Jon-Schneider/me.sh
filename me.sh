@@ -124,7 +124,7 @@ install_gems
 
 install_pip_packages
 
-install_atom_packages
+install_vscode_packages
 
 defaults write com.barebones.bbedit SurfNextPreviousInDisplayOrder -bool YES # Configure BBedit to navigate between tabs in display order, not open order
 defaults write com.barebones.bbedit EditorSoftWrap -bool YES
