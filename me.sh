@@ -138,8 +138,9 @@ killall Finder
 # Set Screenshot Save Location
 defaults write com.apple.screencapture location ~/Downloads
 
-# Copy Atom Keymap file to default Location
-cp -v keymap.cson ~/.atom
+# Copy Visual Studio Code config files to default location
+cp -v vscode/keybindings.json ~/Library/Application\ Support/Code/User/
+cp -v vscode/settings.json ~/Library/Application\ Support/Code/User/
 
 # Set up .vimrc and .vim
 mkdir -p ~/.vim/.backup ~/.vim/.tmp ~/.vim/.undo

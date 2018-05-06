@@ -1,0 +1,5 @@
+{
+    "window.newWindowDimensions": "inherit",
+    "workbench.startupEditor": "newUntitledFile",
+    "workbench.colorTheme": "Visual Studio Light",
+}
