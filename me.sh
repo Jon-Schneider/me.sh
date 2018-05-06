@@ -83,9 +83,11 @@ function install_vscode_packages {
 	code --install-extension Arjun.swagger-viewer
 	code --install-extension blanu.vscode-styled-jsx
 	code --install-extension formulahendry.code-runner
-	code --install-extension ms-vscode.go
+	code --install-extension LaurentTreguier.vscode-simple-icons # I like the 'minimalist' monocrome icons
 	code --install-extension ms-kubernetes-tools.vscode-kubernetes-tools
 	code --install-extension ms-python.python
+	code --install-extension ms-vscode.cpptools
+	code --install-extension ms-vscode.go
 	code --install-extension msjsdiag.debugger-for-chrome
 	code --install-extension PeterJausovec.vscode-docker
 	code --install-extension rebornix.ruby
