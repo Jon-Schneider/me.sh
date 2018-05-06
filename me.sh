@@ -20,7 +20,7 @@ git config --global core.excludesfile ~/.gitignore_global
 
 # Install packages managed by Homebrew
 function install_brews {
-	message "Installing your brews"
+	message "Installing Brews..."
 	brew update
 	brew doctor
 	brew install appledoc
@@ -29,7 +29,7 @@ function install_brews {
 	brew install mysql
 	brew install postgresql
 	brew install yarn
-	message "Brews install completed"
+	message "Finished Installing Brews..."
 }
 
 # Install Applications via Cask
@@ -60,26 +60,29 @@ function install_casks {
 
 # Install Mac App Store Apps
 function install_mas {
+	message "Installing Mac App Store Apps"
 	mas install 497799835 # Xcode
 	mas install 410628904 # Wunderlist
 	mas install 407963104 # Pixelmator
 	mas install 568494494 # Pocket
 	mas install 784801555 # OneNote
 	mas install 427475982 # BreakTime
+	message "Finished Installing Mac App Store Apps"
 }
 
 # Install Rubygems
 function install_gems {
 	message "Installing Rubygems"
 	rvm use ruby
-	gem install cocoapods #sudo for system dir, non-sudo for RVM install
+	gem install cocoapods
 	gem install jekyll
-	gem install rails #sudo for system dir, non-sudo for RVM install
-	message "Rubygems install completed"
+	gem install rails
+	message "Finished Installing Rubygems"
 }
 
 # Install Visual Studio Code Packages
 function install_vscode_packages {
+	message "Installing Rubygems Visual Studio Code Extensions"
 	code --install-extension Arjun.swagger-viewer
 	code --install-extension blanu.vscode-styled-jsx
 	code --install-extension formulahendry.code-runner
@@ -93,6 +96,7 @@ function install_vscode_packages {
 	code --install-extension rebornix.ruby
 	code --install-extension redhat.vscode-yaml
 	code --install-extension yzhang.markdown-all-in-one
+	message "Finished Installing Rubygems Visual Studio Code Extensions"
 }
 
 # Brew
@@ -102,17 +106,14 @@ message "Homebrew install completed"
 
 install_brews
 
-# Mac App Store Apps
-install_mas
-
 # Cask
-message "Installing Cask"
+message "Installing Homebrew Cask"
 brew tap caskroom/cask
-message "Finished Installing Cask"
+message "Finished Installing Homebrew Cask"
 
 install_casks
 
-# Ruby and Rails
+install_mas
 
 message "Installing RVM"
 \curl -sSL https://get.rvm.io | bash -s stable
@@ -124,10 +125,9 @@ message "Finished Installing RVM"
 
 install_gems
 
-install_pip_packages
-
 install_vscode_packages
 
+# BBEdit Configuration 
 defaults write com.barebones.bbedit SurfNextPreviousInDisplayOrder -bool YES # Configure BBedit to navigate between tabs in display order, not open order
 defaults write com.barebones.bbedit EditorSoftWrap -bool YES
 defaults write com.barebones.bbedit SoftWrapStyle -integer 2
@@ -137,8 +137,12 @@ defaults write com.barebones.bbedit EditingWindowShowPageGuide -bool NO
 defaults write com.apple.Finder AppleShowAllFiles true
 killall Finder
 
+# Create Tmp Dir
+mkdir ~/Tmp
+
 # Set Screenshot Save Location
-defaults write com.apple.screencapture location ~/Downloads
+defaults write com.apple.screencapture location ~/Tmp
+killall SystemUIServer
 
 # Copy Visual Studio Code config files to default location
 cp -v vscode/keybindings.json ~/Library/Application\ Support/Code/User/
