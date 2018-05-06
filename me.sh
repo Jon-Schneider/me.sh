@@ -35,16 +35,13 @@ function install_brews {
 # Install Applications via Cask
 function install_casks {
 	message "Installing Casks"
-	# Personal commented out
 	# brew cask install android-studio
-	brew cask install atom
 	brew cask install bbedit
 	# brew cask install calibre
 	brew cask install ccleaner
 	brew cask install coconutbattery
 	brew cask install cyberduck
 	brew cask install dash
-	brew cask install deploymate
 	brew cask install disk-inventory-x
 	brew cask install epubquicklook
 	brew cask install flux
@@ -55,10 +52,8 @@ function install_casks {
 	brew cask install nextcloud
 	brew cask install qlmarkdown
 	brew cask install qlmobi
-	brew cask install rescuetime
 	# brew cask install torbrowser
 	brew cask install the-unarchiver
-	brew cask install transmission
 	brew cask install visual-studio-code
 	message "Finished Installing Casks"
 }
@@ -83,15 +78,19 @@ function install_gems {
 	message "Rubygems install completed"
 }
 
-# Install Atom Packages
-function install_atom_packages {
-	message "Installing Atom Packages"
-	apm install language-swift
-	apm install swift-debugger
-	apm install minimap
-	apm install atom-terminal
-	apm install autocomplete-clang
-	message "Finished Installing Atom Packages"
+# Install Visual Studio Code Packages
+function install_vscode_packages {
+	code --install-extension Arjun.swagger-viewer
+	code --install-extension blanu.vscode-styled-jsx
+	code --install-extension formulahendry.code-runner
+	code --install-extension ms-vscode.go
+	code --install-extension ms-kubernetes-tools.vscode-kubernetes-tools
+	code --install-extension ms-python.python
+	code --install-extension msjsdiag.debugger-for-chrome
+	code --install-extension PeterJausovec.vscode-docker
+	code --install-extension rebornix.ruby
+	code --install-extension redhat.vscode-yaml
+	code --install-extension yzhang.markdown-all-in-one
 }
 
 # Brew
