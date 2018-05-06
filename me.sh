@@ -7,6 +7,17 @@
 # just the tools. To avoid configuration issues with Homebrew and Cask I recommend uninstalling and
 # reinstalling Brew
 
+function show_loading {
+	chars="/-\|"
+
+	while :; do
+		for (( i=0; i<${#chars}; i++ )); do
+			sleep 0.5
+			echo -en "${chars:$i:1}" "\r"
+		done
+	done
+}
+
 function message {
 	G='\033[0;32m'
 	NC='\033[0m'
@@ -21,6 +32,7 @@ git config --global core.excludesfile ~/.gitignore_global
 # Install packages managed by Homebrew
 function install_brews {
 	message "Installing Brews..."
+	show_loading
 	brew update
 	brew doctor
 	brew install appledoc
@@ -35,6 +47,7 @@ function install_brews {
 # Install Applications via Cask
 function install_casks {
 	message "Installing Casks"
+	show_loading
 	# brew cask install android-studio
 	brew cask install bbedit
 	# brew cask install calibre
@@ -61,6 +74,7 @@ function install_casks {
 # Install Mac App Store Apps
 function install_mas {
 	message "Installing Mac App Store Apps"
+	show_loading
 	mas install 497799835 # Xcode
 	mas install 410628904 # Wunderlist
 	mas install 407963104 # Pixelmator
@@ -73,6 +87,7 @@ function install_mas {
 # Install Rubygems
 function install_gems {
 	message "Installing Rubygems"
+	show_loading
 	rvm use ruby
 	gem install cocoapods
 	gem install jekyll
@@ -83,6 +98,7 @@ function install_gems {
 # Install Visual Studio Code Packages
 function install_vscode_packages {
 	message "Installing Rubygems Visual Studio Code Extensions"
+	show_loading
 	code --install-extension Arjun.swagger-viewer
 	code --install-extension blanu.vscode-styled-jsx
 	code --install-extension formulahendry.code-runner
@@ -116,6 +132,7 @@ install_casks
 install_mas
 
 message "Installing RVM"
+show_loading
 \curl -sSL https://get.rvm.io | bash -s stable
 source /Users/jon/.rvm/scripts/rvm # Required to run rvm commands
 rvm install ruby
