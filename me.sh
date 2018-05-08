@@ -172,4 +172,7 @@ cp .vimrc ~/
 # Add '~/bin' to PATH
 sed -i '' -e '$a\' ~/.bash_profile && echo export "PATH=\"\$PATH:\$HOME/bin\"" >> ~/.bash_profile
 
+# Set $GOPATH
+sed -i '' -e '$a\' ~/.bash_profile && echo export "export GOPATH=\"$HOME/go\"" >> ~/.bash_profile
+
 message "Configuration Complete"
