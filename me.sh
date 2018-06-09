@@ -41,6 +41,7 @@ function install_brews {
 	brew install mysql
 	brew install postgresql
 	brew install yarn
+	brew install zsh
 	message "Finished Installing Brews..."
 }
 
@@ -60,6 +61,7 @@ function install_casks {
 	brew cask install flux
 	brew cask install google-chrome
 	# brew cask install kindle
+	brew cask install iterm2
 	brew cask install libreoffice
 	brew cask install macdown
 	brew cask install nextcloud
@@ -169,10 +171,16 @@ cp -v vscode/settings.json ~/Library/Application\ Support/Code/User/
 mkdir -p ~/.vim/.backup ~/.vim/.tmp ~/.vim/.undo
 cp .vimrc ~/
 
-# Add '~/bin' to PATH
+# Install Oh My Zsh
+sh -c "$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"
+
+# Copy .zshrc
+cp -v .zshrc ~/.zshrc
+
+# Add '~/bin' to bash PATH
 sed -i '' -e '$a\' ~/.bash_profile && echo export "PATH=\"\$PATH:\$HOME/bin\"" >> ~/.bash_profile
 
-# Set $GOPATH
+# Set bash $GOPATH
 sed -i '' -e '$a\' ~/.bash_profile && echo export "export GOPATH=\"$HOME/go\"" >> ~/.bash_profile
 
 message "Configuration Complete"
