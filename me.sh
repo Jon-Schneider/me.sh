@@ -60,6 +60,7 @@ function install_casks {
 	brew cask install epubquicklook
 	brew cask install flux
 	brew cask install google-chrome
+	brew cask install karabiner-elements
 	# brew cask install kindle
 	brew cask install iterm2
 	brew cask install libreoffice
