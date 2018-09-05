@@ -184,4 +184,8 @@ sed -i '' -e '$a\' ~/.bash_profile && echo export "PATH=\"\$PATH:\$HOME/bin\"" >
 # Set bash $GOPATH
 sed -i '' -e '$a\' ~/.bash_profile && echo export "export GOPATH=\"$HOME/go\"" >> ~/.bash_profile
 
+# Set up Karabiner configuration
+mkdir ~/.config/karabiner
+cp -v karabiner.json ~/.config/karabiner
+
 message "Configuration Complete"
