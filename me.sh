@@ -49,11 +49,12 @@ function install_brews {
 function install_casks {
 	message "Installing Casks"
 	show_loading
-	# brew cask install android-studio
+	brew cask install android-studio
 	brew cask install bbedit
-	# brew cask install calibre
+	brew cask install calibre
 	brew cask install ccleaner
 	brew cask install coconutbattery
+	brew cask install cryptomator
 	brew cask install cyberduck
 	brew cask install dash
 	brew cask install disk-inventory-x
@@ -61,14 +62,14 @@ function install_casks {
 	brew cask install flux
 	brew cask install google-chrome
 	brew cask install karabiner-elements
-	# brew cask install kindle
+	brew cask install kindle
 	brew cask install iterm2
 	brew cask install libreoffice
 	brew cask install macdown
 	brew cask install nextcloud
 	brew cask install qlmarkdown
 	brew cask install qlmobi
-	# brew cask install torbrowser
+	brew cask install torbrowser
 	brew cask install the-unarchiver
 	brew cask install visual-studio-code
 	message "Finished Installing Casks"
@@ -78,12 +79,11 @@ function install_casks {
 function install_mas {
 	message "Installing Mac App Store Apps"
 	show_loading
-	mas install 497799835 # Xcode
-	mas install 410628904 # Wunderlist
-	mas install 407963104 # Pixelmator
-	mas install 568494494 # Pocket
-	mas install 784801555 # OneNote
 	mas install 427475982 # BreakTime
+	mas install 441258766 # Magnet
+	mas install 784801555 # OneNote
+	mas install 407963104 # Pixelmator
+	mas install 497799835 # Xcode
 	message "Finished Installing Mac App Store Apps"
 }
 
