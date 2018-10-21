@@ -69,8 +69,8 @@ function install_casks {
 	brew cask install nextcloud
 	brew cask install qlmarkdown
 	brew cask install qlmobi
-	brew cask install torbrowser
 	brew cask install the-unarchiver
+	brew cask install torbrowser
 	brew cask install visual-studio-code
 	message "Finished Installing Casks"
 }
