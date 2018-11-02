@@ -69,6 +69,7 @@ function install_casks {
 	brew cask install nextcloud
 	brew cask install qlmarkdown
 	brew cask install qlmobi
+	brew cask install spectacle
 	brew cask install the-unarchiver
 	brew cask install torbrowser
 	brew cask install visual-studio-code
@@ -80,7 +81,6 @@ function install_mas {
 	message "Installing Mac App Store Apps"
 	show_loading
 	mas install 427475982 # BreakTime
-	mas install 441258766 # Magnet
 	mas install 784801555 # OneNote
 	mas install 407963104 # Pixelmator
 	mas install 497799835 # Xcode
