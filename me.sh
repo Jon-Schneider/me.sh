@@ -188,4 +188,8 @@ sed -i '' -e '$a\' ~/.bash_profile && echo export "export GOPATH=\"$HOME/go\"" >
 mkdir ~/.config/karabiner
 cp -v karabiner.json ~/.config/karabiner
 
+# Crank up the key repeat rates. Note you may have to log out for these preferences to be applied
+defaults write -g InitialKeyRepeat -int 15
+defaults write -g KeyRepeat -int 2
+
 message "Configuration Complete"
