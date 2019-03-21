@@ -18,49 +18,6 @@ function message {
 cp ./.gitignore ~/.gitignore_global
 git config --global core.excludesfile ~/.gitignore_global
 
-# Install packages managed by Homebrew
-function install_brews {
-	message "Installing Brews..."
-	brew update
-	brew doctor
-	brew install appledoc
-	brew install carthage
-	brew install mas
-	brew install mysql
-	brew install postgresql
-	brew install yarn
-	brew install zsh
-	message "Finished Installing Brews..."
-}
-
-# Install Applications via Cask
-function install_casks {
-	message "Installing Casks"
-	brew cask install android-studio
-	brew cask install bbedit
-	brew cask install calibre
-	brew cask install coconutbattery
-	brew cask install cryptomator
-	brew cask install dash
-	brew cask install disk-inventory-x
-	brew cask install epubquicklook
-	brew cask install flux
-	brew cask install google-chrome
-	brew cask install karabiner-elements
-	brew cask install kindle
-	brew cask install iterm2
-	brew cask install libreoffice
-	brew cask install macdown
-	brew cask install nextcloud
-	brew cask install qlmarkdown
-	brew cask install qlmobi
-	brew cask install spectacle
-	brew cask install the-unarchiver
-	brew cask install torbrowser
-	brew cask install visual-studio-code
-	message "Finished Installing Casks"
-}
-
 # Install Mac App Store Apps
 function install_mas {
 	message "Installing Mac App Store Apps"
@@ -105,15 +62,21 @@ function install_vscode_packages {
 message "Installing Homebrew"
 ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 message "Homebrew install completed"
+brew update
+brew doctor
 
-install_brews
+message "Installing Brews..."
+brew install appledoc carthage mas mysql postgresql yarn zsh
+message "Finished Installing Brews..."
 
 # Cask
 message "Installing Homebrew Cask"
 brew tap caskroom/cask
 message "Finished Installing Homebrew Cask"
 
-install_casks
+message "Installing Casks"
+brew cask install android-studio bbedit calibre coconutbattery cryptomator dash disk-inventory-x epubquicklook flux google-chrome karabiner-elements kindle iterm2 libreoffice macdown nextcloud qlmarkdown qlmobi spectacle the-unarchiver torbrowser visual-studio-code
+message "Finished Installing Casks"
 
 install_mas
 
