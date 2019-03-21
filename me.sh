@@ -55,7 +55,7 @@ function install_vscode_packages {
 	code --install-extension rebornix.ruby
 	code --install-extension redhat.vscode-yaml
 	code --install-extension yzhang.markdown-all-in-one
-	message "Finished Installing Rubygems Visual Studio Code Extensions"
+	message "Finished Installing Visual Studio Code Extensions"
 }
 
 # Brew
