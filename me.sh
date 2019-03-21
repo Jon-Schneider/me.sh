@@ -52,10 +52,8 @@ function install_casks {
 	brew cask install android-studio
 	brew cask install bbedit
 	brew cask install calibre
-	brew cask install ccleaner
 	brew cask install coconutbattery
 	brew cask install cryptomator
-	brew cask install cyberduck
 	brew cask install dash
 	brew cask install disk-inventory-x
 	brew cask install epubquicklook
