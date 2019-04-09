@@ -97,3 +97,6 @@ source $HOME/.rvm/scripts/rvm
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
+# Stop zsh 'no matches found' from failing commands that contain wildcards with no matches (https://github.com/robbyrussell/oh-my-zsh/issues/31)
+unsetopt nomatch
