@@ -70,6 +70,7 @@ source $ZSH/oh-my-zsh.sh
 
 export GOPATH="/Users/$USER/go"
 source $HOME/.rvm/scripts/rvm
+source $HOME/.aliases
 
 # export MANPATH="/usr/local/man:$MANPATH"
 
