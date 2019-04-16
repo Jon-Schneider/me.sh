@@ -1,13 +1,6 @@
 [ui]
+username = Jon Schneider <jonschneider@instagram.com>
 merge = Kaleidoscope
-
-[merge-tools]
-Kaleidoscope.executable = /usr/local/bin/ksdiff
-Kaleidoscope.args = --merge --output $output --base $base -- $local $other
-
-
-[ui]
-username = Kevin Hiscott <khiscott@instagram.com>
 
 [extensions]
 extdiff =
@@ -16,9 +9,6 @@ extdiff =
 cmd.ksdiff = /usr/local/bin/ksdiff
 opts.ksdiff = --changeset --filelist
 cmd.fmdiff =
-
-[ui]
-merge = fmmerge
 
 [merge-tools]
 Kaleidoscope.executable = /usr/local/bin/ksdiff
