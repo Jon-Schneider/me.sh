@@ -24,6 +24,7 @@ function install_mas {
 	show_loading
 	mas install 1091189122 # Bear notes 
 	mas install 427475982  # BreakTime
+	mas install 587512244  # Kaleidoscope
 	mas install 784801555  # OneNote
 	mas install 407963104  # Pixelmator
 	mas install 497799835  # Xcode
@@ -76,7 +77,7 @@ brew tap caskroom/cask
 message "Finished Installing Homebrew Cask"
 
 message "Installing Casks"
-brew cask install android-studio bbedit calibre coconutbattery cryptomator dash disk-inventory-x epubquicklook flux google-chrome karabiner-elements kindle iterm2 libreoffice macdown nextcloud qlmarkdown qlmobi spectacle the-unarchiver torbrowser visual-studio-code
+brew cask install android-studio bbedit calibre coconutbattery cryptomator dash disk-inventory-x epubquicklook flux google-chrome karabiner-elements kindle ksdiff iterm2 libreoffice macdown nextcloud qlmarkdown qlmobi spectacle the-unarchiver torbrowser visual-studio-code
 message "Finished Installing Casks"
 
 install_mas
@@ -118,6 +119,12 @@ cp -v vscode/settings.json ~/Library/Application\ Support/Code/User/
 # Set up .vimrc and .vim
 mkdir -p ~/.vim/.backup ~/.vim/.tmp ~/.vim/.undo
 cp .vimrc ~/
+
+# Copy .gitconfig
+cp -v .gitconfig ~/.gitconfig
+
+# Copy .hgrc
+cp -v .hgrc ~/.hgrc
 
 # Install Oh My Zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
