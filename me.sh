@@ -142,8 +142,10 @@ sed -i '' -e '$a\' ~/.bash_profile && echo export "export GOPATH=\"$HOME/go\"" >
 mkdir ~/.config
 cp -vR karabiner ~/.config
 
-# Crank up the key repeat rates. Note you may have to log out for these preferences to be applied
+# Crank up the key repeat rates and trackpad speed. We've got stuff to do.
+# Note you will have to log out for these preferences to be applied
 defaults write -g InitialKeyRepeat -int 15
 defaults write -g KeyRepeat -int 2
+defaults write -g com.apple.mouse.scaling 6.0 # Double the default
 
 message "Configuration Complete"
