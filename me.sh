@@ -78,6 +78,7 @@ message "Finished Installing Homebrew Cask"
 
 message "Installing Casks"
 brew cask install android-studio bbedit calibre coconutbattery cryptomator dash disk-inventory-x epubquicklook flux google-chrome karabiner-elements kindle ksdiff iterm2 libreoffice macdown nextcloud qlmarkdown qlmobi spectacle the-unarchiver torbrowser visual-studio-code
+brew tap buo/cask-upgrade
 message "Finished Installing Casks"
 
 install_mas
