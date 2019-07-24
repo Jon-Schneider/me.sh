@@ -149,4 +149,9 @@ defaults write -g InitialKeyRepeat -int 15
 defaults write -g KeyRepeat -int 2
 defaults write -g com.apple.mouse.scaling 6.0 # Double the default
 
+# Configure Login Script
+cp -v login/login.sh ~/
+cp -v login/com.user.loginscript.plist ~/Library/LaunchAgents
+launchctl load ~/Library/LaunchAgents/com.user.loginscript.plist
+
 message "Configuration Complete"
