@@ -68,7 +68,7 @@ brew update
 brew doctor
 
 message "Installing Brews..."
-brew install appledoc carthage mas mysql postgresql yarn zsh
+brew install appledoc carthage mas mysql postgresql yarn
 message "Finished Installing Brews..."
 
 # Cask
