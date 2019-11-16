@@ -137,7 +137,7 @@
   "filterLinkHints": false,
   "waitForEnterForFilteredHints": true,
   "hideHud": false,
-  "keyMappings": "map j scrollDown count=3\nmap k scrollUp count=3\nmap b goBack\nmap f goForward\nmap v LinkHints.activateMode\nmap V LinkHints.activateModeToOpenInNewTab",
+  "keyMappings": "map j scrollDown count=3\nmap d scrollDown count=3\nmap k scrollUp count=3\nmap e scrollUp count=3\nmap b goBack\nmap f goForward\nmap v LinkHints.activateMode\nmap V LinkHints.activateModeToOpenInNewTab\nmap G scrollToTop\nmap gg scrollToBottom",
   "linkHintCharacters": "sadfjklewcmpgh",
   "linkHintNumbers": "0123456789",
   "newTabUrl": "about:newtab",
