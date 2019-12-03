@@ -24,7 +24,6 @@ plugins=(
   # python
   # rails
   # ruby
-  zsh-autosuggestions
 )
 
 export GOPATH="/Users/jon/go"
