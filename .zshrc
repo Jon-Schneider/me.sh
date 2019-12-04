@@ -24,6 +24,7 @@ plugins=(
   # python
   # rails
   # ruby
+  zsh-syntax-highlighting
 )
 
 export GOPATH="/Users/$(whoami)/go"
