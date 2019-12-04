@@ -1,5 +1,5 @@
 # Path to oh-my-zsh installation.
-export ZSH=/Users/jon/.oh-my-zsh
+export ZSH="/Users/$(whoami)/.oh-my-zsh"
 
 ZSH_THEME="robbyrussell"
 
@@ -26,7 +26,7 @@ plugins=(
   # ruby
 )
 
-export GOPATH="/Users/jon/go"
+export GOPATH="/Users/$(whoami)/go"
 source $HOME/.rvm/scripts/rvm
 source $ZSH/oh-my-zsh.sh
 source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh # Load Syntax Highlighting Plugin
