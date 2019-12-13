@@ -24,13 +24,12 @@ plugins=(
   # python
   # rails
   # ruby
-  zsh-syntax-highlighting
 )
 
 export GOPATH="$HOME/go"
 source $HOME/.rvm/scripts/rvm
 source $ZSH/oh-my-zsh.sh
-source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh # Load Syntax Highlighting Plugin
+source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh # Load Syntax Highlighting Plugin installed via brew
 unsetopt nomatch
 
 # My Aliases
