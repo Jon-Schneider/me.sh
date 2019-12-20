@@ -38,3 +38,11 @@ alias nc="cd ~/Nextcloud";
 alias src="cd ~/src";
 alias tmp="cd ~/Tmp";
 alias vsc="code .";
+
+# OLM Aliases. You don't need these.
+alias 'omc'='olm config';
+alias 'omd'="olm doctor";
+alias 'omda'="olm doctor --repair-type=auto";
+alias 'oml'="osascript -e 'quit app \"Xcode\"' && git pull && olm config DEV && olm open"; # Get OLM Latest
+alias 'omo'="olm open";
+alias 'omr'="cd ~/src/client-cocoa"; # "OLM Repo"
