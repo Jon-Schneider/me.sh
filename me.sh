@@ -111,6 +111,9 @@ mkdir ~/Tmp
 defaults write com.apple.screencapture location ~/Tmp
 killall SystemUIServer
 
+# Disable Annoying Screenshot Previews
+defaults write com.apple.screencapture show-thumbnail -bool TRUE
+
 # Copy Visual Studio Code config files to default location
 cp -v vscode/keybindings.json ~/Library/Application\ Support/Code/User/
 cp -v vscode/settings.json ~/Library/Application\ Support/Code/User/
