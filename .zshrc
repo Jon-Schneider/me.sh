@@ -26,7 +26,9 @@ plugins=(
   # ruby
 )
 
+export EDITOR="vim"
 export GOPATH="$HOME/go"
+
 source $HOME/.rvm/scripts/rvm
 source $ZSH/oh-my-zsh.sh
 source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh # Load Syntax Highlighting Plugin installed via brew
@@ -42,6 +44,7 @@ alias tmp="cd ~/Tmp";
 alias vsc="code .";
 alias xck="osascript -e 'quit app \"Xcode\"'";
 alias zshrc="bb ~/.zshrc"
+alias please="sudo"
 
 # OLM Aliases
 alias 'omc'='olm config';
