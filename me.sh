@@ -86,7 +86,7 @@ install_mas
 message "Installing RVM"
 show_loading
 \curl -sSL https://get.rvm.io | bash -s stable
-source /Users/jon/.rvm/scripts/rvm # Required to run rvm commands
+source ~/.rvm/scripts/rvm # Required to run rvm commands
 rvm install ruby
 # rvm install jruby
 # rvm install rbx
