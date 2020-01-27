@@ -15,7 +15,6 @@ plugins=(
   # docker
   # gem
   git
-  git-prompt
   # golang
   # kubectl
   last-working-dir
