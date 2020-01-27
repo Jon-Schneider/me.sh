@@ -33,23 +33,23 @@ source $ZSH/oh-my-zsh.sh
 source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh # Load Syntax Highlighting Plugin installed via brew
 unsetopt nomatch
 
-# My Aliases
-alias dl="cd ~/Downloads";
-alias nc="cd ~/Nextcloud";
-alias odm="cd ~/OneDrive\ -\ Microsoft";
-alias odp="cd ~/OneDrive";
-alias src="cd ~/src";
-alias tmp="cd ~/Tmp";
-alias vsc="code .";
-alias xck="osascript -e 'quit app \"Xcode\"'";
+# My Aliases# My Aliases
+alias dl="cd ~/Downloads"
+alias nc="cd ~/Nextcloud"
+alias odm="cd ~/OneDrive\ -\ Microsoft"
+alias odp="cd ~/OneDrive"
+alias src="cd ~/src"
+alias tmp="cd ~/Tmp"
+alias vsc="code ."
+alias xck="osascript -e 'quit app \"Xcode\"'"
 alias zshrc="bb ~/.zshrc"
 alias please="sudo"
 
 # OLM Aliases
-alias 'omc'='olm config';
-alias 'omd'="olm doctor";
-alias 'omda'="olm doctor --repair-type=auto";
-alias 'omo'="olm open";
-alias 'omco'="omc DEV && omo";
-alias 'oml'="xck && git pull && omco"; # Get OLM Latest
-alias 'omr'="cd ~/src/client-cocoa"; # "OLM Repo"
+alias 'omc'='olm config'
+alias 'omd'="olm doctor"
+alias 'omda'="olm doctor --repair-type=auto"
+alias 'omo'="olm open"
+alias 'omco'="omc DEV && omo"
+alias 'oml'="xck && git pull && omco" # Get OLM Latest
+alias 'omr'="cd ~/src/client-cocoa" # "OLM Repo"
