@@ -34,6 +34,7 @@ source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh # Lo
 unsetopt nomatch
 
 # My Aliases# My Aliases
+alias hm="cd ~/"
 alias dl="cd ~/Downloads"
 alias nc="cd ~/Nextcloud"
 alias odm="cd ~/OneDrive\ -\ Microsoft"
