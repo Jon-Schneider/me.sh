@@ -146,6 +146,9 @@ sed -i '' -e '$a\' ~/.bash_profile && echo export "export GOPATH=\"$HOME/go\"" >
 mkdir ~/.config
 cp -vR karabiner ~/.config
 
+# Copy Rectangle Config
+cp com.knollsoft.Rectangle.plist ~/Library/Preferences/
+
 # Crank up the key repeat rates and trackpad speed. We've got stuff to do.
 # Note you will have to log out for these preferences to be applied
 defaults write -g InitialKeyRepeat -int 15
