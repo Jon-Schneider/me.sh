@@ -20,6 +20,9 @@ function message {
 cp ./.gitignore ~/.gitignore_global
 git config --global core.excludesfile ~/.gitignore_global
 
+# Set git date display preference
+git config --global log.date local
+
 # Install Mac App Store Apps
 function install_mas {
 	message "Installing Mac App Store Apps"
