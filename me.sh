@@ -16,7 +16,6 @@ function message {
 }
 
 # Set up global .gitignore
-
 cp ./.gitignore ~/.gitignore_global
 git config --global core.excludesfile ~/.gitignore_global
 
