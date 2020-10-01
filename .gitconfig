@@ -1,6 +1,6 @@
 [user]
-  name = Jon Schneider
-  email = jon@jonschneider.me
+    name = Jon Schneider
+	email = jsc@microsoft.com
 [difftool]
     prompt = false
 [difftool "Kaleidoscope"]
@@ -18,7 +18,13 @@
 [core]
 	excludesfile = /Users/jon/.gitignore_global
 [alias]
-    graph = git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+    graph="log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative"
     d = diff
+    rh = reset --hard
     s = status -s
     st = status -bs
+	lg = log --graph --pretty=format:'%Cred%h%Creset -%Cblue%d%Creset %s %Cgreen(%cr)%Creset' --abbrev-commit --date=relative
+[diff]
+	tool = Kaleidoscope
+[log]
+	date = local
