@@ -79,7 +79,7 @@ brew tap caskroom/cask
 message "Finished Installing Homebrew Cask"
 
 message "Installing Casks"
-brew cask install android-studio bbedit calibre coconutbattery cryptomator dash disk-inventory-x epubquicklook flux google-chrome karabiner-elements kindle ksdiff iterm2 libreoffice macdown nextcloud rectangle qlmarkdown qlmobi the-unarchiver torbrowser visual-studio-code
+brew cask install android-studio bbedit calibre coconutbattery cryptomator dash disk-inventory-x epubquicklook flux google-chrome karabiner-elements kindle kitty ksdiff libreoffice macdown nextcloud rectangle qlmarkdown qlmobi the-unarchiver torbrowser visual-studio-code
 brew tap buo/cask-upgrade
 message "Finished Installing Casks"
 
@@ -137,6 +137,10 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/mas
 
 # Copy .zshrc
 cp -v .zshrc ~/.zshrc
+
+# Copy Kitty .conf
+mkdir -p ~/.config/kitty
+cp -v kitty.conf ~/.config/kitty/
 
 # Add '~/bin' to bash PATH
 sed -i '' -e '$a\' ~/.bash_profile && echo export "PATH=\"\$PATH:\$HOME/bin\"" >> ~/.bash_profile
