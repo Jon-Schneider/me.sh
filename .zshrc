@@ -9,31 +9,18 @@ export PATH=$HOME/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:
 ENABLE_CORRECTION="true"
 
 plugins=(
-  bbedit
-  brew
   dirhistory
-  # docker
-  # gem
   git
-  # golang
-  # kubectl
-  last-working-dir
-  # minikube
-  osx
-  # python
-  # rails
-  # ruby
 )
 
-export EDITOR="vim"
-export GOPATH="$HOME/go"
-
-source $HOME/.rvm/scripts/rvm
 source $ZSH/oh-my-zsh.sh
-source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh # Load Syntax Highlighting Plugin installed via brew
+source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh # Load Syntax Highlighting Plugin
 unsetopt nomatch
 
-# My Aliases# My Aliases
+export GOPATH="/Users/$(whoami)/go"
+export EDITOR="vim"
+
+# My Aliases
 alias hm="cd ~/"
 alias dl="cd ~/Downloads"
 alias nc="cd ~/Nextcloud"
@@ -45,6 +32,8 @@ alias vsc="code ."
 alias xck="osascript -e 'quit app \"Xcode\"'"
 alias zshrc="bb ~/.zshrc"
 alias please="sudo"
+alias gcr="git checkout --track origin/" # Git checkout Remote Branch - add branch name after
+alias bb="bbedit"
 
 # OLM Aliases
 alias 'omc'='olm config'
@@ -54,3 +43,5 @@ alias 'omo'="olm open"
 alias 'omco'="omc DEV && omo"
 alias 'oml'="xck && git pull && omco" # Get OLM Latest
 alias 'omr'="cd ~/src/client-cocoa" # "OLM Repo"
+
+omr
