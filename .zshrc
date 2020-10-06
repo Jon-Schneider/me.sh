@@ -31,6 +31,7 @@ alias vsc="code ."
 alias xck="osascript -e 'quit app \"Xcode\"'"
 alias zshrc="bb ~/.zshrc"
 alias please="sudo"
+alias grh="git reset --hard"
 alias gcr="git checkout --track origin/" # Git checkout Remote Branch - add branch name after
 alias bb="bbedit"
 
