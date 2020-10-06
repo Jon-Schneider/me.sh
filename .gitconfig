@@ -24,6 +24,8 @@
     s = status -s
     st = status -bs
 	lg = log --graph --pretty=format:'%Cred%h%Creset -%Cblue%d%Creset %s %Cgreen(%cr)%Creset' --abbrev-commit --date=relative
+    bdm = ! git branch --merged | egrep -v '(^\\*|dev|develop|master)' | xargs git branch -d # branch delete merged
+    bda = ! git branch | egrep -v '(^\\*|dev|develop|master)' | xargs git branch -d # branch delete al
 [diff]
 	tool = Kaleidoscope
 [log]
