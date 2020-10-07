@@ -11,6 +11,7 @@ ENABLE_CORRECTION="true"
 plugins=(
   dirhistory
   git
+  last-working-dir
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -34,6 +35,7 @@ alias pls="sudo"
 alias grh="git reset --hard"
 alias gcr="git checkout --track origin/" # Git checkout Remote Branch - add branch name after
 alias bb="bbedit"
+alias fdr="open ."
 
 # OLM Aliases
 alias 'omc'='olm config'
