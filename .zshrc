@@ -36,6 +36,7 @@ alias grh="git reset --hard"
 alias gcr="git checkout --track origin/" # Git checkout Remote Branch - add branch name after
 alias bb="bbedit"
 alias fdr="open ."
+alias pi="pod install"
 
 # OLM Aliases
 alias 'omc'='olm config'
