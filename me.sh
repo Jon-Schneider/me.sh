@@ -22,16 +22,6 @@ git config --global core.excludesfile ~/.gitignore_global
 # Set git date display preference
 git config --global log.date local
 
-# Install Rubygems
-function install_gems {
-	message "Installing Rubygems"
-	rvm use ruby
-	gem install cocoapods
-	gem install jekyll
-	gem install rails
-	message "Finished Installing Rubygems"
-}
-
 # Install Visual Studio Code Packages
 function install_vscode_packages {
 	message "Installing Rubygems Visual Studio Code Extensions"
@@ -77,6 +67,7 @@ mas install 407963104  # Pixelmator
 mas install 497799835  # Xcode
 message "Finished Installing Mac App Store Apps"
 
+# Ruby Config
 message "Installing RVM"
 show_loading
 \curl -sSL https://get.rvm.io | bash -s stable
@@ -86,7 +77,12 @@ rvm install ruby
 # rvm install rbx
 message "Finished Installing RVM"
 
-install_gems
+message "Installing Rubygems"
+rvm use ruby
+gem install cocoapods
+gem install jekyll
+gem install rails
+message "Finished Installing Rubygems"
 
 install_vscode_packages
 
