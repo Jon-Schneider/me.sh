@@ -79,7 +79,7 @@ brew tap caskroom/cask
 message "Finished Installing Homebrew Cask"
 
 message "Installing Casks"
-brew cask install bbedit calibre coconutbattery cryptomator dash disk-inventory-x drawio epubquicklook flux google-chrome karabiner-elements kindle kitty ksdiff libreoffice macdown nextcloud rectangle qlmarkdown qlmobi the-unarchiver torbrowser visual-studio-code
+brew cask install bbedit calibre coconutbattery cryptomator dash disk-inventory-x drawio epubquicklook flux karabiner-elements kindle kitty ksdiff libreoffice macdown microsoft-edge nextcloud rectangle qlmarkdown qlmobi the-unarchiver torbrowser visual-studio-code
 brew tap buo/cask-upgrade
 message "Finished Installing Casks"
 
