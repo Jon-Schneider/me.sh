@@ -15,13 +15,6 @@ function message {
 	printf "${G}$1${NC}\n"
 }
 
-# Set up global .gitignore
-cp ./.gitignore ~/.gitignore_global
-git config --global core.excludesfile ~/.gitignore_global
-
-# Set git date display preference
-git config --global log.date local
-
 # Brew
 message "Installing Homebrew"
 ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
@@ -110,9 +103,6 @@ cp -v vscode/settings.json ~/Library/Application\ Support/Code/User/
 mkdir -p ~/.vim/.backup ~/.vim/.tmp ~/.vim/.undo
 cp .vimrc ~/
 
-# Copy .gitconfig
-cp -v .gitconfig ~/.gitconfig
-
 # Copy .hgrc
 cp -v .hgrc ~/.hgrc
 
@@ -144,6 +134,10 @@ cp com.knollsoft.Rectangle.plist ~/Library/Preferences/
 defaults write -g InitialKeyRepeat -int 15
 defaults write -g KeyRepeat -int 2
 defaults write -g com.apple.mouse.scaling 6.0 # Double the default
+
+# Configure git
+cp ./.gitignore ~/.gitignore_global # Copy global .gitignore
+cp -v .gitconfig ~/.gitconfig # Copy .gitconfig
 
 # Configure Login Script
 cp -v login/login.sh ~/
