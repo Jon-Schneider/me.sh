@@ -130,7 +130,7 @@ cp -vR karabiner ~/.config
 cp com.knollsoft.Rectangle.plist ~/Library/Preferences/
 
 # Crank up the key repeat rates and trackpad speed. We've got stuff to do.
-# Note you will have to log out for these preferences to be applied
+# You will have to log out for these preferences to be applied
 defaults write -g InitialKeyRepeat -int 15
 defaults write -g KeyRepeat -int 2
 defaults write -g com.apple.mouse.scaling 6.0 # Double the default
