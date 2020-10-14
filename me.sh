@@ -22,25 +22,6 @@ git config --global core.excludesfile ~/.gitignore_global
 # Set git date display preference
 git config --global log.date local
 
-# Install Visual Studio Code Packages
-function install_vscode_packages {
-	message "Installing Rubygems Visual Studio Code Extensions"
-	code --install-extension Arjun.swagger-viewer
-	code --install-extension blanu.vscode-styled-jsx
-	code --install-extension formulahendry.code-runner
-	code --install-extension LaurentTreguier.vscode-simple-icons # I like the 'minimalist' monocrome icons
-	code --install-extension ms-kubernetes-tools.vscode-kubernetes-tools
-	code --install-extension ms-python.python
-	code --install-extension ms-vscode.cpptools
-	code --install-extension ms-vscode.go
-	code --install-extension msjsdiag.debugger-for-chrome
-	code --install-extension PeterJausovec.vscode-docker
-	code --install-extension rebornix.ruby
-	code --install-extension redhat.vscode-yaml
-	code --install-extension yzhang.markdown-all-in-one
-	message "Finished Installing Visual Studio Code Extensions"
-}
-
 # Brew
 message "Installing Homebrew"
 ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
@@ -84,7 +65,22 @@ gem install jekyll
 gem install rails
 message "Finished Installing Rubygems"
 
-install_vscode_packages
+# Install Visual Studio Code Plugins
+message "Installing Visual Studio Code Extensions"
+code --install-extension Arjun.swagger-viewer
+code --install-extension blanu.vscode-styled-jsx
+code --install-extension formulahendry.code-runner
+code --install-extension LaurentTreguier.vscode-simple-icons # I like the 'minimalist' monocrome icons
+code --install-extension ms-kubernetes-tools.vscode-kubernetes-tools
+code --install-extension ms-python.python
+code --install-extension ms-vscode.cpptools
+code --install-extension ms-vscode.go
+code --install-extension msjsdiag.debugger-for-chrome
+code --install-extension PeterJausovec.vscode-docker
+code --install-extension rebornix.ruby
+code --install-extension redhat.vscode-yaml
+code --install-extension yzhang.markdown-all-in-one
+message "Finished Installing Visual Studio Code Extensions"
 
 # BBEdit Configuration 
 defaults write com.barebones.bbedit SurfNextPreviousInDisplayOrder -bool YES # Configure BBedit to navigate between tabs in display order, not open order
