@@ -73,11 +73,7 @@ message "Installing Brews..."
 brew install appledoc carthage mas mysql postgresql yarn zsh-syntax-highlighting
 message "Finished Installing Brews..."
 
-# Cask
-message "Installing Homebrew Cask"
-brew tap caskroom/cask
-message "Finished Installing Homebrew Cask"
-
+# Casks
 message "Installing Casks"
 brew cask install bbedit calibre coconutbattery cryptomator dash disk-inventory-x drawio epubquicklook flux karabiner-elements kindle kitty ksdiff libreoffice macdown microsoft-edge onedrive rectangle qlmarkdown qlmobi the-unarchiver torbrowser visual-studio-code
 brew tap buo/cask-upgrade
