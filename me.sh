@@ -22,17 +22,6 @@ git config --global core.excludesfile ~/.gitignore_global
 # Set git date display preference
 git config --global log.date local
 
-# Install Mac App Store Apps
-function install_mas {
-	message "Installing Mac App Store Apps"
-	show_loading
-	mas install 1091189122 # Bear notes 
-	mas install 587512244  # Kaleidoscope
-	mas install 407963104  # Pixelmator
-	mas install 497799835  # Xcode
-	message "Finished Installing Mac App Store Apps"
-}
-
 # Install Rubygems
 function install_gems {
 	message "Installing Rubygems"
@@ -79,7 +68,14 @@ brew cask install bbedit calibre coconutbattery cryptomator dash disk-inventory-
 brew tap buo/cask-upgrade
 message "Finished Installing Casks"
 
-install_mas
+# Mac App Store
+message "Installing Mac App Store Apps"
+show_loading
+mas install 1091189122 # Bear notes 
+mas install 587512244  # Kaleidoscope
+mas install 407963104  # Pixelmator
+mas install 497799835  # Xcode
+message "Finished Installing Mac App Store Apps"
 
 message "Installing RVM"
 show_loading
