@@ -45,5 +45,3 @@ alias 'omo'="olm open"
 alias 'omco'="omc DEV && omo"
 alias 'oml'="xck && git pull && omco" # Get OLM Latest
 alias 'omr'="cd ~/src/client-cocoa" # "OLM Repo"
-
-omr
