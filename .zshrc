@@ -9,7 +9,6 @@ export PATH=$HOME/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:
 ENABLE_CORRECTION="true"
 
 plugins=(
-  dirhistory
   git
   last-working-dir
 )
