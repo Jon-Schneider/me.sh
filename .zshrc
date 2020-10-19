@@ -11,6 +11,7 @@ ENABLE_CORRECTION="true"
 plugins=(
   git
   last-working-dir
+  xcode
 )
 
 source $ZSH/oh-my-zsh.sh
