@@ -36,6 +36,7 @@ alias gcr="git checkout --track origin/" # Git checkout Remote Branch - add bran
 alias bb="bbedit"
 alias fdr="open ."
 alias pi="pod install"
+alias me="~/src/me.sh"
 
 # OLM Aliases
 alias 'omc'='olm config'
