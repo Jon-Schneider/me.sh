@@ -23,7 +23,7 @@ brew update
 brew doctor
 
 message "Installing Brews..."
-brew install appledoc carthage mas mysql postgresql yarn zsh-syntax-highlighting
+brew install carthage mas mysql postgresql yarn zsh-syntax-highlighting
 message "Finished Installing Brews..."
 
 # Casks
