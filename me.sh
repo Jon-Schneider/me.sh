@@ -23,7 +23,7 @@ brew update
 brew doctor
 
 message "Installing Brews..."
-brew install carthage chisel mas mysql postgresql yarn zsh-syntax-highlighting
+brew install carthage chisel mas zsh-syntax-highlighting
 message "Finished Installing Brews..."
 
 # Casks
