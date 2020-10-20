@@ -21,23 +21,23 @@ unsetopt nomatch
 export EDITOR="vim"
 
 # My Aliases
-alias hm="cd ~/"
+alias bb="bbedit"
 alias dl="cd ~/Downloads"
+alias gcr="git checkout --track origin/" # Git checkout Remote Branch - add branch name after
+alias grh="git reset --hard"
+alias fdr="open ."
+alias hm="cd ~/"
+alias me="cd ~/src/me.sh && vsc"
 alias nc="cd ~/Nextcloud"
 alias odm="cd ~/OneDrive\ -\ Microsoft"
 alias odp="cd ~/OneDrive"
+alias pi="pod install"
+alias pls="sudo"
 alias src="cd ~/src"
 alias tmp="cd ~/Tmp"
 alias vsc="code ."
 alias xck="osascript -e 'quit app \"Xcode\"'"
 alias zshrc="open ~/.zshrc"
-alias pls="sudo"
-alias grh="git reset --hard"
-alias gcr="git checkout --track origin/" # Git checkout Remote Branch - add branch name after
-alias bb="bbedit"
-alias fdr="open ."
-alias pi="pod install"
-alias me="cd ~/src/me.sh && vsc"
 
 # OLM Aliases
 alias 'omc'='olm config'
