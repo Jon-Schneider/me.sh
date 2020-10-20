@@ -41,9 +41,9 @@ alias zshrc="open ~/.zshrc"
 
 # OLM Aliases
 alias 'omc'='olm config'
+alias 'omco'="omc DEV && omo"
 alias 'omd'="olm doctor"
 alias 'omda'="olm doctor --repair-type=auto"
-alias 'omo'="olm open"
-alias 'omco'="omc DEV && omo"
 alias 'oml'="xck && git pull && omco" # Get OLM Latest
+alias 'omo'="olm open"
 alias 'omr'="cd ~/src/client-cocoa" # "OLM Repo"
