@@ -23,7 +23,7 @@ brew update
 brew doctor
 
 message "Installing Brews..."
-brew install carthage chisel mas zsh-syntax-highlighting
+brew install carthage chisel duti mas zsh-syntax-highlighting
 message "Finished Installing Brews..."
 
 # Casks
@@ -144,7 +144,11 @@ cp -v login/login.sh ~/
 cp -v login/com.user.loginscript.plist ~/Library/LaunchAgents
 launchctl load ~/Library/LaunchAgents/com.user.loginscript.plist
 
-# copy .lldbinit
+# Copy .lldbinit
 cp -v .lldbinit ~/
+
+# Set default apps
+duti -s com.barebones.bbedit txt all
+duti -s com.uranusjr.macdown md all
 
 message "Configuration Complete"
