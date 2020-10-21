@@ -148,6 +148,7 @@ launchctl load ~/Library/LaunchAgents/com.user.loginscript.plist
 cp -v .lldbinit ~/
 
 # Set default apps
+duti -s com.barebones.bbedit public.plain-text all # All plaintext files. Includes Unix hidden files
 duti -s com.barebones.bbedit json all
 duti -s com.barebones.bbedit sh all
 duti -s com.barebones.bbedit txt all
