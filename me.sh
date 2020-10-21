@@ -148,6 +148,8 @@ launchctl load ~/Library/LaunchAgents/com.user.loginscript.plist
 cp -v .lldbinit ~/
 
 # Set default apps
+duti -s com.barebones.bbedit json all
+duti -s com.barebones.bbedit sh all
 duti -s com.barebones.bbedit txt all
 duti -s com.uranusjr.macdown md all
 
