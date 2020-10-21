@@ -10,9 +10,9 @@
 # After, install BBEdit command line tools from Menu "BBEdit" > "Install Command Line Tools"
 
 function message {
-	G='\033[0;32m'
-	NC='\033[0m'
-	printf "${G}$1${NC}\n"
+	GREEN='\033[0;32m'
+	NOCOLOR='\033[0m'
+	printf "${GREEN}$1${NOCOLOR}\n"
 }
 
 # Brew
