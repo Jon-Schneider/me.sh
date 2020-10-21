@@ -75,6 +75,8 @@ code --install-extension redhat.vscode-yaml
 code --install-extension yzhang.markdown-all-in-one
 message "Finished Installing Visual Studio Code Extensions"
 
+message "Updating System Configuration"
+
 # BBEdit Configuration 
 defaults write com.barebones.bbedit SurfNextPreviousInDisplayOrder -bool YES # Configure BBedit to navigate between tabs in display order, not open order
 defaults write com.barebones.bbedit EditorSoftWrap -bool YES
