@@ -1,0 +1,77 @@
+{
+	"name": "Vimium C",
+	"@time": "10/21/2020, 8:46:04 PM",
+	"time": 1603338364735,
+	"environment": {
+		"extension": "1.86.2",
+		"platform": "mac",
+		"chrome": 86
+	},
+	"exclusionRules": [
+		{
+			"pattern": "^https?://mail\\.google\\.com/*",
+			"passKeys": ""
+		},
+		{
+			"pattern": "^https?://jira\\.jonschneider\\.me/*",
+			"passKeys": ", . / 1 2 g j k l m n o p t "
+		},
+		{
+			"pattern": "^https?://www\\.youtube\\.com/*",
+			"passKeys": "a b "
+		},
+		{
+			"pattern": "^https?://airtable\\.com/*",
+			"passKeys": ""
+		},
+		{
+			"pattern": "^https?://jonschneider\\.atlassian\\.net/*",
+			"passKeys": ", . / 1 2 a b c g j k l m n o p s t t "
+		},
+		{
+			"pattern": "^https?://outlook\\.office365\\.com/*",
+			"passKeys": "a b j k o r u "
+		},
+		{
+			"pattern": "^https?://outlook\\.office\\.com/*",
+			"passKeys": "a f j k r "
+		},
+		{
+			"pattern": "^https?://outlook-sdf\\.office\\.com/*",
+			"passKeys": "a a e f j k r "
+		},
+		{
+			"pattern": "^https?://app\\.getpocket\\.com/*",
+			"passKeys": "a b o t "
+		},
+		{
+			"pattern": "^https?://app\\.getpocket\\.com/$",
+			"passKeys": "j k "
+		}
+	],
+	"keyMappings": [
+		"map j scrollDown count=3",
+		"map f scrollDown count=3",
+		"map k scrollUp count=3",
+		"map d scrollUp count=3",
+		"map b goBack",
+		"map g goForward",
+		"map v LinkHints.activateMode",
+		"map V LinkHints.activateModeToOpenInNewTab",
+		"map <m-g> scrollToTop",
+		"map <m-s-g> scrollToBottom",
+		"map o previousTab",
+		"map p nextTab",
+		"map <c-s-p> togglePinTab",
+		"map w removeTab",
+		"map <c-s-f> mainFrame",
+		"map n createTab",
+		"map i removeTab",
+		"map u restoreTab",
+		"map W moveTabToNextWindow # Redefine default so I remember it exists",
+		""
+	],
+	"linkHintCharacters": "wertasdfgzxcvbq",
+	"nextPatterns": "next,more,newer,>,›,→,»,≫,>>",
+	"previousPatterns": "prev,previous,back,older,<,‹,←,«,≪,<<"
+}
