@@ -105,9 +105,6 @@ cp -v vscode/settings.json ~/Library/Application\ Support/Code/User/
 mkdir -p ~/.vim/.backup ~/.vim/.tmp ~/.vim/.undo
 cp .vimrc ~/
 
-# Copy .hgrc
-cp -v .hgrc ~/.hgrc
-
 # Install Oh My Zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 
