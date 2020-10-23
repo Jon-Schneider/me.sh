@@ -154,4 +154,9 @@ duti -s com.barebones.bbedit txt all
 duti -s com.uranusjr.macdown md all
 duti -s com.microsoft.edgemac http # Set Edge as default browser
 
+# Theming
+# Override system theme to set certain apps to always display in dark or light mode.
+# To reset run 'defaults delete [bundleid] NSRequiresAquaSystemAppearance'
+defaults write com.microsoft.onenote.mac NSRequiresAquaSystemAppearance -bool no # OneNote should always be dark mode
+
 message "Configuration Complete"
