@@ -37,6 +37,7 @@ message "Installing Mac App Store Apps"
 show_loading
 mas install 1091189122 # Bear notes 
 mas install 587512244  # Kaleidoscope
+mas install 784801555  # OneNote
 mas install 407963104  # Pixelmator
 mas install 497799835  # Xcode
 message "Finished Installing Mac App Store Apps"
