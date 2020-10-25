@@ -21,7 +21,7 @@ unsetopt nomatch
 export EDITOR="vim"
 
 # My Aliases
-alias bb="bbedit"
+alias bb="open -b com.barebones.bbedit"
 alias dl="cd ~/Downloads"
 alias gcr="git checkout --track origin/" # Git checkout Remote Branch - add branch name after
 alias grh="git reset --hard"
