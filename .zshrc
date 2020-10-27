@@ -39,7 +39,7 @@ alias src="cd ~/src"
 alias tmp="cd ~/Tmp"
 alias vsc="code ."
 alias xck="osascript -e 'quit app \"Xcode\"'"
-alias zshrc="open ~/.zshrc"
+alias zshrc="bb ~/.zshrc"
 
 # OLM Aliases
 alias 'omc'='olm config'
