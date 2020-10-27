@@ -24,6 +24,7 @@ export EDITOR="vim"
 alias bb="open -b com.barebones.bbedit"
 alias dl="cd ~/Downloads"
 alias gcr="git checkout --track origin/" # Git checkout Remote Branch - add branch name after
+alias gr="git reset"
 alias grh="git reset --hard"
 alias fdr="open ."
 alias hm="cd ~/"
