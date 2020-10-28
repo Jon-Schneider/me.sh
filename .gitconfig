@@ -1,6 +1,6 @@
 [user]
     name = Jon Schneider
-	email = jsc@microsoft.com
+	email = jon@jonschneider.me
 [difftool]
     prompt = false
 [difftool "Kaleidoscope"]
