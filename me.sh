@@ -26,6 +26,13 @@ message "Installing Brews..."
 brew install carthage chisel duti mas zsh-syntax-highlighting
 message "Finished Installing Brews..."
 
+# Install cheat.sh, which is unfortunately not available via brew
+message "Installing cheat.sh"
+mkdir -p ~/bin/
+curl https://cht.sh/:cht.sh > ~/bin/cht.sh
+chmod +x ~/bin/cht.sh
+message "Finished installing cheat.sh"
+
 # Casks
 message "Installing Casks"
 brew cask install bbedit calibre coconutbattery cryptomator dash disk-inventory-x drawio epubquicklook flux karabiner-elements kindle kitty ksdiff libreoffice macdown microsoft-edge onedrive rectangle qlmarkdown qlmobi the-unarchiver torbrowser visual-studio-code
