@@ -88,6 +88,9 @@ message "Finished Installing Visual Studio Code Extensions"
 message "Updating System Configuration"
 
 # BBEdit Configuration 
+message "Copying BBEdit configuration..."
+mkdir -p /Users/jsc/Library/Application\ Support/BBEdit/Setup
+cp -v bbedit/Menu\ Shortcuts.plist /Users/jsc/Library/Application\ Support/BBEdit/Setup/Menu\ Shortcuts.plist
 defaults write com.barebones.bbedit SurfNextPreviousInDisplayOrder -bool YES # Configure BBedit to navigate between tabs in display order, not open order
 defaults write com.barebones.bbedit EditorSoftWrap -bool YES
 defaults write com.barebones.bbedit SoftWrapStyle -integer 2
