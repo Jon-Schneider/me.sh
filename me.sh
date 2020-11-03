@@ -1,17 +1,22 @@
 #!/bin/bash
 
-# Prerequisites
-# You must install the Xcode Command Line tools prior to using homebrew.
-# You can do this by installing and opening Xcode, agreeing to the license, and installing the dev
-# tools prior to using Homebrew. Or you can run 'xcode-select --install' in the Terminal to install
-# just the tools. To avoid configuration issues with Homebrew and Cask I recommend uninstalling and
-# reinstalling Brew
-
 function message {
 	GREEN='\033[0;32m'
 	NOCOLOR='\033[0m'
 	printf "${GREEN}$1${NOCOLOR}\n"
 }
+
+# Xcode Command Line Tools (brew dependency)
+message "To start, install the Xcode Command Line Tools by either installing and then opening Xcode or install the Xcode command line tools with 'xcode-select --install'"
+message "After Xcode Command Line Tools are installed press any key to continue:"
+read -n 1 -s
+
+xcode-select -p 1>/dev/null;echo $?
+if [ $? != 0 ]
+then
+message "Xcode Command Line Tools are not installed"
+exit 1
+fi
 
 # Brew
 message "Installing Homebrew"
