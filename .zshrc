@@ -22,6 +22,14 @@ export EDITOR="vim"
 
 # My Aliases
 alias bb="open -b com.barebones.bbedit"
+alias bi="brew install"
+alias bic="brew install --cask"
+alias bs="brew search"
+alias bsc="brew search --cask"
+alias bu="brew uninstall"
+alias bupc="brew upgrade --cask"
+alias bup="brew upgrade"
+alias buc="brew uninstall --cask"
 alias cht="cht.sh"
 alias dl="cd ~/Downloads"
 alias gcr="git checkout --track origin/" # Git checkout Remote Branch - add branch name after
