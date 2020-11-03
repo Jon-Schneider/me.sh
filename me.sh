@@ -7,8 +7,6 @@
 # just the tools. To avoid configuration issues with Homebrew and Cask I recommend uninstalling and
 # reinstalling Brew
 
-# After, install BBEdit command line tools from Menu "BBEdit" > "Install Command Line Tools"
-
 function message {
 	GREEN='\033[0;32m'
 	NOCOLOR='\033[0m'
