@@ -105,6 +105,9 @@ killall Finder
 message "Creating ~/Tmp dir..."
 mkdir ~/Tmp
 
+# Redirect Downloads to Tmp dir
+sudo rm -rf ~/Downloads && ln -s ~/Tmp ~/Downloads
+
 # Set Screenshot Save Location
 message "Setting screenshot save location..."
 defaults write com.apple.screencapture location ~/Tmp
