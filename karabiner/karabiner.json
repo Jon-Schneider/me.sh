@@ -180,6 +180,23 @@
                                 "type": "basic"
                             }
                         ]
+                    },
+                    {
+                        "description": "Disable 'Fullscreen' Keyboard Shortcut",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "f",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "command",
+                                            "control"
+                                        ]
+                                    }
+                                },
+                                "type": "basic"
+                            }
+                        ]
                     }
                 ]
             },
