@@ -181,6 +181,30 @@
                   ]
                },
                {
+                  "description":"Map Right Cmd + V to Vimac",
+                  "manipulators":[
+                     {
+                        "from":{
+                           "key_code":"v",
+                           "modifiers":{
+                              "mandatory":[
+                                 "right_command"
+                              ]
+                           }
+                        },
+                        "to":[
+                           {
+                              "key_code":"spacebar",
+                              "modifiers":[
+                                 "control"
+                              ]
+                           }
+                        ],
+                        "type":"basic"
+                     }
+                  ]
+               },
+               {
                   "description":"Disable 'Show Dock' Keyboard Shortcut",
                   "manipulators":[
                      {
