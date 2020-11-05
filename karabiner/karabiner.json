@@ -202,7 +202,14 @@
                    "description":"Better Microsoft Teams Keyboard Shortcuts",
                    "manipulators":[
                       {
-                         "type":"basic",
+                         "conditions":[
+                            {
+                               "bundle_identifiers":[
+                                  "^com.microsoft.teams"
+                               ],
+                               "type":"frontmost_application_if"
+                            }
+                         ],
                          "from":{
                             "key_code":"tab",
                             "modifiers":{
@@ -219,17 +226,17 @@
                                ]
                             }
                          ],
-                         "conditions":[
-                            {
-                               "type":"frontmost_application_if",
-                               "bundle_identifiers":[
-                                  "^com.microsoft.teams"
-                               ]
-                            }
-                         ]
+                         "type":"basic"
                       },
                       {
-                         "type":"basic",
+                         "conditions":[
+                            {
+                               "bundle_identifiers":[
+                                  "^com.microsoft.teams"
+                               ],
+                               "type":"frontmost_application_if"
+                            }
+                         ],
                          "from":{
                             "key_code":"tab",
                             "modifiers":{
@@ -247,14 +254,208 @@
                                ]
                             }
                          ],
+                         "type":"basic"
+                      }
+                   ]
+                },
+                {
+                   "description":"Better OneNote Keyboard Shortcuts",
+                   "manipulators":[
+                      {
                          "conditions":[
                             {
-                               "type":"frontmost_application_if",
                                "bundle_identifiers":[
-                                  "^com.microsoft.teams"
+                                  "^com.microsoft.onenote"
+                               ],
+                               "type":"frontmost_application_if"
+                            }
+                         ],
+                         "from":{
+                            "key_code":"g",
+                            "modifiers":{
+                               "mandatory":[
+                                  "command"
                                ]
                             }
-                         ]
+                         },
+                         "to":[
+                            {
+                               "key_code":"g",
+                               "modifiers":[
+                                  "control"
+                               ]
+                            }
+                         ],
+                         "type":"basic"
+                      },
+                      {
+                         "conditions":[
+                            {
+                               "bundle_identifiers":[
+                                  "^com.microsoft.onenote"
+                               ],
+                               "type":"frontmost_application_if"
+                            }
+                         ],
+                         "from":{
+                            "key_code":"tab",
+                            "modifiers":{
+                               "mandatory":[
+                                  "control"
+                               ]
+                            }
+                         },
+                         "to":[
+                            {
+                               "key_code":"page_down",
+                               "modifiers":[
+                                  "command"
+                               ]
+                            }
+                         ],
+                         "type":"basic"
+                      },
+                      {
+                         "conditions":[
+                            {
+                               "bundle_identifiers":[
+                                  "^com.microsoft.onenote"
+                               ],
+                               "type":"frontmost_application_if"
+                            }
+                         ],
+                         "from":{
+                            "key_code":"tab",
+                            "modifiers":{
+                               "mandatory":[
+                                  "control",
+                                  "shift"
+                               ]
+                            }
+                         },
+                         "to":[
+                            {
+                               "key_code":"page_up",
+                               "modifiers":[
+                                  "command"
+                               ]
+                            }
+                         ],
+                         "type":"basic"
+                      },
+                      {
+                         "conditions":[
+                            {
+                               "bundle_identifiers":[
+                                  "^com.microsoft.onenote"
+                               ],
+                               "type":"frontmost_application_if"
+                            }
+                         ],
+                         "from":{
+                            "key_code":"right_arrow",
+                            "modifiers":{
+                               "mandatory":[
+                                  "control",
+                                  "shift"
+                               ]
+                            }
+                         },
+                         "to":[
+                            {
+                               "key_code":"page_down",
+                               "modifiers":[
+                                  "command"
+                               ]
+                            }
+                         ],
+                         "type":"basic"
+                      },
+                      {
+                         "conditions":[
+                            {
+                               "bundle_identifiers":[
+                                  "^com.microsoft.onenote"
+                               ],
+                               "type":"frontmost_application_if"
+                            }
+                         ],
+                         "from":{
+                            "key_code":"left_arrow",
+                            "modifiers":{
+                               "mandatory":[
+                                  "control",
+                                  "shift"
+                               ]
+                            }
+                         },
+                         "to":[
+                            {
+                               "key_code":"page_up",
+                               "modifiers":[
+                                  "command"
+                               ]
+                            }
+                         ],
+                         "type":"basic"
+                      },
+                      {
+                         "conditions":[
+                            {
+                               "bundle_identifiers":[
+                                  "^com.microsoft.onenote"
+                               ],
+                               "type":"frontmost_application_if"
+                            }
+                         ],
+                         "from":{
+                            "key_code":"up_arrow",
+                            "modifiers":{
+                               "mandatory":[
+                                  "control",
+                                  "shift"
+                               ]
+                            }
+                         },
+                         "to":[
+                            {
+                               "key_code":"open_bracket",
+                               "modifiers":[
+                                  "command",
+                                  "shift"
+                               ]
+                            }
+                         ],
+                         "type":"basic"
+                      },
+                      {
+                         "conditions":[
+                            {
+                               "bundle_identifiers":[
+                                  "^com.microsoft.onenote"
+                               ],
+                               "type":"frontmost_application_if"
+                            }
+                         ],
+                         "from":{
+                            "key_code":"down_arrow",
+                            "modifiers":{
+                               "mandatory":[
+                                  "control",
+                                  "shift"
+                               ]
+                            }
+                         },
+                         "to":[
+                            {
+                               "key_code":"close_bracket",
+                               "modifiers":[
+                                  "command",
+                                  "shift"
+                               ]
+                            }
+                         ],
+                         "type":"basic"
                       }
                    ]
                 }
