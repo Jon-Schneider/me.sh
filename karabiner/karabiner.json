@@ -197,7 +197,67 @@
                                 "type": "basic"
                             }
                         ]
-                    }
+                    },
+                    {
+					  "description": "Better Microsoft Teams Keyboard Shortcuts",
+					  "manipulators": [
+						{
+						  "type": "basic",
+						  "from": {
+							"key_code": "tab",
+							"modifiers": {
+							  "mandatory": [
+								"control"
+							  ]
+							}
+						  },
+						  "to": [
+							{
+							  "key_code": "down_arrow",
+							  "modifiers": [
+								"left_option"
+							  ]
+							}
+						  ],
+						  "conditions": [
+							{
+							  "type": "frontmost_application_if",
+							  "bundle_identifiers": [
+								"^com.microsoft.teams"
+							  ]
+							}
+						  ]
+						},
+						{
+						  "type": "basic",
+						  "from": {
+							"key_code": "tab",
+							"modifiers": {
+							  "mandatory": [
+								"control",
+								"shift"
+							  ]
+							}
+						  },
+						  "to": [
+							{
+							  "key_code": "up_arrow",
+							  "modifiers": [
+								"left_option"
+							  ]
+							}
+						  ],
+						  "conditions": [
+							{
+							  "type": "frontmost_application_if",
+							  "bundle_identifiers": [
+								"^com.microsoft.teams"
+							  ]
+							}
+						  ]
+						}
+					  ]
+					}
                 ]
             },
             "devices": [],
