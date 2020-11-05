@@ -1,11 +1,11 @@
 {
 	"name": "Vimium C",
-	"@time": "10/21/2020, 8:46:04 PM",
-	"time": 1603338364735,
+	"@time": "11/5/2020, 1:15:06 PM",
+	"time": 1604610906002,
 	"environment": {
 		"extension": "1.86.2",
 		"platform": "mac",
-		"chrome": 86
+		"chrome": 88
 	},
 	"exclusionRules": [
 		{
@@ -14,19 +14,43 @@
 		},
 		{
 			"pattern": "^https?://jira\\.jonschneider\\.me/*",
-			"passKeys": ", . / 1 2 g j k l m n o p t "
+			"passKeys": ", . / 1 2 ? g j k l m n o p t "
 		},
 		{
 			"pattern": "^https?://www\\.youtube\\.com/*",
 			"passKeys": "a b "
 		},
 		{
+			"pattern": "^https?://app\\.getpocket\\.com/$",
+			"passKeys": "/ j k o "
+		},
+		{
 			"pattern": "^https?://airtable\\.com/*",
 			"passKeys": ""
 		},
 		{
+			"pattern": "^https?://app\\.getpocket\\.com/archive",
+			"passKeys": "j k "
+		},
+		{
+			"pattern": "^https?://app\\.getpocket\\.com/$",
+			"passKeys": "? a b f j k "
+		},
+		{
+			"pattern": "^https?://app\\.getpocket\\.com/*",
+			"passKeys": "a b o t "
+		},
+		{
+			"pattern": "^https?://app\\.getpocket\\.com/search",
+			"passKeys": "j k "
+		},
+		{
+			"pattern": "^https?://app\\.getpocket\\.com/search/",
+			"passKeys": "j k "
+		},
+		{
 			"pattern": "^https?://jonschneider\\.atlassian\\.net/*",
-			"passKeys": ", . / 1 2 a b c g j k l m n o p s t t "
+			"passKeys": ", . / 1 2 ? a b c g j k l m n o p s t "
 		},
 		{
 			"pattern": "^https?://outlook\\.office365\\.com/*",
@@ -38,15 +62,11 @@
 		},
 		{
 			"pattern": "^https?://outlook-sdf\\.office\\.com/*",
-			"passKeys": "a a e f j k r "
+			"passKeys": "/ : ; ? a c e f g i j k l n p r s t z "
 		},
 		{
-			"pattern": "^https?://app\\.getpocket\\.com/*",
-			"passKeys": "a b o t "
-		},
-		{
-			"pattern": "^https?://app\\.getpocket\\.com/$",
-			"passKeys": "j k "
+			"pattern": ":https://microsoft-my.sharepoint-df.com/",
+			"passKeys": "? "
 		}
 	],
 	"keyMappings": [
@@ -60,8 +80,8 @@
 		"map V LinkHints.activateModeToOpenInNewTab",
 		"map <m-g> scrollToTop",
 		"map <m-s-g> scrollToBottom",
-		"map o previousTab",
-		"map p nextTab",
+		"map [ previousTab",
+		"map ] nextTab",
 		"map <c-s-p> togglePinTab",
 		"map w removeTab",
 		"map <c-s-f> mainFrame",
@@ -69,6 +89,10 @@
 		"map i removeTab",
 		"map u restoreTab",
 		"map W moveTabToNextWindow # Redefine default so I remember it exists",
+		"map <c-s-left> moveTabLeft",
+		"map <c-s-right> moveTabRight",
+		"map <c-s-up> moveTabLeft count=9999999",
+		"map <c-s-down> moveTabRight count=9999999",
 		""
 	],
 	"linkHintCharacters": "wertasdfgzxcvbq",
