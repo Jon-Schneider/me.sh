@@ -458,6 +458,44 @@
                          "type":"basic"
                       }
                    ]
+                },
+                {
+                   "description":"OLM Terminal Helpers",
+                   "manipulators":[
+                      {
+                         "conditions":[
+                            {
+                               "bundle_identifiers":[
+                                  "^net.kovidgoyal.kitty"
+                               ],
+                               "type":"frontmost_application_if"
+                            }
+                         ],
+                         "from":{
+                            "key_code":"l",
+                            "modifiers":{
+                               "mandatory":[
+                                  "right_command"
+                               ]
+                            }
+                         },
+                         "to":[
+                            {
+                               "shell_command":"echo 'oml' | pbcopy"
+                            },
+                            {
+                               "key_code":"v",
+                               "modifiers":[
+                                  "command"
+                               ]
+                            },
+                            {
+                               "key_code":"return_or_enter"
+                            }
+                         ],
+                         "type":"basic"
+                      }
+                   ]
                 }
              ]
           },
