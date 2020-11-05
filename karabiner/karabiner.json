@@ -15,7 +15,7 @@
                     "mouse_motion_to_scroll.speed": 100
                 },
                 "rules": [
-                    {
+                	{
                         "description": "Launcher Mode",
                         "manipulators": [
                             {
@@ -160,6 +160,23 @@
                                         "shell_command": "open -a 'XCode.app'"
                                     }
                                 ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "Disable 'Show Dock' Keyboard Shortcut",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "d",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "command",
+                                            "option"
+                                        ]
+                                    }
+                                },
                                 "type": "basic"
                             }
                         ]
