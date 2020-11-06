@@ -29,6 +29,7 @@ alias bs="brew search"
 alias bsc="brew search --cask"
 alias bun="brew uninstall"
 alias bup="brew upgrade"
+alias cdf='cd "`osascript -e "tell application \\"Finder\\" to get POSIX path of (insertion location as text)"`"' # cd to front finder dir
 alias cht="cht.sh"
 alias dl="cd ~/Downloads"
 alias gcr="git checkout --track origin/" # Git checkout Remote Branch - add branch name after
