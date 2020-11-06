@@ -279,6 +279,75 @@
                   ]
                },
                {
+                  "description":"Custom Finder Keyboard Shortcuts",
+                  "manipulators":[
+                     {
+                        "from":{
+                           "key_code":"d",
+                           "modifiers":{
+                              "mandatory":[
+                                 "right_command"
+                              ]
+                           }
+                        },
+                        "to":[
+                           {
+                              "shell_command":"open ~/OneDrive"
+                           }
+                        ],
+                        "type":"basic"
+                     },
+                     {
+                        "from":{
+                           "key_code":"h",
+                           "modifiers":{
+                              "mandatory":[
+                                 "right_command"
+                              ]
+                           }
+                        },
+                        "to":[
+                           {
+                              "shell_command":"open ~/"
+                           }
+                        ],
+                        "type":"basic"
+                     },
+                     {
+                        "from":{
+                           "key_code":"o",
+                           "modifiers":{
+                              "mandatory":[
+                                 "right_command"
+                              ]
+                           }
+                        },
+                        "to":[
+                           {
+                              "shell_command":"open ~/src/client-cocoa"
+                           }
+                        ],
+                        "type":"basic"
+                     },
+                     {
+                        "from":{
+                           "key_code":"s",
+                           "modifiers":{
+                              "mandatory":[
+                                 "right_command"
+                              ]
+                           }
+                        },
+                        "to":[
+                           {
+                              "shell_command":"open ~/src"
+                           }
+                        ],
+                        "type":"basic"
+                     }
+                  ]
+               },
+               {
                   "description":"Better Microsoft Teams Keyboard Shortcuts",
                   "manipulators":[
                      {
