@@ -6,7 +6,7 @@
 	<string>com.user.loginscript</string>
 	<key>ProgramArguments</key>
 	<array>
-		<string>/Users/jon/login.sh</string>
+		<string>/Users/jon/bin/login.sh</string>
 	</array>
 	<key>RunAtLoad</key>
 	<true/>
