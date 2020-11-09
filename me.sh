@@ -54,7 +54,7 @@ message "Finished Installing Mac App Store Apps"
 # Ruby Config
 message "Installing RVM"
 show_loading
-\curl -sSL https://get.rvm.io | bash -s stable
+curl -sSL https://get.rvm.io | bash -s stable
 source ~/.rvm/scripts/rvm # Required to run rvm commands
 rvm install ruby
 # rvm install jruby
