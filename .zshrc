@@ -63,4 +63,4 @@ alias 'omd'="olm doctor"
 alias 'omda'="olm doctor --repair-type=auto"
 alias 'oml'="xck && git pull && omco" # Get OLM Latest
 alias 'omo'="olm open"
-alias 'omr'="cd ~/src/client-cocoa" # "OLM Repo"
+alias 'omr'="cd ~/src/ms/client-cocoa" # "OLM Repo"
