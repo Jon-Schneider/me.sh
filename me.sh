@@ -160,7 +160,7 @@ defaults write -g com.apple.mouse.scaling 6.0 # Double the default
 message "Configuring git..."
 ln git/.gitignore ~/.gitignore
 ln git/.gitconfig ~/.gitconfig
-ln git/.gitconfig-js ~/.gitconfig_jsf
+ln git/.gitconfig-js ~/.gitconfig_js
 ln git/.gitconfig-ms ~/.gitconfig_ms
 
 # Configure Login Script
