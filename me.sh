@@ -90,7 +90,7 @@ message "Updating System Configuration"
 # BBEdit Configuration 
 message "Configuring BBEdit..."
 mkdir -p ~/Library/Application\ Support/BBEdit
-ln -s /Users/jon/src/me.sh/bbedit/Setup /Users/jon/Library/Application\ Support/BBEdit/Setup # Have to symlink dir because changes aren't syncing with hard link (ln)
+ln -s ~//src/me.sh/bbedit/Setup ~/Library/Application\ Support/BBEdit/Setup # Have to symlink dir because changes aren't syncing with hard link (ln)
 defaults write com.barebones.bbedit SurfNextPreviousInDisplayOrder -bool YES # Configure BBedit to navigate between tabs in display order, not open order
 defaults write com.barebones.bbedit EditorSoftWrap -bool YES
 defaults write com.barebones.bbedit SoftWrapStyle -integer 2
