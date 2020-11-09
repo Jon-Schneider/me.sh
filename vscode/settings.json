@@ -3,4 +3,5 @@
     "workbench.startupEditor": "newUntitledFile",
     "workbench.colorTheme": "Visual Studio Light",
     "workbench.iconTheme": "minimalistic-icons",
+    "editor.accessibilitySupport": "off",
 }
