@@ -117,41 +117,37 @@ killall SystemUIServer
 message "Disabling annoying screenshot previews..."
 defaults write com.apple.screencapture show-thumbnail -bool TRUE
 
-# Copy Visual Studio Code config files to default location
-message "Copying Visual Studio Code config..."
-cp -v vscode/keybindings.json ~/Library/Application\ Support/Code/User/
-cp -v vscode/settings.json ~/Library/Application\ Support/Code/User/
+# Visual Studio Code Config
+message "Configuring Visual Studio Code..."
+mkdir ~/Library/Application\ Support/Code/User/
+ln vscode/keybindings.json ~/Library/Application\ Support/Code/User/
+ln vscode/settings.json ~/Library/Application\ Support/Code/User/
 
 # Configure vom
 message "Configuring Vim..."
 mkdir -p ~/.vim/.backup ~/.vim/.tmp ~/.vim/.undo
-cp .vimrc ~/
+ln .vimrc ~/
 
 # Install Oh My Zsh
 message "Installing Oh My Zsh..."
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 
-# Copy .zshrc
-message "Copying .zshrc..."
-cp -v .zshrc ~/.zshrc
+# Configure .zshrc
+message "Configuring .zshrc..."
+ln .zshrc ~/
 
-# Copy Kitty .conf
-message "Copying Kitty Config..."
+# Kitty Config
+message "Configuirng Kitty..."
 mkdir -p ~/.config/kitty
-cp -v kitty.conf ~/.config/kitty/
+ln kitty.conf ~/.config/kitty/
 
-# Add '~/bin' to bash PATH
-message "Adding ~/bin to PATH..."
-sed -i '' -e '$a\' ~/.bash_profile && echo export "PATH=\"\$PATH:\$HOME/bin\"" >> ~/.bash_profile
-
-# Set up Karabiner configuration
+# Karabiner Config
 message "Configuring Karabiner Elements..."
-mkdir ~/.config
-cp -vR karabiner ~/.config
+ln karabiner/karabiner.json ~/.config/karabiner
 
 # Copy Rectangle Config
 message "Copying Rectangle config..."
-cp com.knollsoft.Rectangle.plist ~/Library/Preferences/
+cp -v com.knollsoft.Rectangle.plist ~/Library/Preferences/ # Unfortunately it doesn't appear plists can be linked (ln)
 
 # Crank up the key repeat rates and trackpad speed. We've got stuff to do.
 # You will have to log out for these preferences to be applied
@@ -162,8 +158,8 @@ defaults write -g com.apple.mouse.scaling 6.0 # Double the default
 
 # Configure git
 message "Configuring git..."
-cp ./.gitignore ~/.gitignore_global # Copy global .gitignore
-cp -v .gitconfig ~/.gitconfig # Copy .gitconfig
+ln .gitignore ~/.gitignore_global
+ln .gitconfig ~/.gitconfig
 
 # Configure Login Script
 message "Setting up login script..."
@@ -172,9 +168,9 @@ cp -v login/com.user.loginscript.plist ~/Library/LaunchAgents # Unfortunately it
 sudo chown root ~/Library/LaunchAgents/com.user.loginscript.plist
 launchctl load ~/Library/LaunchAgents/com.user.loginscript.plist
 
-# Copy .lldbinit
-message "Copying lldb config..."
-cp -v .lldbinit ~/
+# Configure .lldbinit
+message "Configuring lldb config..."
+ln .lldbinit ~/
 
 # Set default apps
 message "Setting default apps..."
