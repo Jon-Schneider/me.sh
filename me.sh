@@ -37,8 +37,8 @@ chmod +x ~/bin/cht.sh
 message "Finished installing cheat.sh"
 
 # Casks
-message "Installing Casks"
-brew cask install bbedit calibre coconutbattery cryptomator dash disk-inventory-x drawio epubquicklook flux karabiner-elements kindle kitty ksdiff libreoffice macdown microsoft-edge onedrive rectangle qlmarkdown qlmobi the-unarchiver torbrowser visual-studio-code
+message "Installing Casks" 
+brew cask install bbedit calibre coconutbattery cryptomator dash disk-inventory-x drawio epubquicklook flux hammerspoon karabiner-elements kindle kitty ksdiff libreoffice macdown microsoft-edge onedrive qlmarkdown qlmobi the-unarchiver torbrowser visual-studio-code
 brew tap buo/cask-upgrade
 message "Finished Installing Casks"
 
@@ -145,9 +145,9 @@ ln kitty.conf ~/.config/kitty/
 message "Configuring Karabiner Elements..."
 ln karabiner/karabiner.json ~/.config/karabiner
 
-# Copy Rectangle Config
-message "Copying Rectangle config..."
-cp -v com.knollsoft.Rectangle.plist ~/Library/Preferences/ # Unfortunately it doesn't appear plists can be linked (ln)
+# Configure Hammerspoon
+message "Configuring Hammerspoon"
+ln -s $(pwd)/hammerspoon ~/.hammerspoon # For some reason this would not work with a relative path, an absolute path was required
 
 # Crank up the key repeat rates and trackpad speed. We've got stuff to do.
 # You will have to log out for these preferences to be applied
