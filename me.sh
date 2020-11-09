@@ -88,9 +88,9 @@ message "Finished Installing Visual Studio Code Extensions"
 message "Updating System Configuration"
 
 # BBEdit Configuration 
-message "Copying BBEdit configuration..."
-mkdir -p /Users/jsc/Library/Application\ Support/BBEdit/Setup
-cp -v bbedit/Menu\ Shortcuts.plist /Users/jsc/Library/Application\ Support/BBEdit/Setup/Menu\ Shortcuts.plist
+message "Configuring BBEdit..."
+mkdir -p ~/Library/Application\ Support/BBEdit
+ln -s /Users/jon/src/me.sh/bbedit/Setup /Users/jon/Library/Application\ Support/BBEdit/Setup # Have to symlink dir because changes aren't syncing with hard link (ln)
 defaults write com.barebones.bbedit SurfNextPreviousInDisplayOrder -bool YES # Configure BBedit to navigate between tabs in display order, not open order
 defaults write com.barebones.bbedit EditorSoftWrap -bool YES
 defaults write com.barebones.bbedit SoftWrapStyle -integer 2
