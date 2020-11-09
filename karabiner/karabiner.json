@@ -239,6 +239,55 @@
                   ]
                },
                {
+                  "description":"Disable 'Minimize' Keyboard Shortcut",
+                  "manipulators":[
+                     {
+                        "from":{
+                           "key_code":"m",
+                           "modifiers":{
+                              "mandatory":[
+                                 "command"
+                              ]
+                           }
+                        },
+                        "type":"basic"
+                     }
+                  ]
+               },
+               {
+                  "description":"Disable 'Hide Window' Keyboard Shortcut",
+                  "manipulators":[
+                     {
+                        "from":{
+                           "key_code":"h",
+                           "modifiers":{
+                              "mandatory":[
+                                 "command"
+                              ]
+                           }
+                        },
+                        "type":"basic"
+                     }
+                  ]
+               },
+               {
+                  "description":"Disable 'Hide Non-Focused Windows' Keyboard Shortcut",
+                  "manipulators":[
+                     {
+                        "from":{
+                           "key_code":"h",
+                           "modifiers":{
+                              "mandatory":[
+                                 "command",
+                                 "option"
+                              ]
+                           }
+                        },
+                        "type":"basic"
+                     }
+                  ]
+               },
+               {
                   "description":"Custom Browser Keyboard Shortcuts",
                   "manipulators":[
                      {
