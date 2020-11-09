@@ -373,7 +373,7 @@
                         },
                         "to":[
                            {
-                              "shell_command":"open ~/src/client-cocoa"
+                              "shell_command":"open ~/src/ms/client-cocoa"
                            }
                         ],
                         "type":"basic"
