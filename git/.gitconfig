@@ -1,6 +1,9 @@
 [user]
     name = Jon Schneider
-	email = jon@jonschneider.me
+[includeIf "gitdir:js/"]
+    path = .gitconfig_js
+[includeIf "gitdir:ms/"]
+    path = .gitconfig_ms
 [difftool]
     prompt = false
 [difftool "Kaleidoscope"]
