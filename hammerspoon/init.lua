@@ -1,4 +1,4 @@
--- Defeat Pasteblocking
+-- Defeat Pasteblocking and paste without retaining formatting
 hs.hotkey.bind({"cmd", "alt"}, "V", function() hs.eventtap.keyStrokes(hs.pasteboard.getContents()) end)
 
 -- Disable Lunette bindings I don't need
