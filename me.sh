@@ -236,4 +236,7 @@ defaults write com.apple.dock autohide -bool true
 # Disable the Launchpad gesture (pinch with thumb and three fingers)
 defaults write com.apple.dock showLaunchpadGestureEnabled -int 0
 
+# Check for software updates daily
+defaults write com.apple.SoftwareUpdate ScheduleFrequency -int 1
+
 message "Configuration Complete"
