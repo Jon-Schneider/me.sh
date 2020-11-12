@@ -46,9 +46,7 @@ rvm install ruby
 
 message "Installing Rubygems"
 rvm use ruby
-gem install cocoapods
-gem install jekyll
-gem install rails
+bundle install
 
 # Install Visual Studio Code Plugins
 message "Installing Visual Studio Code Extensions"
