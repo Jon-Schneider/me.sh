@@ -96,9 +96,10 @@ defaults write com.barebones.bbedit EditorSoftWrap -bool YES
 defaults write com.barebones.bbedit SoftWrapStyle -integer 2
 defaults write com.barebones.bbedit EditingWindowShowPageGuide -bool NO
 
-# Configure OS to show hidden files in Finder
-message "Configuring Finder to show hidden files..."
+# Configure Finder
+message "Configuring Finder ..."
 defaults write com.apple.Finder AppleShowAllFiles true
+defaults write com.apple.finder ShowPathbar -bool true
 killall Finder
 
 # Create Tmp Dir
