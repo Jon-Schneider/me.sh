@@ -38,7 +38,32 @@ message "Finished installing cheat.sh"
 
 # Casks
 message "Installing Casks" 
-brew cask install background-music bbedit calibre coconutbattery cryptomator dash disk-inventory-x drawio epubquicklook flux hammerspoon hiddenbar karabiner-elements kindle kitty ksdiff libreoffice macdown microsoft-edge onedrive qlmarkdown qlmobi the-unarchiver torbrowser visual-studio-code
+brew cask install \
+	background-music \
+	bedit \
+	calibre \
+	coconutbattery \
+	cryptomator \
+	dash \
+	disk-inventory-x \
+	drawio \
+	epubquicklook \
+	flux \
+	hammerspoon \
+	hiddenbar \
+	karabiner-elements \
+	kindle \
+	kitty \
+	ksdiff \
+	libreoffice \
+	macdown \
+	microsoft-edge \
+	onedrive \
+	qlmarkdown \
+	qlmobi \
+	the-unarchiver \
+	torbrowser \
+	visual-studio-code
 brew tap buo/cask-upgrade
 message "Finished Installing Casks"
 
