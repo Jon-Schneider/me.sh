@@ -6,8 +6,12 @@ function message {
 	printf "${GREEN}$1${NOCOLOR}\n"
 }
 
+# Sign into Mac App Store (mas dependency)
+message "Prerequisite 1/2: Sign into App Store. Press any key to continue:"
+read -n 1 -s
+
 # Xcode Command Line Tools (brew dependency)
-message "To start, install the Xcode Command Line Tools by either installing and then opening Xcode or install the Xcode command line tools with 'xcode-select --install'"
+message "Prerequisite 2/2: Install the Xcode Command Line Tools by either installing and then opening Xcode or install the Xcode command line tools with 'xcode-select --install'"
 message "After Xcode Command Line Tools are installed press any key to continue:"
 read -n 1 -s
 
@@ -21,13 +25,10 @@ fi
 # Brew
 message "Installing Homebrew"
 ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-message "Homebrew install completed"
 brew update
 brew doctor
-
-message "Installing Brews..."
-brew install carthage chisel duti mas zsh-syntax-highlighting
-message "Finished Installing Brews..."
+brew bundle
+message "Finished Configuring Homebrew"
 
 # Install cheat.sh, which is unfortunately not available via brew
 message "Installing cheat.sh"
@@ -35,46 +36,6 @@ mkdir -p ~/bin/
 curl https://cht.sh/:cht.sh > ~/bin/cht.sh
 chmod +x ~/bin/cht.sh
 message "Finished installing cheat.sh"
-
-# Casks
-message "Installing Casks" 
-brew cask install \
-	background-music \
-	bedit \
-	calibre \
-	coconutbattery \
-	cryptomator \
-	dash \
-	disk-inventory-x \
-	drawio \
-	epubquicklook \
-	flux \
-	hammerspoon \
-	hiddenbar \
-	karabiner-elements \
-	kindle \
-	kitty \
-	ksdiff \
-	libreoffice \
-	macdown \
-	microsoft-edge \
-	onedrive \
-	qlmarkdown \
-	qlmobi \
-	the-unarchiver \
-	torbrowser \
-	visual-studio-code
-brew tap buo/cask-upgrade
-message "Finished Installing Casks"
-
-# Mac App Store
-message "Installing Mac App Store Apps"
-show_loading
-mas install 587512244  # Kaleidoscope
-mas install 784801555  # OneNote
-mas install 407963104  # Pixelmator
-mas install 497799835  # Xcode
-message "Finished Installing Mac App Store Apps"
 
 # Ruby Config
 message "Installing RVM"
