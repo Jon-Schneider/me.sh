@@ -335,7 +335,8 @@
                            "key_code":"d",
                            "modifiers":{
                               "mandatory":[
-                                 "right_command"
+                                 "right_command",
+                                 "option"
                               ]
                            }
                         },
@@ -351,7 +352,8 @@
                            "key_code":"h",
                            "modifiers":{
                               "mandatory":[
-                                 "right_command"
+                                 "right_command",
+                                 "option"
                               ]
                            }
                         },
@@ -367,7 +369,8 @@
                            "key_code":"o",
                            "modifiers":{
                               "mandatory":[
-                                 "right_command"
+                                 "right_command",
+                                 "option"
                               ]
                            }
                         },
