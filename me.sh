@@ -183,6 +183,14 @@ duti -s com.barebones.bbedit txt all
 duti -s com.uranusjr.macdown md all
 duti -s com.microsoft.edgemac http # Set Edge as default browser
 
+# Disable Aidrop by default
+defaults write com.apple.NetworkBrowser DisableAirDrop -bool YES
+
+# Customize Statusbar
+defaults write com.apple.Siri StatusMenuVisible NO
+defaults write com.apple.systemuiserver menuExtras ' ("/System/Library/CoreServices/Menu Extras/Battery.menu", "/System/Library/CoreServices/Menu Extras/Bluetooth.menu", "/System/Library/CoreServices/Menu Extras/Clock.menu")' 
+killall SystemUIServer
+
 # Theming
 # Override system theme to set certain apps to always display in dark or light mode.
 # To reset run 'defaults delete [bundleid] NSRequiresAquaSystemAppearance'
