@@ -84,7 +84,7 @@
                      },
                      {
                         "from":{
-                           "key_code":"k",
+                           "key_code":"s",
                            "modifiers":{
                               "mandatory":[
                                  "right_command"
@@ -383,7 +383,8 @@
                            "key_code":"s",
                            "modifiers":{
                               "mandatory":[
-                                 "right_command"
+                                 "right_command",
+                                 "option"
                               ]
                            }
                         },
