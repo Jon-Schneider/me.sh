@@ -189,7 +189,7 @@ defaults write com.apple.NetworkBrowser DisableAirDrop -bool YES
 
 # Customize Statusbar
 defaults write com.apple.Siri StatusMenuVisible NO
-defaults write com.apple.systemuiserver menuExtras ' ("/System/Library/CoreServices/Menu Extras/Battery.menu", "/System/Library/CoreServices/Menu Extras/Bluetooth.menu", "/System/Library/CoreServices/Menu Extras/Clock.menu")' 
+defaults write com.apple.systemuiserver menuExtras '("/System/Library/CoreServices/Menu Extras/Battery.menu", "/System/Library/CoreServices/Menu Extras/Bluetooth.menu", "/System/Library/CoreServices/Menu Extras/Clock.menu")'
 killall SystemUIServer
 
 # Theming
