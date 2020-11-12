@@ -28,14 +28,12 @@ ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/
 brew update
 brew doctor
 brew bundle
-message "Finished Configuring Homebrew"
 
 # Install cheat.sh, which is unfortunately not available via brew
 message "Installing cheat.sh"
 mkdir -p ~/bin/
 curl https://cht.sh/:cht.sh > ~/bin/cht.sh
 chmod +x ~/bin/cht.sh
-message "Finished installing cheat.sh"
 
 # Ruby Config
 message "Installing RVM"
@@ -45,14 +43,12 @@ source ~/.rvm/scripts/rvm # Required to run rvm commands
 rvm install ruby
 # rvm install jruby
 # rvm install rbx
-message "Finished Installing RVM"
 
 message "Installing Rubygems"
 rvm use ruby
 gem install cocoapods
 gem install jekyll
 gem install rails
-message "Finished Installing Rubygems"
 
 # Install Visual Studio Code Plugins
 message "Installing Visual Studio Code Extensions"
@@ -69,7 +65,6 @@ code --install-extension PeterJausovec.vscode-docker
 code --install-extension rebornix.ruby
 code --install-extension redhat.vscode-yaml
 code --install-extension yzhang.markdown-all-in-one
-message "Finished Installing Visual Studio Code Extensions"
 
 message "Updating System Configuration"
 
