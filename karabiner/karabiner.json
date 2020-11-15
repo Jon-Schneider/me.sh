@@ -132,6 +132,22 @@
                      },
                      {
                         "from":{
+                           "key_code":"w",
+                           "modifiers":{
+                              "mandatory":[
+                                 "right_command"
+                              ]
+                           }
+                        },
+                        "to":[
+                           {
+                              "shell_command":"open -a 'Microsoft Word.app'"
+                           }
+                        ],
+                        "type":"basic"
+                     },
+                     {
+                        "from":{
                            "key_code":"p",
                            "modifiers":{
                               "mandatory":[
