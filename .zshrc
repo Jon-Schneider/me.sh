@@ -38,7 +38,6 @@ alias gdi="g di"
 alias gr="git reset"
 alias grh="git reset --hard"
 alias grs="git reset --soft"
-alias grsh="git reset --soft @~"
 alias gs="git status"
 alias fdr="open ."
 alias hm="cd ~/"
@@ -68,5 +67,10 @@ alias 'omr'="cd ~/src/ms/client-cocoa" # "OLM Repo"
 
 # OAR Aliases
 alias 'oar'="cd ~/src/ms/outlook-auth-framework"
+
+# Functions
+grsh() {
+    git reset --soft "@~$1"
+}
 
 source ~/.zshrc_local 2> /dev/null # Load local .zshrc if available. Fail silently
