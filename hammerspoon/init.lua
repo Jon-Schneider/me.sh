@@ -1,3 +1,8 @@
+-- Automatically reload configuration
+hs.loadSpoon("ReloadConfiguration")
+spoon.ReloadConfiguration:start()
+
+
 -- Defeat Pasteblocking and paste without retaining formatting
 hs.hotkey.bind({"cmd", "alt"}, "V", function() hs.eventtap.keyStrokes(hs.pasteboard.getContents()) end)
 
