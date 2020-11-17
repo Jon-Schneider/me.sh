@@ -48,6 +48,7 @@ duti -s com.barebones.bbedit public.plain-text all # All plaintext files. Includ
 duti -s com.barebones.bbedit json all
 duti -s com.barebones.bbedit sh all
 duti -s com.barebones.bbedit txt all
+duti -s com.barebones.bbedit pub all # Libreoffice wants to open .pub for some reason, but the only .pub files I see are public keys
 duti -s com.uranusjr.macdown md all
 duti -s com.microsoft.edgemac http # Set Edge as default browser
 
