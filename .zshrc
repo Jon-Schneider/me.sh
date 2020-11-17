@@ -35,6 +35,7 @@ alias dl="cd ~/Downloads"
 alias gcr="git checkout --track origin/" # Git checkout Remote Branch - add branch name after
 alias gai="g ai"
 alias gdi="g di"
+alias gdl="gd @~ @" # Git diff last; show diff of last commit
 alias gr="git reset"
 alias grh="git reset --hard"
 alias grs="git reset --soft"
