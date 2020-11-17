@@ -32,6 +32,7 @@ alias bup="brew upgrade"
 alias cdf='cd "`osascript -e "tell application \\"Finder\\" to get POSIX path of (insertion location as text)"`"' # cd to front finder dir
 alias cht="cht.sh"
 alias dl="cd ~/Downloads"
+alias ddnuke="rm -rf ~/Library/Developer/Xcode/DerivedData" # Nuke derived data
 alias gcr="git checkout --track origin/" # Git checkout Remote Branch - add branch name after
 alias gai="g ai"
 alias gdi="g di"
