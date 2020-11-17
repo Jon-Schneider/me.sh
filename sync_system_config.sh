@@ -103,6 +103,9 @@ sudo nvram boot-args="mbasd=1"
 # Configure Dock
 defaults write com.apple.dock persistent-apps -array # Remove all icons from dock
 defaults write com.apple.dock autohide -bool true
+defaults write com.apple.dock orientation left # Move dock to left side of screen
+defaults write com.apple.dock tilesize -int 50; # Set dock icon size
+killall Dock # Restart dock to apply orientation and icon size
 
 # Disable the Launchpad gesture (pinch with thumb and three fingers)
 defaults write com.apple.dock showLaunchpadGestureEnabled -int 0
