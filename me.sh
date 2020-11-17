@@ -7,16 +7,16 @@ function message {
 }
 
 # Sign into Mac App Store (mas dependency)
-message "Prerequisite 1/3: Sign into App Store. Press any key to continue:"
+message "Prerequisite 1/4: Sign into App Store. Press any key to continue:"
 read -n 1 -s
 
 # Xcode Command Line Tools (brew dependency)
-message "Prerequisite 2/3: Install the Xcode Command Line Tools by either installing and then opening Xcode or install the Xcode command line tools with 'xcode-select --install'"
+message "Prerequisite 2/4: Install the Xcode Command Line Tools by either installing and then opening Xcode or install the Xcode command line tools with 'xcode-select --install'"
 message "After Xcode Command Line Tools are installed press any key to continue:"
 read -n 1 -s
 
 # Get sudo
-message "Prerequisite 3/3: Sudo"
+message "Prerequisite 3/4: Sudo"
 sudo -v
 
 xcode-select -p 1>/dev/null;echo $?
@@ -25,6 +25,14 @@ then
 message "Xcode Command Line Tools are not installed"
 exit 1
 fi
+
+# Setup SSH
+message "Prerequisite 4/4: Generate SSH key"
+ssh-keygen -t ed25519 -C "jon@jonschneider.me"
+ssh-add -K ~/.ssh/id_ed25519
+cp -p ssh/config ~/.ssh/
+
+message "Configuring Mac..."
 
 # Brew
 message "Installing Homebrew"
