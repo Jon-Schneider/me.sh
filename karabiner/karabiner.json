@@ -304,46 +304,6 @@
                   ]
                },
                {
-                  "description":"Custom Browser Keyboard Shortcuts",
-                  "manipulators":[
-                     {
-                        "conditions":[
-                           {
-                              "bundle_identifiers":[
-                                 "^com.microsoft.edgemac",
-                                 "^com.microsoft.edgemac.Dev",
-                                 "^com.google.Chrome"
-                              ],
-                              "type":"frontmost_application_if"
-                           }
-                        ],
-                        "from":{
-                           "key_code":"escape",
-                           "modifiers":{
-                              "mandatory":[
-                                 "command"
-                              ]
-                           }
-                        },
-                        "to":[
-                           {
-                              "key_code":"l",
-                              "modifiers":[
-                                 "command"
-                              ]
-                           },
-                           {
-                              "key_code":"f"
-                           },
-                           {
-                              "key_code":"return_or_enter"
-                           }
-                        ],
-                        "type":"basic"
-                     }
-                  ]
-               },
-               {
                   "description":"Custom Finder Keyboard Shortcuts",
                   "manipulators":[
                      {
