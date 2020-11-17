@@ -58,6 +58,7 @@ alias tmp="cd ~/Tmp"
 alias vsc="code ."
 alias wst="osascript -e 'tell application \"Messages\" to send \"How are you?\" to buddy \"Wife\"'" # Wife Status
 alias xck="osascript -e 'quit app \"Xcode\"'"
+alias xcrmdd="rm -rf ~/Library/Developer/Xcode/DerivedData" # Nuke derived data
 alias zshrc="bb ~/.zshrc"
 
 # OLM Aliases
