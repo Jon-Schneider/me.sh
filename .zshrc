@@ -45,6 +45,7 @@ alias gs="git status"
 alias fdr="open ."
 alias hm="cd ~/"
 alias hst="history"
+alias js="cd ~/src/js"
 alias me="mer && vsc"
 alias mer="cd ~/src/js/me.sh"
 alias nc="cd ~/Nextcloud"
@@ -62,6 +63,9 @@ alias wst="osascript -e 'tell application \"Messages\" to send \"How are you?\" 
 alias xck="osascript -e 'quit app \"Xcode\"'"
 alias xcrmdd="rm -rf ~/Library/Developer/Xcode/DerivedData" # Nuke derived data
 alias zshrc="bb ~/.zshrc"
+
+# MS Aliases
+alias ms="cd ~/src/ms"
 
 # OLM Aliases
 alias 'omc'='olm config'
