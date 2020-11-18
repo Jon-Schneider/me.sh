@@ -48,7 +48,6 @@ alias hst="history"
 alias js="cd ~/src/js"
 alias me="mer && vsc"
 alias mer="cd ~/src/js/me.sh"
-alias odm="cd ~/OneDrive\ -\ Microsoft"
 alias odp="cd ~/OneDrive"
 alias pi="pod install"
 alias piru="pod install --repo-update"
@@ -64,6 +63,7 @@ alias xcrmdd="rm -rf ~/Library/Developer/Xcode/DerivedData" # Nuke derived data
 alias zshrc="bb ~/.zshrc"
 
 # MS Aliases
+alias odm="cd ~/OneDrive\ -\ Microsoft"
 alias ms="cd ~/src/ms"
 
 # OLM Aliases
