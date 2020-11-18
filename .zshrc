@@ -68,6 +68,7 @@ alias 'omco'="omc DEV && omo"
 alias 'omd'="olm doctor"
 alias 'omda'="olm doctor --repair-type=auto"
 alias 'oml'="xck && git pull && omco" # Get OLM Latest
+alias 'olmcb'="pushd ~/src/ms/client-cocoa/app-ios; ./carthage-build-xcode-12.sh --platform iOS; popd" # Carthage build
 alias 'omo'="olm open"
 alias 'omr'="cd ~/src/ms/client-cocoa" # "OLM Repo"
 
