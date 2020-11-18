@@ -20,7 +20,7 @@ unsetopt nomatch
 
 export EDITOR="vim"
 
-# My Aliases
+# Personal Aliases and Functions
 alias bb="open -b com.barebones.bbedit"
 alias bi="brew install"
 alias bl="brew list"
@@ -40,6 +40,7 @@ alias gdl="gd @~ @" # Git diff last; show diff of last commit
 alias gr="git reset"
 alias grh="git reset --hard"
 alias grs="git reset --soft"
+grsh() { git reset --soft "@~$1" }
 alias gs="git status"
 alias fdr="open ."
 alias hm="cd ~/"
@@ -74,10 +75,5 @@ alias 'omr'="cd ~/src/ms/client-cocoa" # "OLM Repo"
 
 # OAR Aliases
 alias 'oar'="cd ~/src/ms/outlook-auth-framework"
-
-# Functions
-grsh() {
-    git reset --soft "@~$1"
-}
 
 source ~/.zshrc_local 2> /dev/null # Load local .zshrc if available. Fail silently
