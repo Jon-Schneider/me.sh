@@ -33,6 +33,7 @@ alias cdf='cd "`osascript -e "tell application \\"Finder\\" to get POSIX path of
 alias cht="cht.sh"
 alias dl="cd ~/Downloads"
 alias ddnuke="rm -rf ~/Library/Developer/Xcode/DerivedData" # Nuke derived data
+alias fdr="open ."
 alias gcr="git checkout --track origin/" # Git checkout Remote Branch - add branch name after
 alias gai="g ai"
 alias gdi="g di"
@@ -42,7 +43,6 @@ alias grh="git reset --hard"
 alias grs="git reset --soft"
 grsh() { git reset --soft "@~$1" }
 alias gs="git status"
-alias fdr="open ."
 alias hm="cd ~/"
 alias hst="history"
 alias js="cd ~/src/js"
