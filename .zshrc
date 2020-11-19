@@ -43,6 +43,7 @@ alias grh="git reset --hard"
 alias grs="git reset --soft"
 grsh() { git reset --soft "@~$1" }
 alias gs="git status"
+unalias gst # I want gst to be reserved as a prefix for stashing operations
 alias hm="cd ~/"
 alias hst="history"
 alias hstg="hst | grep"
