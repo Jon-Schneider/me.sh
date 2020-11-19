@@ -45,6 +45,7 @@ grsh() { git reset --soft "@~$1" }
 alias gs="git status"
 alias hm="cd ~/"
 alias hst="history"
+alias hstg="hst | grep"
 alias js="cd ~/src/js"
 alias me="mer && vsc"
 alias mer="cd ~/src/js/me.sh"
