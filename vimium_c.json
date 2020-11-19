@@ -1,7 +1,7 @@
 {
 	"name": "Vimium C",
-	"@time": "11/5/2020, 1:15:06 PM",
-	"time": 1604610906002,
+	"@time": "11/19/2020, 11:53:07 AM",
+	"time": 1605815587537,
 	"environment": {
 		"extension": "1.86.2",
 		"platform": "mac",
@@ -67,6 +67,10 @@
 		{
 			"pattern": ":https://microsoft-my.sharepoint-df.com/",
 			"passKeys": "? "
+		},
+		{
+			"pattern": ":https://msexpense2/",
+			"passKeys": ""
 		}
 	],
 	"keyMappings": [
@@ -75,9 +79,11 @@
 		"map k scrollUp count=3",
 		"map d scrollUp count=3",
 		"map b goBack",
+		"map h goForward",
 		"map g goForward",
 		"map v LinkHints.activateMode",
 		"map V LinkHints.activateModeToOpenInNewTab",
+		"map <m-s-v> LinkHints.activateModeToOpenInNewForegroundTab",
 		"map <m-g> scrollToTop",
 		"map <m-s-g> scrollToBottom",
 		"map [ previousTab",
