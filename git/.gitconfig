@@ -19,7 +19,7 @@
 [fetch]
     prune = true
 [core]
-	excludesfile = /Users/jon/.gitignore
+	excludesfile = ~/.gitignore
 [alias]
     ai = "!f() { git add \"$(git diff --name-only | sed -n $1p)\"; }; f"
     bda = ! git branch | egrep -v '(^\\*|dev|develop|master)' | xargs git branch -d # branch delete all
