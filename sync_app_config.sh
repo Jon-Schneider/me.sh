@@ -17,6 +17,9 @@ defaults write com.barebones.bbedit EditorSoftWrap -bool YES
 defaults write com.barebones.bbedit SoftWrapStyle -integer 2
 defaults write com.barebones.bbedit EditingWindowShowPageGuide -bool NO
 
+# Configure Forklift
+ln -f config/Forklift ~/Library/Preferences
+
 # Configure git
 message "Configuring git..."
 ln -f git/.gitignore ~/.gitignore
