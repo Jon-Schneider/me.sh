@@ -5,7 +5,6 @@ brew "mas"
 brew "zsh-syntax-highlighting"
 
 cask "appcleaner"
-cask "background-music"
 cask "bbedit"
 cask "calibre"
 cask "coconutbattery"
