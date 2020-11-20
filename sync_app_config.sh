@@ -18,7 +18,7 @@ defaults write com.barebones.bbedit SoftWrapStyle -integer 2
 defaults write com.barebones.bbedit EditingWindowShowPageGuide -bool NO
 
 # Configure Forklift
-ln -f config/Forklift ~/Library/Preferences
+ln -f configs/Forklift/com.binarynights.ForkLift-3.plist ~/Library/Preferences
 
 # Configure git
 message "Configuring git..."
