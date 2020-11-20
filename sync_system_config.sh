@@ -51,6 +51,7 @@ defaults write -g com.apple.mouse.scaling 6.0 # Double the default
 
 # Set default apps
 message "Setting default apps..."
+duti -s com.binarynights.ForkLift-3 public.folder all
 duti -s com.barebones.bbedit public.plain-text all # All plaintext files. Includes Unix hidden files
 duti -s com.barebones.bbedit json all
 duti -s com.barebones.bbedit sh all
