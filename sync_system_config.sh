@@ -23,6 +23,7 @@ defaults write com.apple.finder NewWindowTargetPath -string "file://${HOME}/OneD
 defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false # Disable the warning when changing a file extension
 defaults write com.apple.finder FXPreferredViewStyle -string "clmv" # Use Column View by default
 defaults write com.apple.finder WarnOnEmptyTrash -bool false
+defaults write com.apple.finder QuitMenuItem -bool YES # Enable Cmd + Q to quit
 
 # Finder: Expand the Get Info “General”, “Open with”, and “Sharing & Permissions” File Info panes by default:
 defaults write com.apple.finder FXInfoPanesExpanded -dict \
