@@ -10,6 +10,12 @@ message "Updating System Configuration..."
 
 # Configure Finder
 message "Configuring Finder..."
+defaults write com.apple.Finder FXPreferredViewStyle clmv # Default to column view
+# Unfortunately there is no way to enable grouping by default in finder windows; the best I can do is set my preferred finder grouping and sorting
+defaults write com.apple.Finder FXUseGroups -bool true # Group files by default. This gets toggled by Finder when grouping is enabled in a dir but doesn't seem respected by default. Adding anyway.
+defaults write com.apple.finder FXPreferredGroupBy -string "Kind" # Default to grouping by Kind
+defaults write com.apple.finder FXArrangeGroupViewBy -string "Name" # Sort groups by name
+
 defaults write com.apple.Finder AppleShowAllFiles true
 defaults write NSGlobalDomain AppleShowAllExtensions -bool true
 defaults write com.apple.finder ShowPathbar -bool true
