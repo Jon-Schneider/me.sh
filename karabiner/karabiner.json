@@ -342,6 +342,40 @@
                      },
                      {
                         "from":{
+                           "key_code":"j",
+                           "modifiers":{
+                              "mandatory":[
+                                 "right_command",
+                                 "right_option"
+                              ]
+                           }
+                        },
+                        "to":[
+                           {
+                              "shell_command":"open ~/src/js"
+                           }
+                        ],
+                        "type":"basic"
+                     },
+                     {
+                        "from":{
+                           "key_code":"m",
+                           "modifiers":{
+                              "mandatory":[
+                                 "right_command",
+                                 "right_option"
+                              ]
+                           }
+                        },
+                        "to":[
+                           {
+                              "shell_command":"open ~/src/ms"
+                           }
+                        ],
+                        "type":"basic"
+                     },
+                     {
+                        "from":{
                            "key_code":"o",
                            "modifiers":{
                               "mandatory":[
