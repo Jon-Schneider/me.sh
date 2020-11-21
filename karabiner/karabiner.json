@@ -325,7 +325,7 @@
                      },
                      {
                         "from":{
-                           "key_code":"a",
+                           "key_code":"d",
                            "modifiers":{
                               "mandatory":[
                                  "right_command",
