@@ -21,11 +21,3 @@ windowManagementBindings = {
     redo = false
 }
 spoon.Lunette:bindHotkeys(windowManagementBindings)
-
--- Pasteboard History
-hs.loadSpoon("TextClipboardHistory")
-spoon.TextClipboardHistory:bindHotkeys({ toggle_clipboard = { { "cmd", "shift" }, "v" } })
-spoon.TextClipboardHistory.show_in_menubar = false
-spoon.TextClipboardHistory.frequency = 5.0
-spoon.TextClipboardHistory.hist_size = 5.0
-spoon.TextClipboardHistory:start()
