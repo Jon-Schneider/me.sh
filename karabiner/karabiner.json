@@ -228,7 +228,7 @@
                            "key_code":"d",
                            "modifiers":{
                               "mandatory":[
-                                 "command",
+                                 "left_command",
                                  "option"
                               ]
                            }
