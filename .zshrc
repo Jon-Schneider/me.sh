@@ -96,6 +96,7 @@ zinit ice lucid wait
 zinit snippet OMZL::git.zsh
 zinit ice lucid wait
 zinit snippet OMZP::git
+zinit snippet OMZP::last-working-dir # Shell crashes if loaded async
 zinit ice lucid wait
 zinit snippet OMZP::xcode
 zinit ice lucid wait
