@@ -98,5 +98,8 @@ zinit ice lucid wait
 zinit snippet OMZP::xcode
 zinit ice lucid wait
 zinit light zsh-users/zsh-syntax-highlighting
+
+# Load local dev clone of my theme if present, otherwise use remote
+[[ -d "$HOME/src/js/jon.zsh-theme" ]] && local theme_path="$HOME/src/js/jon.zsh-theme" || local theme_path="Jon-Schneider/jon.zsh-theme"
 zinit ice lucid wait'!'
-zinit load Jon-Schneider/jon.zsh-theme
+zinit light $theme_path
