@@ -54,6 +54,8 @@ alias vsc="code ."
 alias wst="osascript -e 'tell application \"Messages\" to send \"How are you?\" to buddy \"Wife\"'" # Wife Status
 alias xck="osascript -e 'quit app \"Xcode\"'"
 alias xcrmdd="rm -rf ~/Library/Developer/Xcode/DerivedData" # Nuke derived data
+alias zpu="zplugin update" # zsh plugin update
+alias zpua="zplugin update --all" # zsh plugin update all
 alias zshrc="bb ~/.zshrc"
 
 # MS Aliases
