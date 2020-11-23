@@ -1,25 +1,14 @@
-# Path to oh-my-zsh installation.
-export ZSH=$HOME/.oh-my-zsh
-
-ZSH_THEME="robbyrussell"
-
-# Set PATH
+# ENV variables
 export PATH=$PATH:$HOME/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:$HOME/.rvm/bin
-
-ENABLE_CORRECTION="true"
-
-plugins=(
-  git
-  last-working-dir
-  xcode
-)
-
-source $ZSH/oh-my-zsh.sh
-source ~/.rvm/scripts/rvm
-source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh # Load Syntax Highlighting Plugin
-unsetopt nomatch
-
 export EDITOR="vim"
+
+unsetopt nomatch # Disable no-match globbing error zsh enables by default
+setopt nocaseglob # Enable case-insensitive pattern matching
+setopt autocd  # Enable cding by just tying the dir name.
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' # Make compinit completions case-insensitive
+autoload -Uz compinit && compinit # Enable completions
+setopt autocd autopushd # cd acts like pushd
+setopt promptsubst # Required for prompt colors to work right
 
 # Personal Aliases and Functions
 alias bb="open -b com.barebones.bbedit"
@@ -45,12 +34,12 @@ alias grh="git reset --hard"
 alias grs="git reset --soft"
 grsh() { git reset --soft "@~$1" }
 alias gs="git status"
-unalias gst # I want gst to be reserved as a prefix for stashing operations
 alias hm="cd ~/"
 alias hst="history"
 alias hstg="hst | grep"
 alias hstr="fc -l -20" # Recent History
 alias js="cd ~/src/js"
+alias ls='ls -aG $@'
 alias me="mer && vsc"
 alias mer="cd ~/src/js/me.sh"
 alias od="cd ~/OneDrive"
@@ -84,4 +73,30 @@ alias 'omr'="cd ~/src/ms/client-cocoa" # "OLM Repo"
 # OAR Aliases
 alias 'oar'="cd ~/src/ms/outlook-auth-framework"
 
+source ~/.rvm/scripts/rvm
 source ~/.zshrc_local 2> /dev/null # Load local .zshrc if available. Fail silently
+
+# ZINIT
+
+if [[ ! -f $HOME/.zinit/bin/zinit.zsh ]]; then
+    print -P "%F{33}▓▒░ %F{220}Installing %F{33}DHARMA%F{220} Initiative Plugin Manager (%F{33}zdharma/zinit%F{220})…%f"
+    command mkdir -p "$HOME/.zinit" && command chmod g-rwX "$HOME/.zinit"
+    command git clone https://github.com/zdharma/zinit "$HOME/.zinit/bin" && \
+        print -P "%F{33}▓▒░ %F{34}Installation successful.%f%b" || \
+        print -P "%F{160}▓▒░ The clone has failed.%f%b"
+fi
+
+source "$HOME/.zinit/bin/zinit.zsh"
+autoload -Uz _zinit
+(( ${+_comps} )) && _comps[zinit]=_zinit
+
+zinit ice lucid wait
+zinit snippet OMZL::git.zsh
+zinit ice lucid wait
+zinit snippet OMZP::git
+zinit ice lucid wait
+zinit snippet OMZP::xcode
+zinit ice lucid wait
+zinit light zsh-users/zsh-syntax-highlighting
+zinit ice lucid wait'!'
+zinit load Jon-Schneider/jon.zsh-theme

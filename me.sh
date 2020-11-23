@@ -76,9 +76,10 @@ code --install-extension rebornix.ruby
 code --install-extension redhat.vscode-yaml
 code --install-extension yzhang.markdown-all-in-one
 
-# Install Oh My Zsh
-message "Installing Oh My Zsh..."
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+# Install zinit
+message "Installing Zinit..."
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/zdharma/zinit/master/doc/install.sh)"
+zinit self-update
 
 # Configure Tmp Dir
 message "Creating ~/Tmp dir..."
