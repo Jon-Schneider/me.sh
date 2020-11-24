@@ -294,7 +294,7 @@
                            "key_code":"h",
                            "modifiers":{
                               "mandatory":[
-                                 "command",
+                                 "left-command",
                                  "option"
                               ]
                            }
@@ -346,7 +346,7 @@
                            "modifiers":{
                               "mandatory":[
                                  "right_command",
-                                 "option"
+                                 "right_option"
                               ]
                            }
                         },
