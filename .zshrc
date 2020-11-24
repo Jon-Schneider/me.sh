@@ -93,15 +93,13 @@ source "$HOME/.zinit/bin/zinit.zsh"
 autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
 
-zinit ice lucid wait'!0a'
-zinit snippet OMZL::git.zsh
-zinit ice lucid wait'!0'
-zinit snippet OMZP::git
 zinit snippet OMZP::last-working-dir # Shell crashes if loaded async
-zinit ice lucid wait'!0'
-zinit snippet OMZP::xcode
-zinit ice lucid wait'!0'
-zinit light zsh-users/zsh-syntax-highlighting
+zinit wait lucid for \
+        OMZL::git.zsh \
+        OMZP::git \
+        OMZP::xcode \
+        zsh-users/zsh-syntax-highlighting \
+        marlonrichert/zsh-autocomplete \
 
 # Load local dev clone of my theme if present, otherwise use remote
 [[ -d "$HOME/src/js/jon.zsh-theme" ]] && local theme_path="$HOME/src/js/jon.zsh-theme" || local theme_path="Jon-Schneider/jon.zsh-theme"
