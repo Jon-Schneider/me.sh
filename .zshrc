@@ -6,6 +6,7 @@ export EDITOR="vim"
 unsetopt nomatch # Disable no-match globbing error zsh enables by default
 setopt nocaseglob # Enable case-insensitive pattern matching
 setopt autocd  # Enable cding by just tying the dir name.
+zstyle ':autocomplete:*' min-input 2 # Minimum number of characters that must be typed before marlonrichert/zsh-autocomplete starts showing options
 zstyle ':completion:*' matcher-list 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]} l:|=* r:|=*' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]} l:|=* r:|=*' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]} l:|=* r:|=*' # Enable case insensitive path-completion
 zstyle :completion::complete:-command-:: tag-order local-directories - # Limit autocomplete directories to current dir
 autoload -Uz compinit && compinit # Enable completions
