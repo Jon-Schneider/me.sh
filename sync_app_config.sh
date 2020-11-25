@@ -49,7 +49,7 @@ ln -f .lldbinit ~/
 # Configure vim
 message "Configuring Vim..."
 mkdir -p ~/.vim/.backup ~/.vim/.tmp ~/.vim/.undo 2> /dev/null # Redirect stderr to suppress dir already exists log
-ln -f .vimrc ~/
+ln -f configs/vim/.vimrc ~/
 
 # Configure Visual Studio Code
 message "Configuring Visual Studio Code..."
