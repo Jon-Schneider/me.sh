@@ -35,7 +35,7 @@ ln -Fs $(pwd)/hammerspoon ~/ # For some reason this would not work with a relati
 
 # Configure Karabiner-Elements
 message "Configuring Karabiner Elements..."
-ln -f karabiner/karabiner.json ~/.config/karabiner
+ln -f configs/karabiner/karabiner.json ~/.config/karabiner
 
 # Configure Kitty
 message "Configuring Kitty..."
