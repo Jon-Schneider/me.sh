@@ -2,6 +2,7 @@
 export PATH=$PATH:$HOME/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:$HOME/.rvm/bin
 export EDITOR="vim"
 
+# zsh config
 unsetopt nomatch # Disable no-match globbing error zsh enables by default
 setopt nocaseglob # Enable case-insensitive pattern matching
 setopt autocd  # Enable cding by just tying the dir name.
