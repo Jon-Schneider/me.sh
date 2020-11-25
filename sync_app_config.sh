@@ -40,7 +40,7 @@ ln -f configs/karabiner/karabiner.json ~/.config/karabiner
 # Configure Kitty
 message "Configuring Kitty..."
 mkdir -p ~/.config/kitty 2> /dev/null # Redirect stderr to suppress dir already exists log
-ln -f kitty.conf ~/.config/kitty/
+ln -f configs/kitty/kitty.conf ~/.config/kitty/
 
 # Configure LLDB
 message "Configuring LLDB..."
