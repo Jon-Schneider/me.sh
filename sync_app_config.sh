@@ -44,7 +44,7 @@ ln -f kitty.conf ~/.config/kitty/
 
 # Configure LLDB
 message "Configuring LLDB..."
-ln -f .lldbinit ~/
+ln -f configs/lldb/.lldbinit ~/
 
 # Configure vim
 message "Configuring Vim..."
