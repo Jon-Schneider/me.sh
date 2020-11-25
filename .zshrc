@@ -11,6 +11,8 @@ zstyle :completion::complete:-command-:: tag-order local-directories - # Limit a
 autoload -Uz compinit && compinit # Enable completions
 setopt autocd autopushd # cd acts like pushd
 setopt promptsubst # Required for prompt colors to work right
+bindkey $'^[[A' up-line-or-search # up arrow goes to previous command with currently typed prefix. Not required when using marlonrichert/zsh-autocomplete but I might decide to abandon this plugin at some point.
+bindkey $'^[[B' down-line-or-search  # down arrow goes to next command with currently typed prefix, if I have up-arrowed back in history. Not required when using marlonrichert/zsh-autocomplete but I might decide to abandon this plugin at some point.
 
 # Personal Aliases and Functions
 alias bb="open -b com.barebones.bbedit"
