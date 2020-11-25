@@ -87,4 +87,4 @@ mkdir ~/Tmp
 sudo rm -rf ~/Downloads && ln -s ~/Tmp ~/Downloads # Redirect Downloads to Tmp dir
 
 ./sync_app_config.sh
-./sync_system_config.sh
+./sync_sys_config.sh
