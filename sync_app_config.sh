@@ -54,8 +54,8 @@ ln -f .vimrc ~/
 # Configure Visual Studio Code
 message "Configuring Visual Studio Code..."
 mkdir -p ~/Library/Application\ Support/Code/User/ 2> /dev/null # Redirect stderr to suppress dir already exists log
-ln -f vscode/keybindings.json ~/Library/Application\ Support/Code/User/
-ln -f vscode/settings.json ~/Library/Application\ Support/Code/User/
+ln -f configs/vscode/keybindings.json ~/Library/Application\ Support/Code/User/
+ln -f configs/vscode/settings.json ~/Library/Application\ Support/Code/User/
 
 # Configure .zshrc
 message "Configuring .zshrc..."
