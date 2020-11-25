@@ -8,6 +8,13 @@ function message {
 
 message "Updating System Configuration..."
 
+# Configure Login Script
+message "Setting up login script..."
+ln login/login.sh ~/bin/
+cp -v login/com.user.loginscript.plist ~/Library/LaunchAgents # Unfortunately it doesn't appear plists can be linked (ln)
+sudo chown root ~/Library/LaunchAgents/com.user.loginscript.plist
+launchctl load ~/Library/LaunchAgents/com.user.loginscript.plist
+
 # Configure Finder
 message "Configuring Finder..."
 defaults write com.apple.Finder FXPreferredViewStyle clmv # Default to column view

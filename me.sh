@@ -86,12 +86,5 @@ message "Creating ~/Tmp dir..."
 mkdir ~/Tmp
 sudo rm -rf ~/Downloads && ln -s ~/Tmp ~/Downloads # Redirect Downloads to Tmp dir
 
-# Configure Login Script
-message "Setting up login script..."
-ln login/login.sh ~/bin/
-cp -v login/com.user.loginscript.plist ~/Library/LaunchAgents # Unfortunately it doesn't appear plists can be linked (ln)
-sudo chown root ~/Library/LaunchAgents/com.user.loginscript.plist
-launchctl load ~/Library/LaunchAgents/com.user.loginscript.plist
-
 ./sync_app_config.sh
 ./sync_system_config.sh
