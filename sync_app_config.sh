@@ -59,4 +59,4 @@ ln -f configs/vscode/settings.json ~/Library/Application\ Support/Code/User/
 
 # Configure .zshrc
 message "Configuring .zshrc..."
-ln -f .zshrc ~/
+ln -f configs/zsh/.zshrc ~/
