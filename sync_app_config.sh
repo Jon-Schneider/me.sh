@@ -24,10 +24,10 @@ defaults write com.apple.LaunchServices/com.apple.launchservices.secure LSHandle
 
 # Configure git
 message "Configuring git..."
-ln -f git/.gitignore ~/.gitignore
-ln -f git/.gitconfig ~/.gitconfig
-ln -f git/.gitconfig-js ~/.gitconfig_js
-ln -f git/.gitconfig-ms ~/.gitconfig_ms
+ln -f configs/git/.gitignore ~/.gitignore
+ln -f configs/git/.gitconfig ~/.gitconfig
+ln -f configs/git/.gitconfig-js ~/.gitconfig_js
+ln -f configs/git/.gitconfig-ms ~/.gitconfig_ms
 
 # Configure Hammerspoon
 message "Configuring Hammerspoon"
