@@ -1,8 +1,11 @@
-# ENV variables
+# ENV
 export PATH=$PATH:$HOME/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:$HOME/.rvm/bin
 export EDITOR="vim"
 
-# zsh config
+source ~/.rvm/scripts/rvm
+
+# ZSH CONFIG
+
 unsetopt nomatch # Disable no-match globbing error zsh enables by default
 setopt nocaseglob # Enable case-insensitive pattern matching
 setopt autocd  # Enable cding by just tying the dir name.
@@ -17,76 +20,82 @@ setopt promptsubst # Required for prompt colors to work right
 bindkey $'^[[A' up-line-or-search # up arrow goes to previous command with currently typed prefix. Not required when using marlonrichert/zsh-autocomplete but I might decide to abandon this plugin at some point.
 bindkey $'^[[B' down-line-or-search  # down arrow goes to next command with currently typed prefix, if I have up-arrowed back in history. Not required when using marlonrichert/zsh-autocomplete but I might decide to abandon this plugin at some point.
 
-# Personal Aliases and Functions
-alias bb="open -b com.barebones.bbedit"
-alias bi="brew install"
-alias bl="brew list"
-alias blc="brew list --cask"
-alias bs="brew search"
-alias bsc="brew search --cask"
-alias bun="brew uninstall"
-alias bu="brew update"
-alias bup="bu && brew upgrade"
-alias cdf='cd "`osascript -e "tell application \\"Finder\\" to get POSIX path of (insertion location as text)"`"' # cd to front finder dir
-alias cht="cht.sh"
-alias dl="cd ~/Downloads"
-alias ddnuke="rm -rf ~/Library/Developer/Xcode/DerivedData" # Nuke derived data
-alias fdr="open ."
-alias gcr="git checkout --track origin/" # Git checkout Remote Branch - add branch name after
-alias gai="g ai"
-alias gdi="g di"
-alias gdl="gd @~ @" # Git diff last; show diff of last commit
-alias gmv="g mv" # Spaces are for plebians
-alias gr="git reset"
-alias grh="git reset --hard"
-alias grs="git reset --soft"
-grsh() { git reset --soft "@~$1" }
-alias gs="git status"
-alias hm="cd ~/"
-alias hst="history"
-alias hstg="hst | grep"
-alias hstr="fc -l -20" # Recent History
-alias js="cd ~/src/js"
-alias ls='ls -aG $@'
-alias me="mer && vsc"
-alias mer="cd ~/src/js/me.sh"
-alias od="cd ~/OneDrive"
-alias pi="pod install"
-alias piru="pod install --repo-update"
-alias pls="sudo"
-alias sac="pushd ~/src/js/me.sh && ./sync_app_config.sh && popd"
-alias sacl="pushd ~/src/js/me.sh && gl && ./sync_app_config.sh && popd"
-alias src="cd ~/src"
-alias tmp="cd ~/Tmp"
-alias thmr="cd ~/src/js/jon.zsh-theme"
-alias thm="thmr && vsc"
-alias vsc="code ."
-alias wst="osascript -e 'tell application \"Messages\" to send \"How are you?\" to buddy \"Wife\"'" # Wife Status
-alias xck="osascript -e 'quit app \"Xcode\"'"
-alias xcrmdd="rm -rf ~/Library/Developer/Xcode/DerivedData" # Nuke derived data
-alias zpu="zplugin update" # zsh plugin update
-alias zpua="zplugin update --all" # zsh plugin update all
-alias zshrc="bb ~/.zshrc"
+# DEFINE LOAD ALIAS FUNCTIONS
 
-# MS Aliases
-alias odm="cd ~/OneDrive\ -\ Microsoft"
-alias ms="cd ~/src/ms"
+### Load git aliases. Zinit loads plugins async after the console prompt appears, so git aliases (which sometimes conflict with zsh git plugin aliases) need loaded after the zsh git plugin
+load_git_aliases() {
+    alias gcr="git checkout --track origin/" # Git checkout Remote Branch - add branch name after
+    alias gai="g ai"
+    alias gdi="g di"
+    alias gdl="gd @~ @" # Git diff last; show diff of last commit
+    alias gmv="g mv" # Spaces are for plebians
+    alias gr="git reset"
+    alias grh="git reset --hard"
+    alias grs="git reset --soft"
+    grsh() { git reset --soft "@~$1" }
+    alias gs="git status"
+}
 
-# OLM Aliases
-alias 'omc'='olm config'
-alias 'omco'="omc DEV && omo"
-alias 'omd'="olm doctor"
-alias 'omda'="olm doctor --repair-type=auto"
-alias 'oml'="xck && git pull && omco" # Get OLM Latest
-alias 'olmcb'="pushd ~/src/ms/client-cocoa/app-ios; ./carthage-build-xcode-12.sh --platform iOS; popd" # Carthage build
-alias 'omo'="olm open"
-alias 'omr'="cd ~/src/ms/client-cocoa" # "OLM Repo"
+load_non_git_aliases() {
 
-# OAR Aliases
-alias 'oar'="cd ~/src/ms/outlook-auth-framework"
+    ## Personal Aliases
+    alias bb="open -b com.barebones.bbedit"
+    alias bi="brew install"
+    alias bl="brew list"
+    alias blc="brew list --cask"
+    alias bs="brew search"
+    alias bsc="brew search --cask"
+    alias bun="brew uninstall"
+    alias bu="brew update"
+    alias bup="bu && brew upgrade"
+    alias cdf='cd "`osascript -e "tell application \\"Finder\\" to get POSIX path of (insertion location as text)"`"' # cd to front finder dir
+    alias cht="cht.sh"
+    alias dl="cd ~/Downloads"
+    alias ddnuke="rm -rf ~/Library/Developer/Xcode/DerivedData" # Nuke derived data
+    alias fdr="open ."
+    alias hm="cd ~/"
+    alias hst="history"
+    alias hstg="hst | grep"
+    alias hstr="fc -l -20" # Recent History
+    alias js="cd ~/src/js"
+    alias ls='ls -aG $@'
+    alias me="mer && vsc"
+    alias mer="cd ~/src/js/me.sh"
+    alias od="cd ~/OneDrive"
+    alias pi="pod install"
+    alias piru="pod install --repo-update"
+    alias pls="sudo"
+    alias sac="pushd ~/src/js/me.sh && ./sync_app_config.sh && popd"
+    alias sacl="pushd ~/src/js/me.sh && gl && ./sync_app_config.sh && popd"
+    alias src="cd ~/src"
+    alias tmp="cd ~/Tmp"
+    alias thmr="cd ~/src/js/jon.zsh-theme"
+    alias thm="thmr && vsc"
+    alias vsc="code ."
+    alias wst="osascript -e 'tell application \"Messages\" to send \"How are you?\" to buddy \"Wife\"'" # Wife Status
+    alias xck="osascript -e 'quit app \"Xcode\"'"
+    alias xcrmdd="rm -rf ~/Library/Developer/Xcode/DerivedData" # Nuke derived data
+    alias zpu="zplugin update" # zsh plugin update
+    alias zpua="zplugin update --all" # zsh plugin update all
+    alias zshrc="bb ~/.zshrc"
 
-source ~/.rvm/scripts/rvm
-source ~/.zshrc_local 2> /dev/null # Load local .zshrc if available. Fail silently
+    ## MS Aliases
+    alias odm="cd ~/OneDrive\ -\ Microsoft"
+    alias ms="cd ~/src/ms"
+
+    ## OLM Aliases
+    alias 'omc'='olm config'
+    alias 'omco'="omc DEV && omo"
+    alias 'omd'="olm doctor"
+    alias 'omda'="olm doctor --repair-type=auto"
+    alias 'oml'="xck && git pull && omco" # Get OLM Latest
+    alias 'olmcb'="pushd ~/src/ms/client-cocoa/app-ios; ./carthage-build-xcode-12.sh --platform iOS; popd" # Carthage build
+    alias 'omo'="olm open"
+    alias 'omr'="cd ~/src/ms/client-cocoa" # "OLM Repo"
+
+    ## OAR Aliases
+    alias 'oar'="cd ~/src/ms/outlook-auth-framework"
+}
 
 # ZINIT
 
@@ -103,14 +112,23 @@ autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
 
 zinit snippet OMZP::last-working-dir # Shell crashes if loaded async
-zinit wait lucid for \
+zinit wait lucid atload'load_git_aliases' for \
         OMZL::git.zsh \
-        OMZP::git \
+        OMZP::git        
+zinit wait lucid for \
         OMZP::xcode \
         zsh-users/zsh-syntax-highlighting \
-        marlonrichert/zsh-autocomplete \
+        marlonrichert/zsh-autocomplete
 
-# Load local dev clone of my theme if present, otherwise use remote
+### Load local dev clone of my theme if present, otherwise use remote
 [[ -d "$HOME/src/js/jon.zsh-theme" ]] && local theme_path="$HOME/src/js/jon.zsh-theme" || local theme_path="Jon-Schneider/jon.zsh-theme"
 zinit ice lucid wait'!0b'
 zinit light $theme_path
+
+# LOAD ALIASES
+
+load_non_git_aliases
+
+# LOCAL ZSH
+
+source ~/.zshrc_local 2> /dev/null # Load local .zshrc if available. Fail silently
