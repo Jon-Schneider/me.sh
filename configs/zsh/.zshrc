@@ -4,6 +4,11 @@ export EDITOR="vim"
 
 source ~/.rvm/scripts/rvm
 
+# Add Brew Autocompletions
+if type brew &>/dev/null; then
+  FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
+fi
+
 # ZSH CONFIG
 
 unsetopt nomatch # Disable no-match globbing error zsh enables by default
