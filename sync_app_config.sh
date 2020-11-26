@@ -31,7 +31,7 @@ ln -f configs/git/.gitconfig-ms ~/.gitconfig_ms
 
 # Configure Hammerspoon
 message "Configuring Hammerspoon"
-ln -Fs $(pwd)/configs/hammerspoon ~/ # For some reason this would not work with a relative path, an absolute path was required
+ln -Fs $(pwd)/configs/hammerspoon ~/.hammerspoon # For some reason this would not work with a relative path, an absolute path was required
 
 # Configure Karabiner-Elements
 message "Configuring Karabiner Elements..."
