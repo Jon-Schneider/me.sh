@@ -83,6 +83,7 @@ load_non_git_aliases() {
     alias zpu="zplugin update" # zsh plugin update
     alias zpua="zplugin update --all" # zsh plugin update all
     alias zshrc="bb ~/.zshrc"
+    alias z="zshrc"
 
     ## MS Aliases
     alias odm="cd ~/OneDrive\ -\ Microsoft"
