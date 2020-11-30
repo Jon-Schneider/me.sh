@@ -31,6 +31,7 @@ defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false # Dis
 defaults write com.apple.finder FXPreferredViewStyle -string "clmv" # Use Column View by default
 defaults write com.apple.finder WarnOnEmptyTrash -bool false
 defaults write com.apple.finder QuitMenuItem -bool YES # Enable Cmd + Q to quit
+defaults write com.apple.finder NewWindowTarget -string "PfHm" # Set new Finder windows without path to open in home dir
 
 # Finder: Expand the Get Info “General”, “Open with”, and “Sharing & Permissions” File Info panes by default:
 defaults write com.apple.finder FXInfoPanesExpanded -dict \
