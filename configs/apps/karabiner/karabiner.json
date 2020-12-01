@@ -457,6 +457,23 @@
                            }
                         ],
                         "type":"basic"
+                     },
+                     {
+                        "from":{
+                           "key_code":"u",
+                           "modifiers":{
+                              "mandatory":[
+                                 "right_command",
+                                 "right_option"
+                              ]
+                           }
+                        },
+                        "to":[
+                           {
+                              "shell_command":"open ~/src/ms/outlook-auth-framework"
+                           }
+                        ],
+                        "type":"basic"
                      }
                   ]
                },
