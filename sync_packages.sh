@@ -11,3 +11,18 @@ bundle install
 
 message "Running 'brew bundle'..."
 brew bundle
+
+message "Installing Visual Studio Code Extensions"
+code --install-extension Arjun.swagger-viewer
+code --install-extension blanu.vscode-styled-jsx
+code --install-extension formulahendry.code-runner
+code --install-extension LaurentTreguier.vscode-simple-icons # I like the 'minimalist' monocrome icons
+code --install-extension ms-kubernetes-tools.vscode-kubernetes-tools
+code --install-extension ms-python.python
+code --install-extension ms-vscode.cpptools
+code --install-extension ms-vscode.go
+code --install-extension msjsdiag.debugger-for-chrome
+code --install-extension PeterJausovec.vscode-docker
+code --install-extension rebornix.ruby
+code --install-extension redhat.vscode-yaml
+code --install-extension yzhang.markdown-all-in-one
