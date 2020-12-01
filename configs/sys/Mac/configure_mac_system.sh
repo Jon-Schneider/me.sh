@@ -27,10 +27,10 @@ duti -s com.microsoft.edgemac http # Set Edge as default browser
 
 # Override system theme to set certain apps to always display in dark or light mode.
 # To reset run 'defaults delete [bundleid] NSRequiresAquaSystemAppearance'
-message "Overriding system theme in specific apps..."
+echo "Overriding system theme in specific apps..."
 defaults write com.microsoft.onenote.mac NSRequiresAquaSystemAppearance -bool no # OneNote should always be dark mode
 
-message "Configuring Statusbar..."
+echo "Configuring Statusbar..."
 # Hide Siri in Statusbar
 defaults write com.apple.Siri StatusMenuVisible NO
 
@@ -48,7 +48,7 @@ defaults write com.apple.systemuiserver menuExtras -array \
     "/System/Library/CoreServices/Menu Extras/Clock.menu"
 killall SystemUIServer # Apply Statusbar Changes
 
-message "Setting Misc. Config..."
+echo "Setting Misc. Config..."
 
 # Disable Aidrop by default
 defaults write com.apple.NetworkBrowser DisableAirDrop -bool YES
