@@ -10,8 +10,8 @@ message "Updating System Configuration..."
 
 # Configure Login Script
 message "Setting up login script..."
-ln configs/login/login.sh ~/bin/
-cp -v configs/login/com.user.loginscript.plist ~/Library/LaunchAgents # Unfortunately it doesn't appear plists can be linked (ln)
+ln configs/sys/login/login.sh ~/bin/
+cp -v configs/sys/login/com.user.loginscript.plist ~/Library/LaunchAgents # Unfortunately it doesn't appear plists can be linked (ln)
 sudo chown root ~/Library/LaunchAgents/com.user.loginscript.plist
 launchctl load ~/Library/LaunchAgents/com.user.loginscript.plist
 
