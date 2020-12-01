@@ -1,0 +1,1 @@
+cp -p configs/sys/ssh/config ~/.ssh/

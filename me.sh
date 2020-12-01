@@ -30,7 +30,6 @@ fi
 message "Prerequisite 4/4: Generate SSH key"
 ssh-keygen -t ed25519 -C "jon@jonschneider.me"
 ssh-add -K ~/.ssh/id_ed25519
-cp -p configs/sys/ssh/config ~/.ssh/
 
 message "Configuring Mac..."
 
