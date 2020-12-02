@@ -8,7 +8,6 @@ hs.hotkey.bind({"cmd", "shift"}, "V", function() hs.eventtap.keyStrokes(hs.paste
 -- Disable Lunette bindings I don't need
 hs.loadSpoon("Lunette")
 windowManagementBindings = {
-    center = false,
     topLeft = false,
     bottomLeft = false,
     topRight = false,
