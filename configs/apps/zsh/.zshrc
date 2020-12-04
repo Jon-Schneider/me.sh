@@ -72,6 +72,8 @@ load_non_git_aliases() {
     alias pls="sudo"
     alias sac="pushd -q ~/src/js/me.sh && ./sync_app_config.sh && popd -q"
     alias sacl="pushd -q ~/src/js/me.sh && gl && ./sync_app_config.sh && popd -q"
+    alias ssc="pushd -q ~/src/js/me.sh && ./sync_sys_config.sh && popd -q"
+    alias sscl="pushd -q ~/src/js/me.sh && gl && ./sync_sys_config.sh && popd -q"
     alias src="cd ~/src"
     alias tmp="cd ~/Tmp"
     alias thmr="cd ~/src/js/jon.zsh-theme"
