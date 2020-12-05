@@ -71,9 +71,6 @@ defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true
 # (e.g. enable Tab in modal dialogs)
 defaults write NSGlobalDomain AppleKeyboardUIMode -int 3
 
-# Enable MacBook Air SuperDrive
-sudo nvram boot-args="mbasd=1"
-
 # Configure Dock
 defaults write com.apple.dock persistent-apps -array # Remove all icons from dock
 defaults write com.apple.dock autohide -bool true
