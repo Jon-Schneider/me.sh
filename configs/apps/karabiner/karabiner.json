@@ -399,6 +399,28 @@
                   ]
                },
                {
+                  "description":"Open .zshrc",
+                  "manipulators":[
+                     {
+                        "from":{
+                           "key_code":"z",
+                           "modifiers":{
+                              "mandatory":[
+                                 "right_command",
+                                 "option"
+                              ]
+                           }
+                        },
+                        "to":[
+                           {
+                              "shell_command":"open ~/.zshrc"
+                           }
+                        ],
+                        "type":"basic"
+                     }
+                  ]
+               },
+               {
                   "description":"Custom Finder Keyboard Shortcuts",
                   "manipulators":[
                      {
