@@ -15,14 +15,12 @@ unsetopt nomatch # Disable no-match globbing error zsh enables by default
 setopt nocaseglob # Enable case-insensitive pattern matching
 setopt autocd  # Enable cding by just tying the dir name.
 
-zstyle ':autocomplete:*' min-input 2 # Minimum number of characters that must be typed before marlonrichert/zsh-autocomplete starts showing options
-zstyle ':autocomplete:*' ignored-input '..##' # Don't autocomplete '..'
-zstyle ':autocomplete:tab:*' insert-unambiguous yes # Autocomplete tab first inserts substrings before full matching patterns
 zstyle ':autocomplete:tab:*' widget-style menu-select
-zstyle ':completion:*' matcher-list '' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}' '+l:|=* r:|=*'
-zstyle ':completion:*' list-suffixeszstyle ':completion:*' expand prefix suffix # partial completion suggestions
-zstyle :completion::complete:-command-:: tag-order local-directories - # Limit autocomplete directories to current dir
-
+zstyle ':autocomplete:*' min-input 2 # Minimum number of characters that must be typed before marlonrichert/zsh-autocomplete starts showing options
+zstyle ':autocomplete:tab:*' insert-unambiguous yes # Autocomplete tab first inserts substrings before full matching patterns
+zstyle ':completion:*' list-suffixesstyle ':completion:*' expand prefix suffix # partial completion suggestions
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*:cd:*' tag-order local-directories
 
 autoload -Uz compinit && compinit # Enable completions
 setopt autocd autopushd # cd acts like pushd
