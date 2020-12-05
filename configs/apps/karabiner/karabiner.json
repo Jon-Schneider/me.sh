@@ -421,6 +421,29 @@
                   ]
                },
                {
+                  "description":"Open me.sh",
+                  "manipulators":[
+                     {
+                        "from":{
+                           "key_code":"m",
+                           "modifiers":{
+                              "mandatory":[
+                                 "right_command",
+                                 "option"
+                              ]
+                           }
+                        },
+                        "to":[
+                           {
+                              "comment":"Full vscode binary path because path updates from .zshrc not loaded to run bash command"
+                              "shell_command":"/usr/local/bin/code ~/src/js/me.sh"
+                           }
+                        ],
+                        "type":"basic"
+                     }
+                  ]
+               },
+               {
                   "description":"Custom Finder Keyboard Shortcuts",
                   "manipulators":[
                      {
