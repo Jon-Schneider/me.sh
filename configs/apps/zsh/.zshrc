@@ -21,6 +21,7 @@ zstyle ':autocomplete:tab:*' insert-unambiguous yes # Autocomplete tab first ins
 zstyle ':completion:*' list-suffixesstyle ':completion:*' expand prefix suffix # partial completion suggestions
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
 zstyle ':completion:*:cd:*' tag-order local-directories
+zstyle ':completion:*:paths' list-suffixes yes
 
 autoload -Uz compinit && compinit # Enable completions
 setopt autocd autopushd # cd acts like pushd
