@@ -389,7 +389,7 @@
                            "key_code":"h",
                            "modifiers":{
                               "mandatory":[
-                                 "left-command",
+                                 "left_command",
                                  "option"
                               ]
                            }
