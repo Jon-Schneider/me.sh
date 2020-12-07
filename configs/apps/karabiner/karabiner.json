@@ -435,7 +435,7 @@
                         },
                         "to":[
                            {
-                              "comment":"Full vscode binary path because path updates from .zshrc not loaded to run bash command"
+                              "comment":"Full vscode binary path because path updates from .zshrc not loaded to run bash command",
                               "shell_command":"/usr/local/bin/code ~/src/js/me.sh"
                            }
                         ],
