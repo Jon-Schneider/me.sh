@@ -1,17 +1,13 @@
 {
 	"name": "Vimium C",
-	"@time": "11/19/2020, 11:53:07 AM",
-	"time": 1605815587537,
+	"@time": "12/6/2020, 4:42:35 PM",
+	"time": 1607301755997,
 	"environment": {
-		"extension": "1.86.2",
+		"extension": "1.87.2",
 		"platform": "mac",
 		"chrome": 88
 	},
 	"exclusionRules": [
-		{
-			"pattern": "^https?://mail\\.google\\.com/*",
-			"passKeys": ""
-		},
 		{
 			"pattern": "^https?://jira\\.jonschneider\\.me/*",
 			"passKeys": ", . / 1 2 ? g j k l m n o p t "
@@ -69,8 +65,12 @@
 			"passKeys": "? "
 		},
 		{
-			"pattern": ":https://msexpense2/",
-			"passKeys": ""
+			"pattern": ":https://mail.google.com/",
+			"passKeys": "! / ? a b c d f g i j k l r s t u x y z "
+		},
+		{
+			"pattern": ":https://outlook.live.com/",
+			"passKeys": "! / ? a b c d f i j k l r s t u x y z "
 		}
 	],
 	"keyMappings": [
@@ -79,11 +79,9 @@
 		"map k scrollUp count=3",
 		"map d scrollUp count=3",
 		"map b goBack",
-		"map h goForward",
 		"map g goForward",
 		"map v LinkHints.activateMode",
 		"map V LinkHints.activateModeToOpenInNewTab",
-		"map <m-s-v> LinkHints.activateModeToOpenInNewForegroundTab",
 		"map <m-g> scrollToTop",
 		"map <m-s-g> scrollToBottom",
 		"map [ previousTab",
@@ -99,9 +97,14 @@
 		"map <c-s-right> moveTabRight",
 		"map <c-s-up> moveTabLeft count=9999999",
 		"map <c-s-down> moveTabRight count=9999999",
+		"map s openCopiedUrlInCurrentTab",
+		"map <m-s> openCopiedUrlInNewTab",
+		"unmap o",
+		"unmap p",
+		"unmap P",
 		""
 	],
-	"linkHintCharacters": "wertasdfgzxcvbq",
+	"linkHintCharacters": "asdfgqwertzxcvb",
 	"nextPatterns": "next,more,newer,>,›,→,»,≫,>>",
 	"previousPatterns": "prev,previous,back,older,<,‹,←,«,≪,<<"
 }
