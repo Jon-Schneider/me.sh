@@ -81,6 +81,7 @@ load_non_git_aliases() {
     alias ssc="pushd -q ~/src/js/me.sh && ./sync_sys_config.sh && popd -q"
     alias sscl="pushd -q ~/src/js/me.sh && gl && ./sync_sys_config.sh && popd -q"
     alias src="cd ~/src"
+    alias tldr="cheat.sh"
     alias tmp="cd ~/Tmp"
     alias thmr="cd ~/src/js/jon.zsh-theme"
     alias thm="thmr && vsc"
