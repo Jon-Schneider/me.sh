@@ -4,7 +4,6 @@ brew "duti"
 brew "mas"
 brew "speedtest-cli"
 brew "ncdu"
-brew "tldr"
 brew "zsh-syntax-highlighting"
 
 cask "appcleaner"
