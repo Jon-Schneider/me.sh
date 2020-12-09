@@ -1,7 +1,7 @@
 
 # Disable Screenshot Previews
 echo "Disabling screenshot previews..."
-defaults write com.apple.screencapture show-thumbnail -bool TRUE
+defaults write com.apple.screencapture show-thumbnail -bool FALSE
 
 # Set Screenshot Save Location
 echo "Setting screenshot save location..."
