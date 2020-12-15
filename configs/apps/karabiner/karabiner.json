@@ -432,29 +432,6 @@
                   ]
                },
                {
-                  "description":"Open me.sh",
-                  "manipulators":[
-                     {
-                        "from":{
-                           "key_code":"m",
-                           "modifiers":{
-                              "mandatory":[
-                                 "right_command",
-                                 "option"
-                              ]
-                           }
-                        },
-                        "to":[
-                           {
-                              "comment":"Full vscode binary path because path updates from .zshrc not loaded to run bash command",
-                              "shell_command":"/usr/local/bin/code ~/src/js/me.sh"
-                           }
-                        ],
-                        "type":"basic"
-                     }
-                  ]
-               },
-               {
                   "description":"Custom Finder Keyboard Shortcuts",
                   "manipulators":[
                      {
@@ -470,6 +447,31 @@
                         "to":[
                            {
                               "shell_command":"open /Applications"
+                           }
+                        ],
+                        "type":"basic"
+                     },
+                     {
+                        "conditions":[
+                           {
+                              "bundle_identifiers":[
+                                 "^com.apple.finder"
+                              ],
+                              "type":"frontmost_application_if"
+                           }
+                        ],
+                        "from":{
+                           "key_code":"c",
+                           "modifiers":{
+                              "mandatory":[
+                                 "right_command",
+                                 "right_option"
+                              ]
+                           }
+                        },
+                        "to":[
+                           {
+                              "shell_command":"/usr/local/bin/code $(~/bin/get_finder_selected_item_paths)"
                            }
                         ],
                         "type":"basic"
