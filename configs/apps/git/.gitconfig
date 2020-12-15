@@ -22,8 +22,8 @@
 	excludesfile = ~/.gitignore
 [alias]
     ai = "!f() { git add \"$(git diff --name-only | sed -n $1p)\"; }; f"
-    bda = ! git branch | egrep -v '(^\\*|dev|develop|master)' | xargs git branch -d # branch delete all
-    bdm = ! git branch --merged | egrep -v '(^\\*|dev|develop|master)' | xargs git branch -d # branch delete merged
+    bda = ! git branch | egrep -v '(^\\*|dev|develop|main|master)' | xargs git branch -D # branch delete all
+    bdm = ! git branch --merged | egrep -v '(^\\*|dev|develop|main|master)' | xargs git branch -d # branch delete merged
     d = diff
     di = "!f() { git diff \"$(git diff --name-only | sed -n $1p)\"; }; f"
     graph="log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative"
