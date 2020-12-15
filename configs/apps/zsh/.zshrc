@@ -37,6 +37,7 @@ load_git_aliases() {
     alias gai="g ai"
     alias gdi="g di"
     alias gdl="gd @~ @" # Git diff last; show diff of last commit
+    alias gdt="git difftool"
     alias gmv="g mv" # Spaces are for plebians
     alias gr="git reset"
     alias grh="git reset --hard"
