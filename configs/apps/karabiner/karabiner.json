@@ -327,6 +327,23 @@
                   ]
                },
                {
+                  "description":"Disable 'Logout' Keyboard Shortcut",
+                  "manipulators":[
+                     {
+                        "from":{
+                           "key_code":"q",
+                           "modifiers":{
+                              "mandatory":[
+                                 "command",
+                                 "shift"
+                              ]
+                           }
+                        },
+                        "type":"basic"
+                     }
+                  ]
+               },
+               {
                   "description":"Disable 'Show Dock' Keyboard Shortcut",
                   "manipulators":[
                      {
