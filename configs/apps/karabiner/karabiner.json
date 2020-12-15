@@ -16,27 +16,6 @@
             },
             "rules":[
                {
-                  "description":"Disable Esc + Enter",
-                  "manipulators":[
-                     {
-                        "from":{
-                           "simultaneous":[
-                              {
-                                 "key_code":"escape"
-                              },
-                              {
-                                 "key_code":"return_or_enter"
-                              }
-                           ]
-                        },
-                        "type":"basic",
-                        "parameters":{
-                           "basic.simultaneous_threshold_milliseconds":5000
-                        }
-                     }
-                  ]
-               },
-               {
                   "description":"Launcher Mode",
                   "manipulators":[
                      {
