@@ -1,2 +1,3 @@
-cd /Users/jon/Tmp
-rm -rf *
+#! bash
+
+rm -rf ~/Tmp/*
