@@ -62,6 +62,7 @@ load_non_git_aliases() {
     alias dl="cd ~/Downloads"
     alias ddnuke="rm -rf ~/Library/Developer/Xcode/DerivedData" # Nuke derived data
     alias fdr="open ."
+    alias gcg="open ~/.gitconfig_js; open ~/.gitconfig_ms; open ~/.gitconfig"
     alias hm="cd ~/"
     alias hst="history"
     alias hstg="hst | grep"
