@@ -6,7 +6,9 @@
 	<string>com.user.loginscript</string>
 	<key>ProgramArguments</key>
 	<array>
-		<string>/Users/jon/bin/login.sh</string>
+		<string>zsh</string>
+		<string>-c</string>
+		<string>"$HOME/bin/login.sh"</string>
 	</array>
 	<key>RunAtLoad</key>
 	<true/>
