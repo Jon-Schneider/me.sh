@@ -1,6 +1,7 @@
 # ENV
 export PATH=$PATH:$HOME/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:$HOME/.rvm/bin
 export EDITOR="vim"
+export LESS="-FR" # Enable mouse scrolling in less.
 
 source ~/.rvm/scripts/rvm
 
