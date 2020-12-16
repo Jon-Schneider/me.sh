@@ -277,32 +277,6 @@
                   ]
                },
                {
-                  "description":"Bring back a classic",
-                  "manipulators":[
-                     {
-                        "from":{
-                           "key_code":"delete_or_backspace",
-                           "modifiers":{
-                              "mandatory":[
-                                 "control",
-                                 "option"
-                              ]
-                           }
-                        },
-                        "to":[
-                           {
-                              "key_code":"escape",
-                              "modifiers":[
-                                 "option",
-                                 "command"
-                              ]
-                           }
-                        ],
-                        "type":"basic"
-                     }
-                  ]
-               },
-               {
                   "description":"Map Right Cmd + V to Vimac",
                   "manipulators":[
                      {
