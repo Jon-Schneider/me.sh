@@ -42,6 +42,7 @@ cask "torbrowser"
 cask "visual-studio-code"
 cask "vlc"
 
+mas "Effortless", id: 1368722917
 mas "Kaleidoscope", id: 587512244
 mas "Microsoft Excel", id: 462058435
 mas "Microsoft Word", id: 462054704
