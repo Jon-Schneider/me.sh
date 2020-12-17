@@ -23,7 +23,7 @@ duti -s com.barebones.bbedit sh all
 duti -s com.barebones.bbedit txt all
 duti -s com.barebones.bbedit pub all # Libreoffice wants to open .pub for some reason, but the only .pub files I see are public keys
 duti -s com.uranusjr.macdown md all
-duti -s com.microsoft.edgemac http # Set Edge as default browser
+duti -s com.microsoft.edgemac.Dev http # Set Edge as default browser
 
 # Override system theme to set certain apps to always display in dark or light mode.
 # To reset run 'defaults delete [bundleid] NSRequiresAquaSystemAppearance'
