@@ -265,6 +265,30 @@
                   "manipulators":[
                      {
                         "from":{
+                           "key_code":"right_shift",
+                           "modifiers":{
+                              "mandatory":[
+                                 "left_shift"
+                              ],
+                              "optional":[
+                                 "any"
+                              ]
+                           }
+                        },
+                        "to":[
+                           {
+                              "key_code":"caps_lock"
+                           }
+                        ],
+                        "type":"basic"
+                     }
+                  ]
+               },
+               {
+                  "description":"Map Right Cmd + V to Vimac",
+                  "manipulators":[
+                     {
+                        "from":{
                            "key_code":"v",
                            "modifiers":{
                               "mandatory":[
