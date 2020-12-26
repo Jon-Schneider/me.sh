@@ -54,7 +54,7 @@ echo "Setting Misc. Config..."
 defaults write com.apple.NetworkBrowser DisableAirDrop -bool YES
 
 #Disable Boot Sound
-sudo nvram SystemAudioVolume=" "
+sudo nvram StartupMute=%01
 
 # Dxpand Save Panel by default
 defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -bool true
