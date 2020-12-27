@@ -1,4 +1,3 @@
-
 # Disable Screenshot Previews
 echo "Disabling screenshot previews..."
 defaults write com.apple.screencapture show-thumbnail -bool FALSE
