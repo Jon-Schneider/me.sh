@@ -48,5 +48,5 @@ mas "Kaleidoscope", id: 587512244
 mas "Microsoft Excel", id: 462058435
 mas "Microsoft Word", id: 462054704
 mas "Microsoft OneNote", id: 784801555
-mas "Pixelmator", id: 407963104
+mas "Pixelmator Pro", id: 1289583905
 mas "Xcode", id: 497799835
