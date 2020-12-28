@@ -1,7 +1,7 @@
 echo "Configuring custom app icons..."
 
 # Apps with iOS equivalant or nice-looking permutations of default icon can be generated with iconsur
-sudo iconsur set /Applications/BBEdit.app -l -c 2e0854
+sudo iconsur set /Applications/BBEdit.app -l -c ffffff
 sudo iconsur set /Applications/Calibre.app -l
 sudo iconsur set /Applications/CHIRP.app -l -s 0.8
 sudo iconsur set /Applications/coconutBattery.app -l
