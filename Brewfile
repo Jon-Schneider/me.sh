@@ -1,6 +1,7 @@
 brew "carthage"
 brew "chisel"
 brew "duti"
+brew "fileicon"
 brew "mas"
 brew "speedtest-cli"
 brew "ncdu"

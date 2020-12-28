@@ -6,6 +6,9 @@ function message {
 	printf "${GREEN}$1${NOCOLOR}\n"
 }
 
+message "Installing yarn deps..."
+yarn global add iconsur
+
 message "Running 'bundle install'..."
 bundle install
 
@@ -28,3 +31,5 @@ code --install-extension PeterJausovec.vscode-docker
 code --install-extension rebornix.ruby
 code --install-extension redhat.vscode-yaml
 code --install-extension yzhang.markdown-all-in-one
+
+configs/sys/Mac/Icons/configure_app_icons.sh
