@@ -13,7 +13,7 @@ sudo iconsur set /Applications/Firefox.app
 sudo iconsur set /Applications/Gramps.app -s 0.7 -l
 sudo iconsur set /Applications/Horo.app -l
 sudo iconsur set /Applications/Kindle.app
-sudo iconsur set /Applications/kitty.app -l -c 000000
+sudo iconsur set /Applications/kitty.app -l -c cccccc
 sudo iconsur set /Applications/Microsoft\ Edge.app
 sudo iconsur set /Applications/Microsoft\ Excel.app
 sudo iconsur set /Applications/Microsoft\ OneNote.app
