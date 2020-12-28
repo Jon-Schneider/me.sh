@@ -30,9 +30,6 @@ sudo iconsur cache
 # Set custom icon images for some applications
 current_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-fileicon set /Applications/Flux.app $current_dir/Flux.icns
-touch /Applications/Flux.app
-
 fileicon set /Applications/LibreOffice.app $current_dir/LibreOffice.icns
 touch /Applications/LibreOffice.app
 
