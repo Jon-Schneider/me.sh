@@ -24,7 +24,7 @@ sudo iconsur set /Applications/RescueTime.app
 sudo iconsur set /Applications/TorBrowser.app -l
 sudo iconsur set /Applications/VLC.app
 sudo iconsur set /Applications/Vimac.app -l
-sudo iconsur set /Applications/Visual\ Studio\ Code.app -l -c 333333
+sudo iconsur set /Applications/Visual\ Studio\ Code.app -l -s 0.8 -c 333333
 sudo iconsur cache
 
 # Set custom icon images for some applications
