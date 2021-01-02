@@ -38,3 +38,5 @@ touch /Applications/LibreOffice.app
 
 fileicon set /Applications/MacDown.app $current_dir/MacDown.icns
 touch /Applications/MacDown.app
+
+sudo killall Dock
