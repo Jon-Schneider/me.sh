@@ -13,7 +13,7 @@ message "Running 'bundle install'..."
 bundle install
 
 message "Running 'brew bundle'..."
-brew bundle
+brew bundle --verbose # Slow so I want verbose output to know something is happening
 
 message "Installing Visual Studio Code Extensions"
 code --install-extension Arjun.swagger-viewer
