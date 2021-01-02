@@ -6,6 +6,7 @@ brew "mas"
 brew "smudge/smudge/nightlight"
 brew "speedtest-cli"
 brew "ncdu"
+brew "yarn"
 brew "zsh-syntax-highlighting"
 
 cask "appcleaner"

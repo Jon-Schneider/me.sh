@@ -6,14 +6,14 @@ function message {
 	printf "${GREEN}$1${NOCOLOR}\n"
 }
 
-message "Installing yarn deps..."
-yarn global add iconsur
-
 message "Running 'bundle install'..."
 bundle install
 
 message "Running 'brew bundle'..."
 brew bundle --verbose # Slow so I want verbose output to know something is happening
+
+message "Installing yarn deps..."
+yarn global add iconsur
 
 message "Installing Visual Studio Code Extensions"
 code --install-extension Arjun.swagger-viewer
