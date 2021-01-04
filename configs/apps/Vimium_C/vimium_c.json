@@ -1,11 +1,11 @@
 {
 	"name": "Vimium C",
-	"@time": "12/6/2020, 4:42:35 PM",
-	"time": 1607301755997,
+	"@time": "1/4/2021, 10:48:59 AM",
+	"time": 1609786139251,
 	"environment": {
-		"extension": "1.87.2",
+		"extension": "1.88.0",
 		"platform": "mac",
-		"chrome": 88
+		"chrome": 87
 	},
 	"exclusionRules": [
 		{
@@ -58,7 +58,7 @@
 		},
 		{
 			"pattern": "^https?://outlook-sdf\\.office\\.com/*",
-			"passKeys": "/ : ; ? a c e f g i j k l n p r s t z "
+			"passKeys": "/ : ; ? a b c e f g i j k l n p r s t z "
 		},
 		{
 			"pattern": ":https://microsoft-my.sharepoint-df.com/",
