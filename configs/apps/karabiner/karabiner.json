@@ -571,6 +571,23 @@
                         },
                         "to":[
                            {
+                              "shell_command":"open ~/OneDrive\\ -\\ Microsoft"
+                           }
+                        ],
+                        "type":"basic"
+                     },
+                     {
+                        "from":{
+                           "key_code":"r",
+                           "modifiers":{
+                              "mandatory":[
+                                 "right_command",
+                                 "option"
+                              ]
+                           }
+                        },
+                        "to":[
+                           {
                               "shell_command":"open ~/src/ms/client-cocoa"
                            }
                         ],
