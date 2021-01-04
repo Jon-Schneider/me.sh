@@ -90,7 +90,6 @@ load_non_git_aliases() {
     alias thm="thmr && vsc"
     alias vsc="code ."
     alias wst="osascript -e 'tell application \"Messages\" to send \"How are you?\" to buddy \"Wife\"'" # Wife Status
-    wtxt() { echo "osascript -e 'tell application \"Messages\" to send \"$1\" to buddy \"Wife\"'" }
     alias xck="osascript -e 'quit app \"Xcode\"'"
     alias xcrmdd="rm -rf ~/Library/Developer/Xcode/DerivedData" # Nuke derived data
     alias zpu="zplugin update" # zsh plugin update
