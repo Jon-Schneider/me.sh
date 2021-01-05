@@ -17,6 +17,7 @@ sudo iconsur set /Applications/kitty.app -l
 sudo iconsur set /Applications/Microsoft\ Edge.app
 sudo iconsur set /Applications/Microsoft\ Excel.app
 sudo iconsur set /Applications/Microsoft\ OneNote.app
+sudo iconsur set /Applications/Microsoft\ Teams.app
 sudo iconsur set /Applications/Microsoft\ Word.app
 sudo iconsur set /Applications/Minecraft.app
 sudo iconsur set /Applications/OneDrive.app
