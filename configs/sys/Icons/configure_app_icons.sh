@@ -34,9 +34,6 @@ current_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 fileicon set /Applications/BBEdit.app $current_dir/BBEdit.icns
 touch /Applications/BBEdit.app
 
-fileicon set /Applications/LibreOffice.app $current_dir/LibreOffice.icns
-touch /Applications/LibreOffice.app
-
 fileicon set /Applications/MacDown.app $current_dir/MacDown.icns
 touch /Applications/MacDown.app
 
