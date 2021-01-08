@@ -50,3 +50,6 @@ xcuserdata/
 *.xcscmblueprint
 
 .vscode
+
+# Python
+venv/*
