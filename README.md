@@ -15,7 +15,7 @@ There are several scripts in the project root for syncing app and system config.
 ### Updates
 
 - Run ```sync_app_config.sh``` (alias ```sac```) when there are changes to your installed apps.
-- Run ```sync_packages.sh``` when ther eare new apps to be installed.
+- Run ```sync_packages.sh``` when there are new apps to be installed.
 - Run ```sync_sys_config.sh``` when there are changes to the system config.
 
 I find ```sync_app_config.sh``` to be the one that I need to run most frequently because I'm constantly optimizing my app configurations, especially Karabiner-Elements.
