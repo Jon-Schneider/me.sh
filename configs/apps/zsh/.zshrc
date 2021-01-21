@@ -55,6 +55,7 @@ load_non_git_aliases() {
     alias activitymonitor="htop"
     alias am="activitymonitor"
     alias bb="open -b com.barebones.bbedit"
+    alias beep="echo $'\a'" # Beeps. Useful for [long command]; beep
     alias bi="brew install"
     alias bl="brew list"
     alias blc="brew list --cask"
