@@ -9,6 +9,7 @@ tap "smudge/smudge"
 brew "ncdu"
 brew "nightlight"
 brew "speedtest-cli"
+brew "tree"
 brew "yarn"
 brew "zsh-syntax-highlighting"
 
