@@ -93,7 +93,7 @@ load_non_git_aliases() {
     alias tmp="cd ~/Tmp"
     alias thmr="cd ~/src/js/jon.zsh-theme"
     alias thm="thmr && vsc"
-    alias tr="tree -L 2"
+    alias tr="tree -C -L 2"
     alias vsc="code ."
     alias wst="osascript -e 'tell application \"Messages\" to send \"How are you?\" to buddy \"Wife\"'" # Wife Status
     alias xck="osascript -e 'quit app \"Xcode\"'"
