@@ -52,6 +52,8 @@ load_git_aliases() {
 load_non_git_aliases() {
 
     ## Personal Aliases
+    alias activitymonitor="htop"
+    alias am="activitymonitor"
     alias bb="open -b com.barebones.bbedit"
     alias bi="brew install"
     alias bl="brew list"
