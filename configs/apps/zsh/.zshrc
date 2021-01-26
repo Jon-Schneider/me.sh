@@ -104,23 +104,6 @@ load_non_git_aliases() {
     alias zpua="zplugin update --all" # zsh plugin update all
     alias zshrc="bb ~/.zshrc"
     alias z="zshrc"
-
-    ## MS Aliases
-    alias odm="cd ~/OneDrive\ -\ Microsoft"
-    alias ms="cd ~/src/ms"
-
-    ## OLM Aliases
-    alias omc='olm config'
-    alias omco="omc DEV && omo"
-    alias omd="olm doctor"
-    alias omda="olm doctor --repair-type=auto"
-    alias oml="xck && git pull && omco" # Get OLM Latest
-    alias olmcb="pushd ~/src/ms/client-cocoa/app-ios; ./carthage-build-xcode-12.sh --platform iOS; popd" # Carthage build
-    alias omo="olm open"
-    alias omr="cd ~/src/ms/client-cocoa" # "OLM Repo"
-
-    ## OAR Aliases
-    alias 'oar'="cd ~/src/ms/outlook-auth-framework"
 }
 
 # ZINIT
