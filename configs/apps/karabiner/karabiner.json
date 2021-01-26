@@ -100,6 +100,22 @@
                      },
                      {
                         "from":{
+                           "key_code":"h",
+                           "modifiers":{
+                              "mandatory":[
+                                 "right_command"
+                              ]
+                           }
+                        },
+                        "to":[
+                           {
+                              "shell_command":"open -a 'Horo.app'"
+                           }
+                        ],
+                        "type":"basic"
+                     },
+                     {
+                        "from":{
                            "key_code":"i",
                            "modifiers":{
                               "mandatory":[
@@ -157,7 +173,7 @@
                         },
                         "to":[
                            {
-                              "shell_command":"open -a 'Horo.app'"
+                              "shell_command":"open -a 'Reminders.app'"
                            }
                         ],
                         "type":"basic"
