@@ -21,6 +21,7 @@
 [core]
 	excludesfile = ~/.gitignore
     pager = less -+X
+    preloadIndex = true
 [alias]
     ai = "!f() { git add \"$(git diff --name-only | sed -n $1p)\"; }; f"
     bda = ! git branch | egrep -v '(^\\*|dev|develop|main|master)' | xargs git branch -D # branch delete all
