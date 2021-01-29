@@ -48,6 +48,7 @@ load_git_aliases() {
     alias grs="git reset --soft"
     grsh() { git reset --soft "@~$1" }
     alias gs="git status"
+    alias gsu="gs -uno"
 }
 
 load_non_git_aliases() {
