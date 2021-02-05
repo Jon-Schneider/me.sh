@@ -34,8 +34,8 @@ bindkey $'^[[B' down-line-or-search  # down arrow goes to next command with curr
 
 ### Load git aliases. Zinit loads plugins async after the console prompt appears, so git aliases (which sometimes conflict with zsh git plugin aliases) need loaded after the zsh git plugin
 load_git_aliases() {
-    alias gcr="git checkout --track origin/" # Git checkout Remote Branch - add branch name after
     alias gai="g ai"
+    alias gcr="git checkout --track origin/" # Git checkout Remote Branch - add branch name after
     alias gdi="g di"
     alias gdl="gd @~ @" # Git diff last; show diff of last commit
     alias gdt="git difftool"
