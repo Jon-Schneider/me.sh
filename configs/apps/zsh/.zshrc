@@ -2,6 +2,8 @@
 export PATH=$PATH:$HOME/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:$HOME/.rvm/bin
 export EDITOR="vim"
 export LESS="-R" # Enable mouse scrolling in less.
+export COLOR_RED='\033[0;31m'
+export COLOR_RESET='\033[0m' # No Color
 
 source ~/.rvm/scripts/rvm
 
@@ -36,7 +38,8 @@ bindkey $'^[[B' down-line-or-search  # down arrow goes to next command with curr
 load_git_aliases() {
     alias gA="git add --all"
     alias ga.="git add ."
-    ga() { echo "Use more specific git add alias: 'gA', 'ga.', or 'gap'" }
+    unalias ga
+    ga() { echo "${COLOR_RED}Use more specific git add alias: 'gA', 'ga.', or 'gap'${COLOR_NC}" }
     alias gai="g ai"
     alias gap="git add --patch"
     alias gcr="git checkout --track origin/" # Git checkout Remote Branch - add branch name after
