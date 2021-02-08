@@ -92,6 +92,7 @@ load_non_git_aliases() {
     alias pi="pod install"
     alias piru="pod install --repo-update"
     alias pls="sudo"
+    alias ra="sudo pkill -9 coreaudiod" # Restart Audio
     alias sac="pushd -q ~/src/js/me.sh && ./sync_app_config.sh && popd -q"
     alias sacl="pushd -q ~/src/js/me.sh && gl && ./sync_app_config.sh && popd -q"
     alias sasc="sac && ssc"
