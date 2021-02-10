@@ -38,8 +38,6 @@ bindkey $'^[[B' down-line-or-search  # down arrow goes to next command with curr
 load_git_aliases() {
     alias gA="git add --all"
     alias ga.="git add ."
-    unalias ga
-    ga() { echo "${COLOR_RED}Use more specific git add alias: 'gA', 'ga.', or 'gap'${COLOR_NC}" }
     alias gai="g ai"
     alias gap="git add --patch"
     alias gcr="git checkout --track origin/" # Git checkout Remote Branch - add branch name after
