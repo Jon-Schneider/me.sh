@@ -1,3 +1,10 @@
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
 # ENV
 export PATH=$PATH:$HOME/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:$HOME/.rvm/bin
 export EDITOR="vim"
@@ -137,10 +144,8 @@ zinit wait lucid for \
         zsh-users/zsh-syntax-highlighting \
         marlonrichert/zsh-autocomplete
 
-### Load local dev clone of my theme if present, otherwise use remote
-[[ -d "$HOME/src/js/jon.zsh-theme" ]] && local theme_path="$HOME/src/js/jon.zsh-theme" || local theme_path="Jon-Schneider/jon.zsh-theme"
 zinit ice lucid wait'!0b'
-zinit light $theme_path
+zinit ice depth=1; zinit light romkatv/powerlevel10k
 
 # LOAD ALIASES
 
@@ -149,3 +154,6 @@ load_non_git_aliases
 # LOCAL ZSH
 
 source ~/.zshrc_local 2> /dev/null # Load local .zshrc if available. Fail silently
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
