@@ -49,9 +49,6 @@ killall SystemUIServer # Apply Statusbar Changes
 
 echo "Setting Misc. Config..."
 
-# Disable Aidrop by default
-defaults write com.apple.NetworkBrowser DisableAirDrop -bool YES
-
 #Disable Boot Sound
 sudo nvram StartupMute=%01
 
