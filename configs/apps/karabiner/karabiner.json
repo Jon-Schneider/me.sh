@@ -45,7 +45,7 @@
                         },
                         "to":[
                            {
-                              "shell_command":"open -a 'Visual Studio Code.app'"
+                              "shell_command":"open -a 'Calendar.app'"
                            }
                         ],
                         "type":"basic"
@@ -276,6 +276,22 @@
                      },
                      {
                         "from":{
+                           "key_code":"v",
+                           "modifiers":{
+                              "mandatory":[
+                                 "right_command"
+                              ]
+                           }
+                        },
+                        "to":[
+                           {
+                              "shell_command":"open -a 'Visual Studio Code.app'"
+                           }
+                        ],
+                        "type":"basic"
+                     },
+                     {
+                        "from":{
                            "key_code":"x",
                            "modifiers":{
                               "mandatory":[
@@ -293,7 +309,6 @@
                   ]
                },
                {
-                  "description":"Map Right Cmd + V to Vimac",
                   "manipulators":[
                      {
                         "from":{
@@ -310,30 +325,6 @@
                         "to":[
                            {
                               "key_code":"caps_lock"
-                           }
-                        ],
-                        "type":"basic"
-                     }
-                  ]
-               },
-               {
-                  "description":"Map Right Cmd + V to Vimac",
-                  "manipulators":[
-                     {
-                        "from":{
-                           "key_code":"v",
-                           "modifiers":{
-                              "mandatory":[
-                                 "right_command"
-                              ]
-                           }
-                        },
-                        "to":[
-                           {
-                              "key_code":"spacebar",
-                              "modifiers":[
-                                 "control"
-                              ]
                            }
                         ],
                         "type":"basic"
@@ -478,31 +469,6 @@
                         "to":[
                            {
                               "shell_command":"open /Applications"
-                           }
-                        ],
-                        "type":"basic"
-                     },
-                     {
-                        "conditions":[
-                           {
-                              "bundle_identifiers":[
-                                 "^com.apple.finder"
-                              ],
-                              "type":"frontmost_application_if"
-                           }
-                        ],
-                        "from":{
-                           "key_code":"c",
-                           "modifiers":{
-                              "mandatory":[
-                                 "right_command",
-                                 "right_option"
-                              ]
-                           }
-                        },
-                        "to":[
-                           {
-                              "shell_command":"/usr/local/bin/code $(~/bin/get_finder_selected_item_paths)"
                            }
                         ],
                         "type":"basic"
@@ -656,6 +622,31 @@
                         "to":[
                            {
                               "shell_command":"open ~/src/ms/outlook-auth-framework"
+                           }
+                        ],
+                        "type":"basic"
+                     },
+                     {
+                        "conditions":[
+                           {
+                              "bundle_identifiers":[
+                                 "^com.apple.finder"
+                              ],
+                              "type":"frontmost_application_if"
+                           }
+                        ],
+                        "from":{
+                           "key_code":"v",
+                           "modifiers":{
+                              "mandatory":[
+                                 "right_command",
+                                 "right_option"
+                              ]
+                           }
+                        },
+                        "to":[
+                           {
+                              "shell_command":"/usr/local/bin/code $(~/bin/get_finder_selected_item_paths)"
                            }
                         ],
                         "type":"basic"
