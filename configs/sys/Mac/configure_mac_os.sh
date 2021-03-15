@@ -27,6 +27,7 @@ duti -s com.microsoft.edgemac http # Set Edge as default browser
 # Override system theme to set certain apps to always display in dark or light mode.
 # To reset run 'defaults delete [bundleid] NSRequiresAquaSystemAppearance'
 echo "Overriding system theme in specific apps..."
+defaults write com.apple.iCal NSRequiresAquaSystemAppearance -bool yes # Calendar should always be light mode
 defaults write com.microsoft.onenote.mac NSRequiresAquaSystemAppearance -bool no # OneNote should always be dark mode
 
 echo "Configuring Statusbar..."
