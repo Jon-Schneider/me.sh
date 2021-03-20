@@ -32,4 +32,4 @@ code --install-extension rebornix.ruby
 code --install-extension redhat.vscode-yaml
 code --install-extension yzhang.markdown-all-in-one
 
-configs/sys/Mac/Icons/configure_app_icons.sh
+configs/sys/Icons/configure_app_icons.sh
