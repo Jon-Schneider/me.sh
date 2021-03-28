@@ -75,6 +75,7 @@ defaults write com.apple.Dock autohide-delay -float 0.1
 defaults write com.apple.dock autohide-time-modifier -float 0.25
 defaults write com.apple.dock orientation left # Move dock to left side of screen
 defaults write com.apple.dock tilesize -int 50; # Set dock icon size
+defaults write com.apple.Dock static-only -bool true # Only show running apps on dock
 killall Dock # Restart dock to apply orientation and icon size
 
 # Disable the Launchpad gesture (pinch with thumb and three fingers)
