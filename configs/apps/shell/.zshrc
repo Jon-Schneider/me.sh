@@ -56,6 +56,7 @@ load_git_aliases() {
     alias glr='git pull --rebase'
     alias gmv="g mv" # Spaces are for plebians
     alias gr="git reset"
+    alias grbod="grb origin/develop"
     alias grh="git reset --hard"
     alias grs="git reset --soft"
     grsh() { git reset --soft "@~$1" }
@@ -84,6 +85,7 @@ load_non_git_aliases() {
     alias ddnuke="rm -rf ~/Library/Developer/Xcode/DerivedData" # Nuke derived data
     alias f="open ."
     alias fdr="open ."
+    alias fm="nnn"
     alias gcg="open ~/.gitconfig_js; open ~/.gitconfig_ms; open ~/.gitconfig"
     alias hm="cd ~/"
     alias hst="history"
