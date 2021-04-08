@@ -83,3 +83,14 @@ defaults write com.apple.dock showLaunchpadGestureEnabled -int 0
 
 # Check for software updates daily
 defaults write com.apple.SoftwareUpdate ScheduleFrequency -int 1
+
+# Enable TouchId for Command Line Sudo. https://nicholasmangold.com/blog/how-use-sudo-touch-id-mac
+if grep -i "pam_tid.so" /etc/pam.d/sudo
+then
+  echo "Sudo already configured to use TouchID"
+else
+  echo "Configuring sudo to accep TouchId"
+sudo sed -i '' '2i\
+auth       sufficient     pam_tid.so\
+' /etc/pam.d/sudo
+fi
