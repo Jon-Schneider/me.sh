@@ -18,9 +18,10 @@ defaults write -g com.apple.mouse.scaling 6.0 # Double the default
 echo "Setting default apps..."
 duti -s com.barebones.bbedit public.plain-text all # All plaintext files. Includes Unix hidden files
 duti -s com.barebones.bbedit json all
-duti -s com.barebones.bbedit sh all
-duti -s com.barebones.bbedit txt all
 duti -s com.barebones.bbedit pub all # Libreoffice wants to open .pub for some reason, but the only .pub files I see are public keys
+duti -s com.barebones.bbedit sh all
+duti -s com.barebones.bbedit ts all # VLC recognizes .ts as a media file, but the only .ts files I see are typescript
+duti -s com.barebones.bbedit txt all
 duti -s com.uranusjr.macdown md all
 duti -s com.microsoft.edgemac http # Set Edge as default browser
 
