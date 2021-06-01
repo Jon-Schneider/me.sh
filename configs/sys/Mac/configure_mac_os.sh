@@ -22,6 +22,7 @@ duti -s com.barebones.bbedit pub all # Libreoffice wants to open .pub for some r
 duti -s com.barebones.bbedit sh all
 duti -s com.barebones.bbedit ts all # VLC recognizes .ts as a media file, but the only .ts files I see are typescript
 duti -s com.barebones.bbedit txt all
+duti -s com.barebones.bbedit yml all
 duti -s com.uranusjr.macdown md all
 duti -s com.microsoft.edgemac http # Set Edge as default browser
 
