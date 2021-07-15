@@ -123,6 +123,7 @@ load_non_git_aliases() {
     alias zpua="zplugin update --all" # zsh plugin update all
     alias zshrc="bb ~/.zshrc"
     alias z="zshrc"
+    alias zl="bb ~/.zshrc_local"
 }
 
 # ZINIT
