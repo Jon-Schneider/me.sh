@@ -47,6 +47,7 @@ load_git_aliases() {
     alias ga.="git add ."
     alias gai="g ai"
     alias gap="git add --patch"
+    alias gcdi="g cdi"
     alias gcr="git checkout --track origin/" # Git checkout Remote Branch - add branch name after
     alias gdi="g di"
     alias gdl="gd @~ @" # Git diff last; show diff of last commit
