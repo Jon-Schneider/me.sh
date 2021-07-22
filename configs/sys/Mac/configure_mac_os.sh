@@ -2,9 +2,10 @@
 echo "Disabling screenshot previews..."
 defaults write com.apple.screencapture show-thumbnail -bool FALSE
 
-# Set Screenshot Save Location
+# Set Screenshots Save Location
 echo "Setting screenshot save location..."
-defaults write com.apple.screencapture location ~/Tmp
+defaults write com.apple.screencapture location ~/Tmp # System Screenshots
+defaults write com.apple.iphonesimulator ScreenShotSaveLocation -string ~/Tmp # iPhone Simulator Screenshots
 killall SystemUIServer
 
 # Crank up the key repeat rates and trackpad speed. We've got stuff to do.
