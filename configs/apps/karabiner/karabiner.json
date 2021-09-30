@@ -253,7 +253,7 @@
                         },
                         "to":[
                            {
-                              "shell_command":"open -a 'Preview.app'"
+                              "shell_command":"open -a 'bitwarden.app'"
                            }
                         ],
                         "type":"basic"
