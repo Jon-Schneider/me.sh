@@ -50,6 +50,7 @@ cask "the-unarchiver"
 cask "torbrowser"
 cask "visual-studio-code"
 cask "vlc"
+cask "vox"
 
 mas "Effortless", id: 1368722917
 mas "Horo", id: 1437226581
