@@ -27,7 +27,7 @@ exit 1
 fi
 
 # Setup SSH
-message "Prerequisite 4/4: Generate SSH key"
+message "Prerequisite 4/4: Generate SSH keys"
 ssh-keygen -t ed25519 -C "jon@jonschneider.me"
 ssh-add -K ~/.ssh/id_ed25519
 ssh-keygen -t rsa -C "jon@jonschneider.me"
@@ -47,6 +47,9 @@ message "Installing cheat.sh"
 mkdir -p ~/bin/
 curl https://cht.sh/:cht.sh > ~/bin/cht.sh
 chmod +x ~/bin/cht.sh
+
+# Install trash command-line util, not available via brew
+npm install --global trash-cli
 
 # Ruby Config
 message "Installing RVM"

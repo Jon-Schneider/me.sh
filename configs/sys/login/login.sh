@@ -1,3 +1,3 @@
 #! bash
 
-rm -rf ~/Tmp/*
+trash ~/Tmp/*
