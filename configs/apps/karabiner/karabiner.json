@@ -475,6 +475,23 @@
                      },
                      {
                         "from":{
+                           "key_code":"c",
+                           "modifiers":{
+                              "mandatory":[
+                                 "right_command",
+                                 "option"
+                              ]
+                           }
+                        },
+                        "to":[
+                           {
+                              "shell_command":"open /Volumes/Secure1"
+                           }
+                        ],
+                        "type":"basic"
+                     },
+                     {
+                        "from":{
                            "key_code":"d",
                            "modifiers":{
                               "mandatory":[
