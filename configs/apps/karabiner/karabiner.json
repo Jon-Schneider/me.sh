@@ -536,7 +536,7 @@
                         },
                         "to":[
                            {
-                              "shell_command":"open ~/src/js"
+                              "shell_command":"open ~/Developer/js"
                            }
                         ],
                         "type":"basic"
@@ -553,7 +553,7 @@
                         },
                         "to":[
                            {
-                              "shell_command":"open ~/src/ms"
+                              "shell_command":"open ~/Developer/ms"
                            }
                         ],
                         "type":"basic"
@@ -587,7 +587,7 @@
                         },
                         "to":[
                            {
-                              "shell_command":"open ~/src/ms/client-cocoa"
+                              "shell_command":"open ~/Developer/ms/client-cocoa"
                            }
                         ],
                         "type":"basic"
@@ -604,7 +604,7 @@
                         },
                         "to":[
                            {
-                              "shell_command":"open ~/src"
+                              "shell_command":"open ~/Developer"
                            }
                         ],
                         "type":"basic"
@@ -638,7 +638,7 @@
                         },
                         "to":[
                            {
-                              "shell_command":"open ~/src/ms/outlook-auth-framework"
+                              "shell_command":"open ~/Developer/ms/outlook-auth-framework"
                            }
                         ],
                         "type":"basic"

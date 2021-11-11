@@ -4,4 +4,6 @@
     "workbench.iconTheme": "minimalistic-icons",
     "editor.accessibilitySupport": "off",
     "explorer.confirmDelete": false,
+    "editor.suggestSelection": "first",
+    "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
 }

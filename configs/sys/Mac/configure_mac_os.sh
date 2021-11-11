@@ -1,3 +1,6 @@
+# Create Developer Dir
+mkdir "~/Developer" # I used to use '~/src' but then I found out '~/Developer' has a system icon
+
 # Disable Screenshot Previews
 echo "Disabling screenshot previews..."
 defaults write com.apple.screencapture show-thumbnail -bool FALSE
