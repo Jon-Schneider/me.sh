@@ -80,6 +80,7 @@ load_non_git_aliases() {
     alias bun="brew uninstall"
     alias bu="brew update"
     alias bup="bu && brew upgrade"
+    alias bupc="bu && brew upgrade --cask"
     alias cdf='cd "`osascript -e "tell application \\"Finder\\" to get POSIX path of (insertion location as text)"`"' # cd to front finder dir
     alias cht="cht.sh"
     alias dl="cd ~/Downloads"
