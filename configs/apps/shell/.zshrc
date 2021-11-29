@@ -70,6 +70,7 @@ load_non_git_aliases() {
     ## Personal Aliases
     alias activitymonitor="htop"
     alias am="activitymonitor"
+    alias b="beep"
     alias bb="open -b com.barebones.bbedit"
     alias beep="echo $'\a'" # Beeps. Useful for [long command]; beep
     alias bi="brew install"
