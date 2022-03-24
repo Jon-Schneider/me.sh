@@ -6,7 +6,7 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 fi
 
 # ENV
-export PATH=$PATH:$HOME/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:$HOME/.rvm/bin:$HOME/Library/Android/sdk/platform-tools
+export PATH=$PATH:$HOME/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:$HOME/.rvm/bin:$HOME/Library/Android/sdk/platform-tools:/Users/jsc/.cargo/bin
 export EDITOR="vim"
 export LESS="-R" # Enable mouse scrolling in less.
 export COLOR_RED='\033[0;31m'
