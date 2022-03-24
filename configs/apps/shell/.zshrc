@@ -36,8 +36,8 @@ zstyle ':completion:*:paths' list-suffixes yes
 autoload -Uz compinit && compinit # Enable completions
 setopt autocd autopushd # cd acts like pushd
 setopt promptsubst # Required for prompt colors to work right
-bindkey $'^[[A' up-line-or-search # up arrow goes to previous command with currently typed prefix. Not required when using marlonrichert/zsh-autocomplete but I might decide to abandon this plugin at some point.
-bindkey $'^[[B' down-line-or-search  # down arrow goes to next command with currently typed prefix, if I have up-arrowed back in history. Not required when using marlonrichert/zsh-autocomplete but I might decide to abandon this plugin at some point.
+bindkey "^[[A" history-beginning-search-backward # up arrow goes to previous command with currently typed prefix. Not required when using marlonrichert/zsh-autocomplete but I might decide to abandon this plugin at some point.
+bindkey "^[[B" history-beginning-search-forward # down arrow goes to next command with currently typed prefix, if I have up-arrowed back in history. Not required when using marlonrichert/zsh-autocomplete but I might decide to abandon this plugin at some point.
 
 # DEFINE LOAD ALIAS FUNCTIONS
 
