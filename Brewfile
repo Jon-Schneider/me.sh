@@ -15,7 +15,7 @@ brew "postman"
 brew "speedtest-cli"
 brew "tree"
 brew "watch"
-brew "xcodes"
+brew "xcinfo"
 brew "yarn"
 brew "zsh-syntax-highlighting"
 
