@@ -109,6 +109,8 @@ load_non_git_aliases() {
     alias sacl="pushd -q ~/Developer/js/me.sh && gl && ./sync_app_config.sh && popd -q"
     alias sasc="sac && ssc"
     alias sascl="pushd -q ~/Developer/js/me.sh && sac && ssc && popd -q"
+    scanned() { convert -density 175 "$1" +noise Gaussian -rotate 0.5 -depth 2 ~/Tmp/SCAN.pdf }
+    scannedg() { convert -density 175 "$1" -colorspace gray +noise Gaussian -rotate 0.5 -depth 2 ~/Tmp/SCAN.pdf }
     alias ssc="pushd -q ~/Developer/js/me.sh && ./sync_sys_config.sh && popd -q"
     alias sscl="pushd -q ~/Developer/js/me.sh && gl && ./sync_sys_config.sh && popd -q"
     alias src="cd ~/Developer"
