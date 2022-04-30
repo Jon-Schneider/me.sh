@@ -1,0 +1,74 @@
+[
+  {
+    "title" : "Amazon",
+    "shortcuts" : [
+      "a",
+      "amz"
+    ],
+    "mobile" : "https:\/\/www.amazon.com\/s?k=%s"
+  },
+  {
+    "title" : "Amazon Orders",
+    "shortcuts" : [
+      "ao"
+    ],
+    "mobile" : "https:\/\/smile.amazon.com\/gp\/your-account\/order-history\/ref=ppx_yo_dt_b_search?opt=ab&search=%s"
+  },
+  {
+    "title" : "DuckDuckGo",
+    "shortcuts" : [
+      "ddg"
+    ],
+    "mobile" : "https:\/\/duckduckgo.com?q=%s"
+  },
+  {
+    "title" : "Google",
+    "shortcuts" : [
+      "g",
+      "google"
+    ],
+    "mobile" : "https:\/\/www.google.com\/search?q=%s"
+  },
+  {
+    "title" : "Home Depot",
+    "shortcuts" : [
+      "hd"
+    ],
+    "mobile" : "https:\/\/www.homedepot.com\/s\/%s"
+  },
+  {
+    "title" : "Marketplace",
+    "shortcuts" : [
+      "mkt"
+    ],
+    "mobile" : "https:\/\/www.facebook.com\/marketplace\/111723635511834\/search\/?deliveryMethod=local_pick_up&query=%s&exact=false"
+  },
+  {
+    "title" : "Reddit On Google",
+    "shortcuts" : [
+      "r"
+    ],
+    "mobile" : "https:\/\/google.com\/search?q=reddit+%s"
+  },
+  {
+    "title" : "Walmart",
+    "shortcuts" : [
+      "w"
+    ],
+    "mobile" : "https:\/\/www.walmart.com\/search?q=%s"
+  },
+  {
+    "title" : "Wikipedia",
+    "shortcuts" : [
+      "wk"
+    ],
+    "mobile" : "https:\/\/en.wikipedia.org\/wiki\/%s"
+  },
+  {
+    "title" : "Youtube",
+    "shortcuts" : [
+      "yt"
+    ],
+    "mobile" : "https:\/\/www.youtube.com\/results?search_query=%s&page={startPage?}&utm_source=opensearch"
+  }
+]
