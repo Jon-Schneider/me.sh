@@ -12,14 +12,7 @@ sudo iconsur set /Applications/Firefox.app
 sudo iconsur set /Applications/Gramps.app -s 0.7 -l
 sudo iconsur set /Applications/Horo.app -l
 sudo iconsur set /Applications/Kindle.app
-sudo iconsur set /Applications/kitty.app -l
-sudo iconsur set /Applications/Microsoft\ Edge.app
-sudo iconsur set /Applications/Microsoft\ Excel.app
-sudo iconsur set /Applications/Microsoft\ OneNote.app
-sudo iconsur set /Applications/Microsoft\ Teams.app
-sudo iconsur set /Applications/Microsoft\ Word.app
 sudo iconsur set /Applications/Minecraft.app
-sudo iconsur set /Applications/OneDrive.app
 sudo iconsur set /Applications/RescueTime.app
 sudo iconsur set /Applications/TorBrowser.app -l
 sudo iconsur set /Applications/VLC.app
