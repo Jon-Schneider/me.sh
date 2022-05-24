@@ -47,6 +47,7 @@ load_git_aliases() {
     alias ga.="git add ."
     alias gai="g ai"
     alias gap="git add --patch"
+    alias gapi="g api"
     alias gcdi="g cdi"
     alias gcr="git checkout --track origin/" # Git checkout Remote Branch - add branch name after
     alias gdi="g di"
@@ -129,6 +130,7 @@ load_non_git_aliases() {
     alias zpua="zplugin update --all" # zsh plugin update all
     alias zshrc="bb ~/.zshrc"
     alias z="zshrc"
+    alias zr="source ~/.zshrc" # Zshrc Reload
     alias zl="bb ~/.zshrc_local"
 }
 
