@@ -1,87 +1,96 @@
 {
 	"name": "Vimium C",
-	"@time": "1/4/2021, 10:48:59 AM",
-	"time": 1609786139251,
+	"@time": "6/7/2022, 9:33:02 AM",
+	"time": 1654608782308,
 	"environment": {
-		"extension": "1.88.0",
+		"extension": "1.98.0",
 		"platform": "mac",
-		"chrome": 87
+		"chrome": "102"
 	},
 	"exclusionRules": [
 		{
-			"pattern": "^https?://jira\\.jonschneider\\.me/*",
-			"passKeys": ", . / 1 2 ? g j k l m n o p t "
+			"passKeys": ", . / 1 2 ? g j k l m n o p t ",
+			"pattern": "^https?://jira\\.jonschneider\\.me/*"
 		},
 		{
-			"pattern": "^https?://www\\.youtube\\.com/*",
-			"passKeys": "a b "
+			"passKeys": "a b ",
+			"pattern": "^https?://www\\.youtube\\.com/*"
 		},
 		{
-			"pattern": "^https?://app\\.getpocket\\.com/$",
-			"passKeys": "/ j k o "
+			"passKeys": "/ j k o ",
+			"pattern": "^https?://app\\.getpocket\\.com/$"
 		},
 		{
-			"pattern": "^https?://airtable\\.com/*",
-			"passKeys": ""
+			"passKeys": "",
+			"pattern": "^https?://airtable\\.com/*"
 		},
 		{
-			"pattern": "^https?://app\\.getpocket\\.com/archive",
-			"passKeys": "j k "
+			"passKeys": "j k ",
+			"pattern": "^https?://app\\.getpocket\\.com/archive"
 		},
 		{
-			"pattern": "^https?://app\\.getpocket\\.com/$",
-			"passKeys": "? a b f j k "
+			"passKeys": "? a b f j k ",
+			"pattern": "^https?://app\\.getpocket\\.com/$"
 		},
 		{
-			"pattern": "^https?://app\\.getpocket\\.com/*",
-			"passKeys": "a b o t "
+			"passKeys": "a b o t ",
+			"pattern": "^https?://app\\.getpocket\\.com/*"
 		},
 		{
-			"pattern": "^https?://app\\.getpocket\\.com/search",
-			"passKeys": "j k "
+			"passKeys": "j k ",
+			"pattern": "^https?://app\\.getpocket\\.com/search"
 		},
 		{
-			"pattern": "^https?://app\\.getpocket\\.com/search/",
-			"passKeys": "j k "
+			"passKeys": "j k ",
+			"pattern": "^https?://app\\.getpocket\\.com/search/"
 		},
 		{
-			"pattern": "^https?://jonschneider\\.atlassian\\.net/*",
-			"passKeys": ", . / 1 2 ? a b c g j k l m n o p s t "
+			"passKeys": ", . / 1 2 ? a c j k l m n o p s t ",
+			"pattern": "^https?://jonschneider\\.atlassian\\.net/*"
 		},
 		{
-			"pattern": "^https?://outlook\\.office365\\.com/*",
-			"passKeys": "a b j k o r u "
+			"passKeys": "a b j k o r u ",
+			"pattern": "^https?://outlook\\.office365\\.com/*"
 		},
 		{
-			"pattern": "^https?://outlook\\.office\\.com/*",
-			"passKeys": "a f j k r "
+			"passKeys": "a f j k r ",
+			"pattern": "^https?://outlook\\.office\\.com/*"
 		},
 		{
-			"pattern": "^https?://outlook-sdf\\.office\\.com/*",
-			"passKeys": "/ : ; ? a b c e f g i j k l n p r s t z "
+			"passKeys": "/ : ; ? a b c d e f g i j k l n p r s t x z ",
+			"pattern": "^https?://outlook-sdf\\.office\\.com/*"
 		},
 		{
-			"pattern": ":https://microsoft-my.sharepoint-df.com/",
-			"passKeys": "? "
+			"passKeys": "/ ? ",
+			"pattern": ":https://microsoft-my.sharepoint-df.com/"
 		},
 		{
-			"pattern": ":https://mail.google.com/",
-			"passKeys": "! / ? a b c d f g i j k l r s t u x y z "
+			"passKeys": "! / ? a b c d f g i j k l r s t u x y z ",
+			"pattern": ":https://mail.google.com/"
 		},
 		{
-			"pattern": ":https://outlook.live.com/",
-			"passKeys": "! / ? a b c d f i j k l r s t u x y z "
+			"passKeys": "! / ? a b c d f i j k l r s t u x y z ",
+			"pattern": ":https://outlook.live.com/"
+		},
+		{
+			"passKeys": "a b j k o t ",
+			"pattern": ":https://getpocket.com/my-list"
+		},
+		{
+			"passKeys": "b e o t ",
+			"pattern": ":https://getpocket.com/read"
 		}
 	],
 	"keyMappings": [
+		"#!no-check",
 		"map j scrollDown count=3",
 		"map f scrollDown count=3",
 		"map k scrollUp count=3",
 		"map d scrollUp count=3",
 		"map b goBack",
 		"map g goForward",
-		"map v LinkHints.activateMode",
-		"map V LinkHints.activateModeToOpenInNewTab",
+		"map v LinkHints.activate",
+		"map V LinkHints.activateOpenInNewTab",
 		"map <m-g> scrollToTop",
 		"map <m-s-g> scrollToBottom",
 		"map [ previousTab",
@@ -89,6 +98,8 @@
 		"map <c-s-p> togglePinTab",
 		"map w removeTab",
 		"map <c-s-f> mainFrame",
+		"map <c-t> createTab",
+		"map <c-m-t> duplicateTab",
 		"map n createTab",
 		"map i removeTab",
 		"map u restoreTab",
@@ -98,10 +109,10 @@
 		"map <c-s-up> moveTabLeft count=9999999",
 		"map <c-s-down> moveTabRight count=9999999",
 		"map s openCopiedUrlInCurrentTab",
-		"map <m-s> openCopiedUrlInNewTab",
 		"unmap o",
 		"unmap p",
 		"unmap P",
+		"unmap R",
 		""
 	],
 	"linkHintCharacters": "asdfgqwertzxcvb",
