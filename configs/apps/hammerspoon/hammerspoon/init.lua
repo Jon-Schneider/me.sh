@@ -11,6 +11,8 @@ hs.hotkey.bind({"cmd", "shift", "option"}, "V", function() hs.eventtap.keyStroke
 -- Disable Lunette bindings I don't need
 hs.loadSpoon("Lunette")
 windowManagementBindings = {
+	topHalf = false,
+	bottomHalf = false,
     topLeft = false,
     bottomLeft = false,
     topRight = false,

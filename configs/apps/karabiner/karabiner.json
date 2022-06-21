@@ -754,7 +754,11 @@
                         },
                         "to":[
                            {
-                              "key_code":"f6"
+                              "key_code":"up_arrow",
+                              "modifiers":[
+                                 "command",
+                                 "option"
+                              ]
                            }
                         ],
                         "type":"basic"
