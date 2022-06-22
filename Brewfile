@@ -58,6 +58,7 @@ cask "vlc"
 cask "vox"
 
 mas "Effortless", id: 1368722917
+mas "GoodNotes 5", id: 1444383602
 mas "Horo", id: 1437226581
 mas "Kaleidoscope", id: 587512244
 mas "Microsoft Excel", id: 462058435
