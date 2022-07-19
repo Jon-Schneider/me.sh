@@ -29,7 +29,7 @@
                         },
                         "to":[
                            {
-                              "shell_command":"open -a 'Chromium.app'"
+                              "shell_command":"open -a 'Google Chrome.app'"
                            }
                         ],
                         "type":"basic"
@@ -733,13 +733,13 @@
                   ]
                },
                {
-                  "description":"Custom Chromium Shortcuts",
+                  "description":"Custom Chrome Shortcuts",
                   "manipulators":[
                      {
                         "conditions":[
                            {
                               "bundle_identifiers":[
-                                 "^org.chromium.Chromium"
+                                 "^com.google.Chrome"
                               ],
                               "type":"frontmost_application_if"
                            }
