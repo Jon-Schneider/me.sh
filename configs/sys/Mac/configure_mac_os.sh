@@ -28,7 +28,7 @@ duti -s com.barebones.bbedit ts all # VLC recognizes .ts as a media file, but th
 duti -s com.barebones.bbedit txt all
 duti -s com.barebones.bbedit yml all
 duti -s com.uranusjr.macdown md all
-duti -s com.microsoft.edgemac http # Set Edge as default browser
+duti -s com.googe.Chrome http # Set Edge as default browser
 duti -s com.macpaw.site.theunarchiver zip # Use The Unarchiver for zips
 
 # Override system theme to set certain apps to always display in dark or light mode.
