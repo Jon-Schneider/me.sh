@@ -75,6 +75,7 @@ load_non_git_aliases() {
     alias bb="open -b com.barebones.bbedit"
     alias beep="echo $'\a'" # Beeps. Useful for [long command]; beep
     alias bi="brew install"
+    alias bbi="brew bundle install"
     alias bl="brew list"
     alias blc="brew list --cask"
     alias bs="brew search"
