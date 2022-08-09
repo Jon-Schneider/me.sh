@@ -704,6 +704,39 @@
                   ]
                },
                {
+                  "description":"Custom Chrome Shortcuts",
+                  "manipulators":[
+                     {
+                        "conditions":[
+                           {
+                              "bundle_identifiers":[
+                                 "^com.google.Chrome"
+                              ],
+                              "type":"frontmost_application_if"
+                           }
+                        ],
+                        "from":{
+                           "key_code":"escape",
+                           "modifiers":{
+                              "mandatory":[
+                                 "command"
+                              ]
+                           }
+                        },
+                        "to":[
+                           {
+                              "key_code":"up_arrow",
+                              "modifiers":[
+                                 "command",
+                                 "option"
+                              ]
+                           }
+                        ],
+                        "type":"basic"
+                     }
+                  ]
+               },
+               {
                   "description":"Custom Edge Shortcuts",
                   "manipulators":[
                      {
@@ -787,39 +820,6 @@
                               "modifiers":[
                                  "fn",
                                  "command"
-                              ]
-                           }
-                        ],
-                        "type":"basic"
-                     }
-                  ]
-               },
-               {
-                  "description":"Custom Chrome Shortcuts",
-                  "manipulators":[
-                     {
-                        "conditions":[
-                           {
-                              "bundle_identifiers":[
-                                 "^com.google.Chrome"
-                              ],
-                              "type":"frontmost_application_if"
-                           }
-                        ],
-                        "from":{
-                           "key_code":"escape",
-                           "modifiers":{
-                              "mandatory":[
-                                 "command"
-                              ]
-                           }
-                        },
-                        "to":[
-                           {
-                              "key_code":"up_arrow",
-                              "modifiers":[
-                                 "command",
-                                 "option"
                               ]
                            }
                         ],
