@@ -102,6 +102,7 @@ load_non_git_aliases() {
     alias me="mer && vsc"
     alias mer="cd ~/Developer/js/me.sh"
     alias od="cd ~/OneDrive"
+    alias oi="open *.jpg *.jpeg *.png" # Open images in dir
     alias pi="pod install"
     alias piru="pod install --repo-update"
     alias pls="sudo"
