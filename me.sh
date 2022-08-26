@@ -35,6 +35,11 @@ ssh-add -K ~/.ssh/id_rsa
 
 message "Configuring Mac..."
 
+# Install Rosetta
+message "Installing Rosetta 2..."
+sudo softwareupdate --install-rosetta
+message "Rosetta 2 Installed"
+
 # Brew
 message "Installing Homebrew"
 ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
