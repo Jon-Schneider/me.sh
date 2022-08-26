@@ -21,7 +21,6 @@ brew "zsh-syntax-highlighting"
 
 cask "appcleaner"
 cask "bbedit"
-cask "bitwarden"
 cask "calibre"
 cask "coconutbattery"
 cask "cold-turkey-blocker"
@@ -59,6 +58,7 @@ cask "visual-studio-code"
 cask "vlc"
 cask "vox"
 
+mas "Bitwarden", id: 1352778147
 mas "GoodNotes 5", id: 1444383602
 mas "Horo", id: 1437226581
 mas "Kaleidoscope", id: 587512244
