@@ -28,7 +28,6 @@ cask "cryptomator"
 cask "dash"
 cask "disk-inventory-x"
 cask "drawio"
-cask "epubquicklook"
 cask "google-chrome"
 cask "gramps"
 cask "hammerspoon"
@@ -58,7 +57,6 @@ cask "visual-studio-code"
 cask "vlc"
 cask "vox"
 
-mas "Effortless", id: 1368722917
 mas "GoodNotes 5", id: 1444383602
 mas "Horo", id: 1437226581
 mas "Kaleidoscope", id: 587512244
