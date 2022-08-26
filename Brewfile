@@ -69,4 +69,4 @@ mas "Pixelmator Pro", id: 1289583905
 mas "Vimlike", id: 1584519802
 mas "Wireguard", id: 1451685025
 mas "Xcode", id: 497799835
-mas "xSearch for Safari, id: 1579902068
+mas "xSearch for Safari", id: 1579902068
