@@ -38,6 +38,8 @@ message "Configuring Mac..."
 # Brew
 message "Installing Homebrew"
 ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+eval "$(/opt/homeberw/bin/brews shellenv)"
 brew update
 brew doctor
 brew bundle
