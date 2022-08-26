@@ -21,6 +21,7 @@ brew "zsh-syntax-highlighting"
 
 cask "appcleaner"
 cask "bbedit"
+cask "bitwarden"
 cask "calibre"
 cask "coconutbattery"
 cask "cold-turkey-blocker"
