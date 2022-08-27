@@ -17,6 +17,7 @@ brew "tree"
 brew "watch"
 brew "xcinfo"
 brew "yarn"
+brew "zinit"
 brew "zsh-syntax-highlighting"
 
 cask "appcleaner"
