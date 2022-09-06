@@ -541,6 +541,23 @@
                      },
                      {
                         "from":{
+                           "key_code":"e",
+                           "modifiers":{
+                              "mandatory":[
+                                 "right_command",
+                                 "right_option"
+                              ]
+                           }
+                        },
+                        "to":[
+                           {
+                              "shell_command":"open ~/Tmp/$(ls -Art ~/Tmp | tail -n 1) -R"
+                           }
+                        ],
+                        "type":"basic"
+                     },
+                     {
+                        "from":{
                            "key_code":"g",
                            "modifiers":{
                               "mandatory":[
