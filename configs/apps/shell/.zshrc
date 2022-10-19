@@ -46,6 +46,7 @@ load_git_aliases() {
     alias gA="git add --all"
     alias ga.="git add ."
     alias gai="g ai"
+    alias gaui="g aui"
     alias gap="git add --patch"
     alias gapi="g api"
     alias gcdi="g cdi"
