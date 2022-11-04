@@ -24,7 +24,4 @@ sudo iconsur cache
 # Set custom icon images for some applications
 current_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-fileicon set /Applications/MacDown.app $current_dir/MacDown.icns
-touch /Applications/MacDown.app
-
 sudo killall Dock

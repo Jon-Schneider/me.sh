@@ -39,7 +39,7 @@ cask "karabiner-elements"
 cask "kindle"
 cask "kitty"
 cask "ksdiff"
-cask "macdown"
+cask "mark-text"
 cask "messenger"
 cask "microsoft-teams"
 cask "minecraft"
@@ -66,8 +66,9 @@ mas "GoodNotes 5", id: 1444383602
 mas "Horo", id: 1437226581
 mas "Kaleidoscope", id: 587512244
 mas "Microsoft Excel", id: 462058435
-mas "Microsoft Word", id: 462054704
 mas "Microsoft OneNote", id: 784801555
+mas "Microsoft Powerpoint", id: 462062816
+mas "Microsoft Word", id: 462054704
 mas "Pixelmator Pro", id: 1289583905
 mas "Vimlike", id: 1584519802
 mas "Wireguard", id: 1451685025

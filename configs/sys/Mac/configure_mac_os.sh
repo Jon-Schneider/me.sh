@@ -27,7 +27,7 @@ duti -s com.barebones.bbedit sh all
 duti -s com.barebones.bbedit ts all # VLC recognizes .ts as a media file, but the only .ts files I see are typescript
 duti -s com.barebones.bbedit txt all
 duti -s com.barebones.bbedit yml all
-duti -s com.uranusjr.macdown md all
+duti -s com.github.marktext.marktext md all
 duti -s com.googe.Chrome http # Set Edge as default browser
 duti -s com.macpaw.site.theunarchiver zip # Use The Unarchiver for zips
 
