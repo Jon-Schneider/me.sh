@@ -92,7 +92,7 @@ load_non_git_aliases() {
     alias emptytrash="rm -rf ~/.Trash/*" # Faster than emptying trash through Finder
     alias f="open ."
     alias fdr="open ."
-    alias fm="nnn"
+    alias fm="nnn" # Open 'nnn' file manager in current dir
     alias gcg="open ~/.gitconfig_js; open ~/.gitconfig_ms; open ~/.gitconfig"
     alias hm="cd ~/"
     alias hst="history"
