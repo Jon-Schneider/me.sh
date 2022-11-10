@@ -109,7 +109,7 @@ load_non_git_aliases() {
     alias pls="sudo"
     alias pru="pod repo update"
     alias ra="sudo pkill -9 coreaudiod" # Restart Audio
-    alias randpw="openssl rand -base64 32" # Generate random 32 char password
+    alias pw="pwgen -ysB1 20 | pbcopy"
     alias rz="source ~/.zshrc && source ~/.zshrc_local" # Reload zsh
     alias sac="pushd -q ~/Developer/js/me.sh && ./sync_app_config.sh && popd -q"
     alias sacl="pushd -q ~/Developer/js/me.sh && gl && ./sync_app_config.sh && popd -q"
