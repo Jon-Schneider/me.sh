@@ -1,11 +1,11 @@
 {
 	"name": "Vimium C",
-	"@time": "6/15/2022, 3:13:12 PM",
-	"time": 1655331192531,
+	"@time": "1/24/2023, 1:33:35 PM",
+	"time": 1674585215206,
 	"environment": {
-		"extension": "1.98.0",
+		"extension": "1.99.97",
 		"platform": "mac",
-		"chrome": "102"
+		"chromium": 108
 	},
 	"exclusionRules": [
 		{
@@ -45,7 +45,7 @@
 			"pattern": "^https?://app\\.getpocket\\.com/search/"
 		},
 		{
-			"passKeys": ", . / 1 2 ? a c j k l m n o p s t ",
+			"passKeys": ", . / 1 2 ? a c l m n o p s t ",
 			"pattern": "^https?://jonschneider\\.atlassian\\.net/*"
 		},
 		{
@@ -73,16 +73,53 @@
 			"pattern": ":https://outlook.live.com/"
 		},
 		{
-			"passKeys": "a b j k o t ",
+			"passKeys": "? a b j k o t ",
 			"pattern": ":https://getpocket.com/my-list"
 		},
 		{
 			"passKeys": "b e o t ",
 			"pattern": ":https://getpocket.com/read"
+		},
+		{
+			"passKeys": "? ",
+			"pattern": ":https://office.visualstudio.com/"
+		},
+		{
+			"passKeys": "/ j k o ",
+			"pattern": ":https://getpocket.com/$"
+		},
+		{
+			"passKeys": "? ",
+			"pattern": ":https://www.messenger.com/"
+		},
+		{
+			"passKeys": "? d f j k ",
+			"pattern": ":https://getpocket.com/saves"
+		},
+		{
+			"passKeys": "j k ",
+			"pattern": "^https?://jonschneider\\.atlassian\\.net/jira/software/c/projects/*"
 		}
 	],
+	"keyLayout": 4,
 	"keyMappings": [
 		"#!no-check",
+		"unmap b",
+		"unmap d",
+		"unmap f",
+		"unmap i",
+		"unmap j",
+		"unmap k",
+		"unmap n",
+		"unmap o",
+		"unmap p",
+		"unmap P",
+		"unmap R",
+		"unmap u",
+		"unmap v",
+		"unmap V",
+		"unmap x",
+		"",
 		"map j scrollDown count=3",
 		"map f scrollDown count=3",
 		"map k scrollUp count=3",
@@ -100,6 +137,7 @@
 		"map <c-s-f> mainFrame",
 		"map <c-t> createTab",
 		"map <c-m-t> duplicateTab",
+		"map <c-d> duplicateTab",
 		"map n createTab",
 		"map i removeTab",
 		"map u restoreTab",
@@ -109,11 +147,7 @@
 		"map <c-s-up> moveTabLeft count=9999999",
 		"map <c-s-down> moveTabRight count=9999999",
 		"map s openCopiedUrlInCurrentTab",
-		"unmap o",
-		"unmap p",
-		"unmap P",
-		"unmap R",
-		"map <m-s-c> openUrl url=\"vimium://url\\u002012\\u0020$url\\u0020c\" url_mask=\"$url\" reuse=0",
+		"map <m-s-c> openUrl url=\"vimium://url\\u002012\\u0020$url\\u0020c\" url_mask=\"$url\" reuse=0 # 12ft.io",
 		""
 	],
 	"linkHintCharacters": "asdfgqwertzxcvb",
@@ -164,5 +198,6 @@
 		"  blank=https://gitee.com/ Gitee 仓库",
 		"js\\:|Js: javascript:\\ $S; JavaScript",
 		""
-	]
+	],
+	"vimSync": true
 }
