@@ -15,7 +15,6 @@ brew bundle --verbose # Slow so I want verbose output to know something is happe
 message "Installing Visual Studio Code Extensions"
 code --install-extension Arjun.swagger-viewer
 code --install-extension blanu.vscode-styled-jsx
-code --install-extension CoenraadS.bracket-pair-colorizer-2
 code --install-extension eamodio.gitlens
 code --install-extension formulahendry.code-runner
 code --install-extension LaurentTreguier.vscode-simple-icons # I like the 'minimalist' monocrome icons
