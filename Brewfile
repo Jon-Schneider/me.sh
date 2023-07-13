@@ -64,6 +64,7 @@ cask "vlc"
 cask "vox"
 
 mas "Bitwarden", id: 1352778147
+mas "GoodLinks", id: 1474335294
 mas "GoodNotes 5", id: 1444383602
 mas "Horo", id: 1437226581
 mas "Kaleidoscope", id: 587512244
