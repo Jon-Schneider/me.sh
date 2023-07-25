@@ -24,6 +24,7 @@ code --install-extension ms-vscode.cpptools
 code --install-extension ms-vscode.go
 code --install-extension msjsdiag.debugger-for-chrome
 code --install-extension PeterJausovec.vscode-docker
+code --install-extension rangav.vscode-thunder-client
 code --install-extension rebornix.ruby
 code --install-extension redhat.vscode-yaml
 code --install-extension yzhang.markdown-all-in-one
