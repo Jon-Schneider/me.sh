@@ -131,8 +131,13 @@ load_non_git_aliases() {
     alias vsc="code ."
     alias wst="osascript -e 'tell application \"Messages\" to send \"How are you?\" to buddy \"Wife\"'" # Wife Status
     alias xck="osascript -e 'quit app \"Xcode\"'"
+    alias xci="xcinfo"
+    alias xcii="xcinfo install"
+    alias xcil="xcinfo list"
+    alias xcp="xcode-info --print-path"
     alias xcrmdd="rm -rf ~/Library/Developer/Xcode/DerivedData" # Nuke derived data
-    alias xcs="xcodes"
+    alias xcs="xcode-select"
+    alias xcss="sudo xcode-select --switch"
     alias zpu="zplugin update" # zsh plugin update
     alias zpua="zplugin update --all" # zsh plugin update all
     alias zshrc="bb ~/.zshrc"
