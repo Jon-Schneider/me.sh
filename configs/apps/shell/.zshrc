@@ -51,6 +51,7 @@ load_git_aliases() {
     alias gapi="g api"
     alias gbr="g branch --sort=-committerdate"
     alias gcdi="g cdi"
+    alias gchi="g chi" # Git checkout head at index. Discards local changes to file at index
     alias gcr="git checkout --track origin/" # Git checkout Remote Branch - add branch name after
     alias gdi="g di"
     alias gdl="gd @~ @" # Git diff last; show diff of last commit

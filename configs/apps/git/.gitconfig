@@ -28,6 +28,7 @@
     aui = "!f() { git add \"$(git ls-files --other --exclude-standard  | sed -n $1p)\"; }; f"
     bda = ! git branch | egrep -v '(^\\*|dev|develop|main|master)' | xargs git branch -D # branch delete all
     bdm = ! git branch --merged | egrep -v '(^\\*|dev|develop|main|master)' | xargs git branch -d # branch delete merged
+    chi  = "!f() { git checkout @ \"$(git diff --name-only | sed -n $1p)\"; }; f" # Git checkout head at index. Discards local changes to file at index
     cdi = "!f() { git checkout develop \"$(git diff --name-only | sed -n $1p)\"; }; f"
     d = diff
     di = "!f() { git diff \"$(git diff --name-only | sed -n $1p)\"; }; f"
