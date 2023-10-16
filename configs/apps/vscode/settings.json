@@ -7,4 +7,8 @@
     "editor.suggestSelection": "first",
     "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
     "security.workspace.trust.untrustedFiles": "open",
+    "git.openRepositoryInParentFolders": "never",
+    "workbench.colorTheme": "Xcode Classic Light",
+    "workbench.preferredLightColorTheme": "Xcode Classic Light",
+    "editor.fontSize": 13,
 }
