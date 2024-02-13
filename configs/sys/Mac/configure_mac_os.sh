@@ -101,3 +101,7 @@ sudo sed -i '' '2i\
 auth       sufficient     pam_tid.so\
 ' /etc/pam.d/sudo
 fi
+
+# Reduce obnoxious spacing between menu bar icons
+defaults -currentHost write -globalDomain NSStatusItemSelectionPadding -int 7
+defaults -currentHost write -globalDomain NSStatusItemSpacing -int 7
