@@ -13,7 +13,6 @@ sudo iconsur set /Applications/Firefox.app
 sudo iconsur set /Applications/Gramps.app -s 0.7 -l
 sudo iconsur set /Applications/Horo.app -l
 sudo iconsur set /Applications/Minecraft.app
-sudo iconsur set /Applications/Pocket.app
 sudo iconsur set /Applications/RescueTime.app
 sudo iconsur set /Applications/TorBrowser.app -l
 sudo iconsur set /Applications/VLC.app
