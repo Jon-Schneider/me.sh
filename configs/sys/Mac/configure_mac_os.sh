@@ -31,7 +31,7 @@ duti -s com.github.marktext.marktext md all
 duti -s com.googe.Chrome http # Set Edge as default browser
 duti -s com.macpaw.site.theunarchiver zip # Use The Unarchiver for zips
 
-# Override system theme to set certain apps to always display in dark or light mode.
+# Override system theme to set certain apps to always display in dark or light mode
 # To reset run 'defaults delete [bundleid] NSRequiresAquaSystemAppearance'
 echo "Overriding system theme in specific apps..."
 defaults write com.apple.iCal NSRequiresAquaSystemAppearance -bool yes # Calendar should always be light mode
