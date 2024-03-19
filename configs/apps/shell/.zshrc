@@ -131,6 +131,7 @@ load_non_git_aliases() {
     alias tr="tree -C -L 2"
     alias vsc="code ."
     alias wst="osascript -e 'tell application \"Messages\" to send \"How are you?\" to buddy \"Wife\"'" # Wife Status
+    alias xcg="xcodegen"
     alias xck="osascript -e 'quit app \"Xcode\"'"
     alias xci="xcinfo"
     alias xcii="xcinfo install"
