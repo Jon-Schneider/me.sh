@@ -39,6 +39,30 @@ setopt promptsubst # Required for prompt colors to work right
 bindkey "^[[A" history-beginning-search-backward # up arrow goes to previous command with currently typed prefix. Not required when using marlonrichert/zsh-autocomplete but I might decide to abandon this plugin at some point.
 bindkey "^[[B" history-beginning-search-forward # down arrow goes to next command with currently typed prefix, if I have up-arrowed back in history. Not required when using marlonrichert/zsh-autocomplete but I might decide to abandon this plugin at some point.
 
+# Utility Functions
+
+function close_xcode_project() {
+    if [ -z "$1" ]; then
+        echo "Usage: close_xcode_project <project_name>"
+        return 1
+    fi
+
+    osascript -e "
+    tell application \"Xcode\"
+        set projectName to \"$1\"
+        try
+            repeat with w in (windows whose name contains projectName)
+                close w
+            end repeat
+        on error errMsg number errNum
+            if errNum is not -128 then
+                display dialog \"Error: \" & errMsg
+            end if
+        end try
+    end tell
+    "
+}
+
 # DEFINE LOAD ALIAS FUNCTIONS
 
 ### Load git aliases. Zinit loads plugins async after the console prompt appears, so git aliases (which sometimes conflict with zsh git plugin aliases) need loaded after the zsh git plugin
@@ -137,6 +161,7 @@ load_non_git_aliases() {
     alias xcii="xcinfo install"
     alias xcil="xcinfo list"
     alias xcp="xcode-info --print-path"
+    alias xcpc="close_xcode_project"
     alias xcrmdd="rm -rf ~/Library/Developer/Xcode/DerivedData" # Nuke derived data
     alias xcs="xcode-select"
     alias xcss="sudo xcode-select --switch"
