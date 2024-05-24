@@ -33,6 +33,7 @@
     d = diff
     di = "!f() { git diff \"$(git diff --name-only | sed -n $1p)\"; }; f"
     graph="log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative"
+    fixup = !sh -c 'REV=$(git rev-parse $1) && git commit --fixup $@ && git rebase -i --autostash --autosquash $REV^' - # https://www.colinodell.com/blog/201803/four-useful-git-aliases
     lg = log --graph --pretty=format:'%Cred%h%Creset -%Cblue%d%Creset %s %Cgreen(%cr)%Creset' --abbrev-commit --date=relative
     rh = reset --hard
     s = status -s
