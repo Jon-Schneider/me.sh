@@ -21,6 +21,7 @@ defaults write -g com.apple.mouse.scaling 6.0 # Double the default
 # Set default apps
 echo "Setting default apps..."
 duti -s com.barebones.bbedit public.plain-text all # All plaintext files. Includes Unix hidden files
+duti -s com.barebones.bbedit public.data all # I need this to open Podfiles using bbedit instead of TextEdit. I don't know if this is universal or just my project
 duti -s com.barebones.bbedit json all
 duti -s com.barebones.bbedit pub all # Libreoffice wants to open .pub for some reason, but the only .pub files I see are public keys
 duti -s com.barebones.bbedit sh all
