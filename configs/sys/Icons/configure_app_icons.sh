@@ -8,7 +8,6 @@ sudo iconsur set /Applications/coconutBattery.app -l
 sudo iconsur set /Applications/CubicSDR.app -l
 sudo iconsur set /Applications/Dash.app -l
 sudo iconsur set /Applications/Disk\ Inventory\ X.app -l
-sudo iconsur set /Applications/Firefox.app
 sudo iconsur set /Applications/Gramps.app -s 0.7 -l
 sudo iconsur set /Applications/Horo.app -l
 sudo iconsur set /Applications/Minecraft.app
