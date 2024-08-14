@@ -988,7 +988,7 @@
                         "conditions":[
                            {
                               "bundle_identifiers":[
-                                 "^com.microsoft.teams"
+                                 "^com.microsoft.teams2"
                               ],
                               "type":"frontmost_application_if"
                            }
@@ -1015,7 +1015,7 @@
                         "conditions":[
                            {
                               "bundle_identifiers":[
-                                 "^com.microsoft.teams"
+                                 "^com.microsoft.teams2"
                               ],
                               "type":"frontmost_application_if"
                            }
