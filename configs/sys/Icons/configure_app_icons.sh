@@ -23,7 +23,4 @@ sudo iconsur cache
 # Set custom icon images for some applications
 current_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-fileicon set /Applications/Kindle.app $current_dir/Kindle.icns
-touch /Applications/Kindle.app
-
 sudo killall Dock

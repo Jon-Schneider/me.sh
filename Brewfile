@@ -37,7 +37,6 @@ cask "gramps"
 cask "hammerspoon"
 cask "hiddenbar"
 cask "karabiner-elements"
-cask "kindle"
 cask "kitty"
 cask "ksdiff"
 cask "messenger"
@@ -64,6 +63,7 @@ cask "visual-studio-code"
 cask "vlc"
 cask "vox"
 
+mas "Amazon Kindle", id: 302584613
 mas "Bitwarden", id: 1352778147
 mas "GoodLinks", id: 1474335294
 mas "GoodNotes 5", id: 1444383602
