@@ -6,7 +6,6 @@ sudo iconsur set /Applications/calibre.app -l
 sudo iconsur set /Applications/CHIRP.app -l -s 0.8
 sudo iconsur set /Applications/coconutBattery.app -l
 sudo iconsur set /Applications/CubicSDR.app -l
-sudo iconsur set /Applications/Cryptomator.app
 sudo iconsur set /Applications/Dash.app -l
 sudo iconsur set /Applications/Disk\ Inventory\ X.app -l
 sudo iconsur set /Applications/Firefox.app
