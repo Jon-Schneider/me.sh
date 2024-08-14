@@ -1,1 +1,1 @@
-Custom icons for Kindle and MarkText are from https://github.com/elrumo/macOS_Big_Sur_icons_replacements. Licensed under GPLv3.
+Custom icon for Kindle is from https://github.com/elrumo/macOS_Big_Sur_icons_replacements. Licensed under GPLv3.
