@@ -61,7 +61,7 @@
                         },
                         "to":[
                            {
-                              "shell_command":"open -a 'Calendar.app'"
+                              "shell_command":"open -a 'Pixelmator Pro.app'"
                            }
                         ],
                         "type":"basic"
