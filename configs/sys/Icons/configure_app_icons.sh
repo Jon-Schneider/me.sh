@@ -9,7 +9,6 @@ sudo iconsur set /Applications/Dash.app -l
 sudo iconsur set /Applications/Disk\ Inventory\ X.app -l
 sudo iconsur set /Applications/Gramps.app -s 0.7 -l
 sudo iconsur set /Applications/Horo.app -l
-sudo iconsur set /Applications/Minecraft.app
 sudo iconsur set /Applications/RescueTime.app
 sudo iconsur set /Applications/TorBrowser.app -l
 sudo iconsur set /Applications/VLC.app
