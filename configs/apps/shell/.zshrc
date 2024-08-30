@@ -80,6 +80,8 @@ load_git_aliases() {
     alias gdi="g di"
     alias gdl="gd @~ @" # Git diff last; show diff of last commit
     alias gdt="git difftool"
+    alias gfx="git fixup"
+    alias gfix="gfx"
     alias glfp="git lfs pull"
     alias glm='git pull --rebase=false' # git pull docs say merge strategy (default) used if --rebase=false
     alias glr='git pull --rebase'
