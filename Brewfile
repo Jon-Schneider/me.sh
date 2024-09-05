@@ -1,6 +1,7 @@
 tap "robotsandpencils/made"
 tap "smudge/smudge"
 
+brew "antidote"
 brew "carthage"
 brew "chisel"
 brew "duti"
@@ -20,7 +21,6 @@ brew "tree"
 brew "watch"
 brew "xcinfo"
 brew "yarn"
-brew "zinit"
 brew "zsh-syntax-highlighting"
 
 cask "appcleaner"

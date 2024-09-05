@@ -175,27 +175,16 @@ load_non_git_aliases() {
     alias zr="source ~/.zshrc" # Zshrc Reload
 }
 
-# ZINIT
+###
 
-source $(brew --prefix)/opt/zinit/zinit.zsh
-autoload -Uz _zinit
-(( ${+_comps} )) && _comps[zinit]=_zinit
+# Antidote
 
-zinit snippet OMZP::last-working-dir # Shell crashes if loaded async
-zinit wait lucid atload'load_git_aliases' for \
-        OMZL::git.zsh \
-        OMZP::git        
-zinit wait lucid for \
-        OMZP::xcode \
-        zsh-users/zsh-syntax-highlighting \
-        marlonrichert/zsh-autocomplete
-
-zinit ice lucid wait'!0b'
-zinit ice depth=1; zinit light romkatv/powerlevel10k
-
+source $(brew --prefix)/opt/antidote/share/antidote/antidote.zsh
+antidote load ${ZDOTDIR:-~}/.zsh_plugins
 
 # LOAD ALIASES
 
+load_git_aliases
 load_non_git_aliases
 
 # LOCAL ZSH
@@ -204,13 +193,3 @@ source ~/.zshrc_local 2> /dev/null # Load local .zshrc if available. Fail silent
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
-# Load a few important annexes, without Turbo
-# (this is currently required for annexes)
-zinit light-mode for \
-    zdharma-continuum/zinit-annex-as-monitor \
-    zdharma-continuum/zinit-annex-bin-gem-node \
-    zdharma-continuum/zinit-annex-patch-dl \
-    zdharma-continuum/zinit-annex-rust
-
-### End of Zinit's installer chunk
