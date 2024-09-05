@@ -7,5 +7,6 @@ ohmyzsh/ohmyzsh path:plugins/last-working-dir
 
 zsh-users/zsh-syntax-highlighting
 marlonrichert/zsh-autocomplete kind:defer
+MichaelAquilina/zsh-you-should-use
 
 romkatv/powerlevel10k
