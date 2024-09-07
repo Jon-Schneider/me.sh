@@ -21,24 +21,49 @@ fi
 
 # ZSH CONFIG
 
+zmodload zsh/complist
+
+autoload -Uz compinit && compinit # Enable completions
+
+_comp_options+=(globdots) # Completions include hidden files
+
 unsetopt nomatch # Disable no-match globbing error zsh enables by default
 setopt nocaseglob # Enable case-insensitive pattern matching
 setopt autocd  # Enable cding by just tying the dir name.
+setopt autocd autopushd # cd acts like pushd
+setopt promptsubst # Required for prompt colors to work right
+
+zstyle ':completion:*' completer _extensions _complete _approximate # Give priority to completing extensions first, then regular completions, then possible typos/fixes
 
 zstyle ':autocomplete:*' min-input 2 # Minimum number of characters that must be typed before marlonrichert/zsh-autocomplete starts showing options
 zstyle ':autocomplete:tab:*' insert-unambiguous yes # Autocomplete tab first inserts substrings before full matching patterns
 zstyle ':autocomplete:tab:*' widget-style menu-select
+zstyle ':completion:*' menu select # Use completion menu
 zstyle ':completion:*' list-suffixesstyle ':completion:*' expand prefix suffix # partial completion suggestions
-zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*' # First string arg is to prefer case sensitive completion but fall back on case insensitive completion, second string arg is try to complete substrings from any position
 zstyle ':completion:*:cd:*' tag-order local-directories
 zstyle ':completion:*:paths' list-suffixes yes
 
-autoload -Uz compinit && compinit # Enable completions
-setopt autocd autopushd # cd acts like pushd
-setopt promptsubst # Required for prompt colors to work right
+# Enable completion cache
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path "$XDG_CACHE_HOME/zsh/.zcompcache"
+
+# Completion menu styles
+zstyle ':completion:*' group-name '' # Enable completion menu groupings
+zstyle ':completion:*:*:*:*:descriptions' format '%F{green}-- %d --%f' # Style completion menu section headers
+zstyle ':completion:*:*:*:*:corrections' format '%F{yellow}!- %d (errors: %e) -!%f' # Style completion menu correction suggestions header
+zstyle ':completion:*:messages' format ' %F{purple} -- %d --%f'
+zstyle ':completion:*:warnings' format ' %F{red}-- no matches found --%f' # Style no matches found text
+zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS} # Style directory names in completion menu
+
+bindkey -e # emacs key bindings
 bindkey "^[[A" history-beginning-search-backward # up arrow goes to previous command with currently typed prefix. Not required when using marlonrichert/zsh-autocomplete but I might decide to abandon this plugin at some point.
 bindkey "^[[B" history-beginning-search-forward # down arrow goes to next command with currently typed prefix, if I have up-arrowed back in history. Not required when using marlonrichert/zsh-autocomplete but I might decide to abandon this plugin at some point.
 
+# Bind Ctrl + A to expanding aliase
+zle -C alias-expension complete-word _generic
+bindkey '^a' alias-expension
+zstyle ':completion:alias-expension:*' completer _expand_alias
 # Utility Functions
 
 function close_xcode_project() {
