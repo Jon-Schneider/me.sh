@@ -94,12 +94,14 @@ function close_xcode_project() {
 
 # DEFINE LOAD ALIAS FUNCTIONS
 
-### Load git aliases. Zinit loads plugins async after the console prompt appears, so git aliases (which sometimes conflict with zsh git plugin aliases) need loaded after the zsh git plugin
+### Load git aliases
+
 load_git_aliases() {
     alias gA="git add --all"
     alias ga.="git add ."
     alias gai="g ai"
     alias gaui="g aui"
+    alias gab="g absorb --and-rebase" # https://github.com/tummychow/git-absorb
     alias gap="git add --patch"
     alias gapi="g api"
     alias gbr="g branch --sort=-committerdate"
