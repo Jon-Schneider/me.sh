@@ -324,6 +324,22 @@
                      },
                      {
                         "from":{
+                           "key_code":"u",
+                           "modifiers":{
+                              "mandatory":[
+                                 "right_command"
+                              ]
+                           }
+                        },
+                        "to":[
+                           {
+                              "shell_command":"open -a 'Music.app'"
+                           }
+                        ],
+                        "type":"basic"
+                     },
+                     {
+                        "from":{
                            "key_code":"v",
                            "modifiers":{
                               "mandatory":[
