@@ -4,6 +4,7 @@
 *.DS_Store
 .AppleDouble
 .LSOverride
+default.profraw
 
 # Icon must end with two \r
 Icon
