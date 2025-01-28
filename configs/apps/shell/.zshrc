@@ -105,6 +105,7 @@ load_git_aliases() {
     alias gap="git add --patch"
     alias gapi="g api"
     alias gbr="g branch --sort=-committerdate"
+    alias gbrn="gb -m" # Git current branch rename - 'git branch -m <newname>
     alias gcdi="g cdi"
     alias gchi="g chi" # Git checkout head at index. Discards local changes to file at index
     alias gcr="git checkout --track origin/" # Git checkout Remote Branch - add branch name after
