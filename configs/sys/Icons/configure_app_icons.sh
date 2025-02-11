@@ -14,4 +14,4 @@ sudo iconsur cache
 # Set custom icon images for some applications
 current_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-sudo killall Dock
+sudo iconsur cache # Update the system icon cache and reload Finder & Dock
