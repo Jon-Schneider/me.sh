@@ -54,3 +54,6 @@ xcuserdata/
 
 # Python
 venv/*
+
+# dotenv
+.env
