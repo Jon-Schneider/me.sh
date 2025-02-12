@@ -1,0 +1,1 @@
+* Xcode, by default, overrides the Cmd + delete keyboard shortcut from deleting to the beginning of the line to deleting to the beginning of the text. This needs to be fixed in keyboard shortcuts.
