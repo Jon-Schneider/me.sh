@@ -59,16 +59,12 @@ chmod +x ~/bin/cht.sh
 npm install --global trash-cli
 
 # Ruby Config
-message "Installing RVM"
-show_loading
-curl -sSL https://get.rvm.io | bash -s stable
-source ~/.rvm/scripts/rvm # Required to run rvm commands
-rvm install ruby
-# rvm install jruby
-# rvm install rbx
+message "Installing Ruby"
+rbenv install $(rbenv install -l | grep -v - | tail -1) # Install Latest RBI Ruby using rbenv, installed via homebrew
+export PATH="$HOME/.rbenv/bin:$PATH" # Add rbenv to path
+eval "$(rbenv init -)" # Load rbenv
 
 message "Installing Rubygems"
-rvm use ruby
 bundle install
 
 # Configure Tmp Dir

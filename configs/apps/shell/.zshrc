@@ -6,13 +6,15 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 fi
 
 # ENV
-export PATH=$PATH:$HOME/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/sbin:/opt/X11/bin:$HOME/.rvm/bin:$HOME/Library/Android/sdk/platform-tools:/Users/jsc/.cargo/bin
+export PATH=$PATH:$HOME/.rbenv/bin:$HOME/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/sbin:/opt/X11/bin:$HOME/Library/Android/sdk/platform-tools:/Users/jsc/.cargo/bin
 export EDITOR="vim"
 export LESS="-R" # Enable mouse scrolling in less.
 export COLOR_RED='\033[0;31m'
 export COLOR_RESET='\033[0m' # No Color
 
-source ~/.rvm/scripts/rvm
+# Load rbenv
+# 'rbenv init' would not work for me, so set it up manually
+eval "$(rbenv init -)"
 
 # Add Brew Autocompletions
 if type brew &>/dev/null; then
