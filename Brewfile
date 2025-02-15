@@ -64,6 +64,7 @@ cask "vox"
 
 mas "Amazon Kindle", id: 302584613
 mas "Bitwarden", id: 1352778147
+mas "Brother iPrint&Scan", id: 1193539993
 mas "GoodLinks", id: 1474335294
 mas "GoodNotes 5", id: 1444383602
 mas "Horo", id: 1437226581
