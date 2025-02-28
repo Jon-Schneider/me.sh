@@ -18,6 +18,7 @@ code --install-extension blanu.vscode-styled-jsx
 code --install-extension eamodio.gitlens
 code --install-extension formulahendry.code-runner
 code --install-extension LaurentTreguier.vscode-simple-icons # I like the 'minimalist' monocrome icons
+code --install-extension mateocerquetella.xcode-12-theme
 code --install-extension ms-kubernetes-tools.vscode-kubernetes-tools
 code --install-extension ms-python.python
 code --install-extension ms-vscode.cpptools
