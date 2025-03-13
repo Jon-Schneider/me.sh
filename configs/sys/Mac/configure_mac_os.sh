@@ -16,7 +16,7 @@ killall SystemUIServer
 echo "Configuring Keyboard and Trackpad..."
 defaults write -g InitialKeyRepeat -int 15
 defaults write -g KeyRepeat -int 2
-defaults write -g com.apple.mouse.scaling 6.0 # Double the default
+defaults write -g com.apple.mouse.scaling 8.0 # Double the default
 
 # Set default apps
 echo "Setting default apps..."
