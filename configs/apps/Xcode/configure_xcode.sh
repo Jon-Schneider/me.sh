@@ -7,4 +7,4 @@ defaults write com.apple.dt.Xcode ShowBuildOperationDuration YES
 
 # Configure keyboard shortcuts
 # This file cannot be symlinked because Xcode writes a copy when updated
-cp -v $current_dir/Default.idekeybindings /Users/jon/Library/Developer/Xcode/UserData/KeyBindings/Default.idekeybindings
+cp -v $current_dir/Default.idekeybindings ~/Library/Developer/Xcode/UserData/KeyBindings/Default.idekeybindings
