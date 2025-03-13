@@ -793,7 +793,7 @@
                         },
                         "to":[
                            {
-                              "shell_command":"/usr/local/bin/code $(~/bin/get_finder_selected_item_paths)"
+                              "shell_command":"/opt/homebrew/bin/code $(~/bin/get_finder_selected_item_paths)"
                            }
                         ],
                         "type":"basic"
