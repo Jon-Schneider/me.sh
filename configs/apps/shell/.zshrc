@@ -165,7 +165,7 @@ load_non_git_aliases() {
     alias js="cd ~/Developer/js"
     alias ls='ls -aG $@'
     alias me="mer && vsc"
-    alias mer="cd ~/Developer/js/me.sh"
+    alias mer="cd ~/Developer/jsc/me.sh"
     alias od="cd ~/OneDrive"
     alias oi="open *.jpg *.jpeg *.png" # Open images in dir
     alias pi="pod install"
@@ -175,22 +175,22 @@ load_non_git_aliases() {
     alias ra="sudo pkill -9 coreaudiod" # Restart Audio
     alias pw="pwgen -ysB1 20 | pbcopy"
     alias rz="source ~/.zshrc && source ~/.zshrc_local && source ~/.zshrc_ms" # Reload zsh
-    alias sac="pushd -q ~/Developer/js/me.sh && ./sync_app_config.sh && popd -q"
-    alias sacl="pushd -q ~/Developer/js/me.sh && gl && ./sync_app_config.sh && popd -q"
+    alias sac="pushd -q ~/Developer/jsc/me.sh && ./sync_app_config.sh && popd -q"
+    alias sacl="pushd -q ~/Developer/jsc/me.sh && gl && ./sync_app_config.sh && popd -q"
     alias sasc="sac && ssc"
-    alias sascl="pushd -q ~/Developer/js/me.sh && sac && ssc && popd -q"
+    alias sascl="pushd -q ~/Developer/jsc/me.sh && sac && ssc && popd -q"
     alias scan="scanned"
     scanned() { convert -density 175 "$1" +noise Gaussian -rotate 0.5 -depth 2 ~/Tmp/SCAN.pdf }
     scannedg() { convert -density 175 "$1" -colorspace gray +noise Gaussian -rotate 0.5 -depth 2 ~/Tmp/SCAN.pdf }
     alias slq="swiftlint --quiet"
     alias slqa="slq --autocorrect"
-    alias ssc="pushd -q ~/Developer/js/me.sh && ./sync_sys_config.sh && popd -q"
-    alias sscl="pushd -q ~/Developer/js/me.sh && gl && ./sync_sys_config.sh && popd -q"
+    alias ssc="pushd -q ~/Developer/jsc/me.sh && ./sync_sys_config.sh && popd -q"
+    alias sscl="pushd -q ~/Developer/jsc/me.sh && gl && ./sync_sys_config.sh && popd -q"
     alias src="cd ~/Developer"
     alias spd="speedtest"
     alias tldr="cht.sh"
     alias tmp="cd ~/Tmp"
-    alias thmr="cd ~/Developer/js/jon.zsh-theme"
+    alias thmr="cd ~/Developer/jsc/jon.zsh-theme"
     alias thm="thmr && vsc"
     alias tr="tree -C -L 2"
     alias vsc="code ."
