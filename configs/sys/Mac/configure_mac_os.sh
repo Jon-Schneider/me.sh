@@ -12,11 +12,11 @@ defaults write com.apple.iphonesimulator ScreenShotSaveLocation -string ~/Tmp # 
 killall SystemUIServer
 
 # Crank up the key repeat rates and trackpad speed. We've got stuff to do.
-# You will have to log out for these preferences to be applied
+# You will have to log out for these preferences to be applied, or run 'killall Dock' or 'killall SystemUIServer'
 echo "Configuring Keyboard and Trackpad..."
 defaults write -g InitialKeyRepeat -int 15
 defaults write -g KeyRepeat -int 2
-defaults write -g com.apple.mouse.scaling 8.0 # Double the default
+defaults write -g com.apple.trackpad.scaling 3.0
 
 # Set default apps
 echo "Setting default apps..."
