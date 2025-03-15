@@ -12,20 +12,16 @@ brew "htop"
 brew "iconsur"
 brew "imagemagick"
 brew "mas"
-brew "mitmproxy"
 brew "ncdu"
 brew "nnn"
 brew "node"
-brew "nightlight"
-brew "postman"
 brew "rbenv"
-brew "speedtest-cli"
-brew "tree"
 brew "watch"
 brew "xcinfo"
 brew "yarn"
 brew "zsh-syntax-highlighting"
 
+cask "ankerwork"
 cask "appcleaner"
 cask "bbedit"
 cask "calibre"
@@ -38,15 +34,9 @@ cask "hammerspoon"
 cask "hiddenbar"
 cask "karabiner-elements"
 cask "kitty"
-cask "ksdiff"
-cask "messenger"
-cask "microsoft-teams"
 cask "minecraft"
 cask "onedrive"
-cask "send-to-kindle"
 cask "qlcolorcode"
-cask "qlimagesize"
-cask "qlmarkdown"
 cask "qlmobi"
 cask "qlstephen"
 cask "qlvideo"
@@ -61,17 +51,13 @@ cask "tunnelblick"
 cask "typora"
 cask "visual-studio-code"
 cask "vlc"
-cask "vox"
 
 mas "Amazon Kindle", id: 302584613
 mas "Bitwarden", id: 1352778147
 mas "Brother iPrint&Scan", id: 1193539993
-mas "GoodLinks", id: 1474335294
 mas "GoodNotes 5", id: 1444383602
-mas "Horo", id: 1437226581
-mas "Kaleidoscope", id: 587512244
+mas "Glance", id: 1564688210
 mas "Microsoft Excel", id: 462058435
-mas "Microsoft OneNote", id: 784801555
 mas "Microsoft Powerpoint", id: 462062816
 mas "Microsoft Word", id: 462054704
 mas "Spotica Menu", id: 570549457
