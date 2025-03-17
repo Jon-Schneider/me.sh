@@ -51,6 +51,7 @@ cask "tunnelblick"
 cask "typora"
 cask "visual-studio-code"
 cask "vlc"
+cask "xcodegen"
 
 mas "Amazon Kindle", id: 302584613
 mas "Bitwarden", id: 1352778147
