@@ -182,6 +182,7 @@ load_non_git_aliases() {
     alias scan="scanned"
     scanned() { convert -density 175 "$1" +noise Gaussian -rotate 0.5 -depth 2 ~/Tmp/SCAN.pdf }
     scannedg() { convert -density 175 "$1" -colorspace gray +noise Gaussian -rotate 0.5 -depth 2 ~/Tmp/SCAN.pdf }
+    alias sims="cd ~/Library/Developer/CoreSimulator/Devices"
     alias slq="swiftlint --quiet"
     alias slqa="slq --autocorrect"
     alias ssc="pushd -q ~/Developer/jsc/me.sh && ./sync_sys_config.sh && popd -q"
