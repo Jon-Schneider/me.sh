@@ -201,6 +201,7 @@ load_non_git_aliases() {
     alias xci="xcinfo"
     alias xcii="xcinfo install"
     alias xcil="xcinfo list"
+    alias xcg="xcodegen"
     alias xcp="xcode-info --print-path"
     alias xcpc="close_xcode_project"
     alias xcrmdd="rm -rf ~/Library/Developer/Xcode/DerivedData" # Nuke derived data
