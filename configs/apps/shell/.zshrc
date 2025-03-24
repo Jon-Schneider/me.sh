@@ -162,7 +162,7 @@ load_non_git_aliases() {
     alias hstg="hst | grep"
     alias hstr="fc -l -20" # Recent History
     alias jks="jekyll serve"
-    alias js="cd ~/Developer/js"
+    alias js="cd ~/Developer/jsc"
     alias ls='ls -aG $@'
     alias me="mer && vsc"
     alias mer="cd ~/Developer/jsc/me.sh"
