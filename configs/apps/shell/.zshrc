@@ -125,6 +125,7 @@ load_git_aliases() {
     alias grh="git reset --hard"
     alias grs="git reset --soft"
     grsh() { git reset --soft "@~$1" }
+    alias gtd="g todo" # Prints TODO comments in uncommitted changes
     alias gs="git status"
     alias gsu="gs -uno"
 }

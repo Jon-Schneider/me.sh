@@ -39,6 +39,11 @@
     rh = reset --hard
     s = status -s
     st = status -bs
+    todo = "!sh -c ' \
+    	[ \"$GIT_PREFIX\" ] && cd \"$GIT_PREFIX\"; \
+    	git --no-pager diff -U0 main | \
+    	grep \"^+.*TODO\" | sed \"s/^+//\" | \
+    	git --no-pager grep -nFf - -- $(git --no-pager diff --name-only main) 2> /dev/null' -"
 [diff]
 	tool = Kaleidoscope
 [diff "localizablestrings"]
