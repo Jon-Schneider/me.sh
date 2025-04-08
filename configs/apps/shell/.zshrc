@@ -128,6 +128,7 @@ load_git_aliases() {
     grsh() { git reset --soft "@~$1" }
     alias gtd="g todo" # Prints TODO comments in uncommitted changes
     alias gs="git status"
+    alias gstas="git stash --staged" # Stash only staged changes
     alias gsu="gs -uno"
 }
 
