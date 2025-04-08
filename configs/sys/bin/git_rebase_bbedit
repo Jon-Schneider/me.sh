@@ -1,0 +1,4 @@
+#! bash
+# Custom script to perform a rebase specifying bbedit
+export GIT_EDITOR="bbedit --wait --resume"
+git rebase -i "$@"

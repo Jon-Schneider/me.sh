@@ -121,6 +121,7 @@ load_git_aliases() {
     alias glr='git pull --rebase'
     alias gmv="g mv" # Spaces are for plebians
     alias gr="git reset"
+    alias grbbi='echo "Running git_rebase_bbedit"; ~/bin/git_rebase_bbedit'
     alias grbod="grb origin/develop"
     alias grh="git reset --hard"
     alias grs="git reset --soft"
