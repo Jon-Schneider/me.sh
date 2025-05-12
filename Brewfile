@@ -1,5 +1,3 @@
-tap "smudge/smudge"
-
 brew "antidote"
 brew "carthage"
 brew "chisel"
@@ -16,6 +14,7 @@ brew "ncdu"
 brew "nnn"
 brew "node"
 brew "rbenv"
+brew "smudge/smudge/nightlight"
 brew "swiftlint"
 brew "watch"
 brew "xcinfo"
