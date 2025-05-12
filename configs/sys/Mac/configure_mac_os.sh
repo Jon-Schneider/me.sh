@@ -81,7 +81,6 @@ defaults write com.apple.dock persistent-apps -array # Remove all icons from doc
 defaults write com.apple.dock autohide -bool true
 defaults write com.apple.Dock autohide-delay -float 0.1
 defaults write com.apple.dock autohide-time-modifier -float 0.25
-defaults write com.apple.dock orientation right # Move dock to left side of screen
 defaults write com.apple.dock tilesize -int 50; # Set dock icon size
 defaults write com.apple.Dock static-only -bool true # Only show running apps on dock
 defaults write com.apple.dock wvous-corner-ignore-modifier -bool YES # Disable Notes.app opening from corner mouseover
