@@ -1,4 +1,3 @@
-tap "robotsandpencils/made"
 tap "smudge/smudge"
 
 brew "antidote"
