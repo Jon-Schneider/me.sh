@@ -1,5 +1,4 @@
 brew "antidote"
-brew "carthage"
 brew "chisel"
 brew "cloc"
 brew "duti"
