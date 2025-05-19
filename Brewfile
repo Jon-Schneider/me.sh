@@ -62,6 +62,7 @@ mas "Glance", id: 1564688210
 mas "Microsoft Excel", id: 462058435
 mas "Microsoft Powerpoint", id: 462062816
 mas "Microsoft Word", id: 462054704
+mas "Shortcut Keeper", id: 1585404175
 mas "Spotica Menu", id: 570549457
 mas "Pixelmator Pro", id: 1289583905
 mas "Vimlike", id: 1584519802
