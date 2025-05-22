@@ -1,0 +1,46 @@
+# Inserts a blank line between shell prompts
+add_newline = true
+
+format = """
+╭─$directory$git_branch$git_status
+╰──$character"""
+
+# Right-aligned elements (rbenv + time)
+right_format = """$ruby$time"""
+
+[directory]
+style = "bold cyan"
+format = " [$path]($style)"
+truncate_to_repo = false
+truncation_length = 0
+
+[time]
+disabled = false
+time_format = "%H:%M:%S"
+format = " [](white) [$time](yellow)"
+
+[character]
+success_symbol = '[\$](bold green)'
+error_symbol = '[\$](bold red)'
+
+[git_branch]
+symbol = "" # U+F126, a branch symbol
+format = " [$symbol $branch](purple)"
+only_attached = false
+
+[git_commit]
+tag_symbol = " tag "
+
+[git_status]
+# Symbols for types of changes
+staged = '[+${count}](green) ' # staged changes
+modified = '[!${count}](yellow) ' # unstaged changes (modified but not staged)
+untracked = '[?${count}](yellow) ' # untracked files
+deleted = '[-${count}](red) '
+
+# Format the status with counts for each
+format = ' ($modified$staged$untracked$deleted )'
+
+[ruby]
+symbol = " " # U+F219, Unicode Ruby
+format = " [$symbol$version](red)"
