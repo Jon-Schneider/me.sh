@@ -32,5 +32,44 @@ module.exports = {
       match: ({ url }) => url.protocol === "globalprotectcallback",
       browser: "/Applications/GlobalProtect.app",
     },
+    {
+      match: /^https?:\/\/linkedin\.com\/.*$/,
+	  browser: {
+        name: "Google Chrome",
+        profile: "Profile 2",
+      }
+    },
+    {
+      match: /airbnb\.com/,
+	  browser: {
+        name: "Google Chrome",
+        profile: "Profile 1",
+      }
+    },
+    {
+    match: /zoom\.us\/join/,
+    browser: "us.zoom.xos"
+    }
   ],
+  rewrite: [{
+    match: ({
+      url
+    }) => url.host.includes("zoom.us") && url.pathname.includes("/j/"),
+    url({
+      url
+    }) {
+      try {
+        var pass = '&pwd=' + url.search.match(/pwd=(\w*)/)[1];
+      } catch {
+        var pass = ""
+      }
+      var conf = 'confno=' + url.pathname.match(/\/j\/(\d+)/)[1];
+      return {
+        search: conf + pass,
+        pathname: '/join',
+        protocol: "zoommtg"
+      }
+    }
+  }]
+
 }
