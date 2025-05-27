@@ -2,7 +2,10 @@
 // Learn more about configuration options: https://github.com/johnste/finicky/wiki/Configuration
 
 module.exports = {
-  defaultBrowser: "Google Chrome",
+  defaultBrowser: {
+    name: "Google Chrome",
+    profile: "Profile 1",
+  },
   options: {
     hideIcon: false,
     checkForUpdate: true,
