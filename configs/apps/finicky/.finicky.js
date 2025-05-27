@@ -13,7 +13,7 @@ module.exports = {
   handlers: [
     {
       match: ({ opener }) =>
-        ["Slack"].includes(opener.name),
+        ["Slack", "Xcode"].includes(opener.name),
       browser: {
         name: "Google Chrome",
         profile: "Profile 1",
