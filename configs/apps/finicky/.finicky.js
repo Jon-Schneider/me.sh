@@ -21,7 +21,7 @@ module.exports = {
     },
     {
       match: ({ opener }) =>
-        ["Stache"].includes(opener.name),
+        ["Messages", "Stache"].includes(opener.name),
       browser: {
         name: "Google Chrome",
         profile: "Profile 2",
