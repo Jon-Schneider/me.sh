@@ -61,6 +61,7 @@ mas "Bitwarden", id: 1352778147
 mas "Brother iPrint&Scan", id: 1193539993
 mas "GoodNotes 5", id: 1444383602
 mas "Glance", id: 1564688210
+mas "MeetingBar", id: 1532419400
 mas "Microsoft Excel", id: 462058435
 mas "Microsoft Powerpoint", id: 462062816
 mas "Microsoft Word", id: 462054704
