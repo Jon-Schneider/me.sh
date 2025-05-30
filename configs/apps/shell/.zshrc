@@ -123,7 +123,6 @@ load_git_aliases() {
     alias gpff="gp --force" # 'gpf' is mapped to 'git push --force-with-lease --force-if-includes'
     alias gr="git reset"
     alias grbbi='echo "Running git_rebase_bbedit"; ~/bin/git_rebase_bbedit'
-    alias grbod="grb origin/develop"
     alias grh="git reset --hard"
     alias grs="git reset --soft"
     grsh() { git reset --soft "@~$1" }
