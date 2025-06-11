@@ -41,9 +41,11 @@
     st = status -bs
     todo = "!sh -c ' \
     	[ \"$GIT_PREFIX\" ] && cd \"$GIT_PREFIX\"; \
-    	git --no-pager diff -U0 main | \
+    	base_branch=$(for b in main master dev develop; do git show-ref --verify --quiet refs/heads/$b && echo $b && break; done); \
+	    [ \"$base_branch\" ] || { echo \"No base branch (main/master/dev/develop) found.\" >&2; exit 1; }; \
+	    git --no-pager diff -U0 \"$base_branch\" | \
     	grep \"^+.*TODO\" | sed \"s/^+//\" | \
-    	git --no-pager grep -nFf - -- $(git --no-pager diff --name-only main) 2> /dev/null' -"
+	    git --no-pager grep -nFf - -- $(git --no-pager diff --name-only \"$base_branch\") 2>/dev/null' -"
 [diff]
 	tool = Kaleidoscope
 [diff "localizablestrings"]
