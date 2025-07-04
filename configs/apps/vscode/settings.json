@@ -1,7 +1,7 @@
 {
     "window.newWindowDimensions": "inherit",
     "workbench.startupEditor": "newUntitledFile",
-    "workbench.iconTheme": "minimalistic-icons",
+    "workbench.iconTheme": "material-icon-theme",
     "editor.accessibilitySupport": "off",
     "explorer.confirmDelete": false,
     "editor.suggestSelection": "first",
