@@ -106,6 +106,7 @@ load_git_aliases() {
     alias gab="g absorb --and-rebase" # https://github.com/tummychow/git-absorb
     alias gap="git add --patch"
     alias gapi="g api"
+    alias gbl="git branches-latest" # Lists git branches with last commit date, sorted from least recently to most recently updated
     alias gbr="g branch --sort=-committerdate"
     alias gbrn="gb -m" # Git current branch rename - 'git branch -m <newname>
     alias gcdi="g cdi"
