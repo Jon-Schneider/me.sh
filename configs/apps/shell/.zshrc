@@ -122,6 +122,7 @@ load_git_aliases() {
     alias glr='git pull --rebase'
     alias gmv="g mv" # Spaces are for plebians
     alias gpff="gp --force" # 'gpf' is mapped to 'git push --force-with-lease --force-if-includes'
+    alias gptg="g push --tags"
     alias gr="git reset"
     alias grbbi='echo "Running git_rebase_bbedit"; ~/bin/git_rebase_bbedit'
     alias grh="git reset --hard"
