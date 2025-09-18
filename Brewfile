@@ -19,6 +19,7 @@ brew "starship"
 brew "swiftlint"
 brew "watch"
 brew "xcinfo"
+brew "xcodegen"
 brew "yarn"
 brew "zsh-syntax-highlighting"
 
