@@ -135,7 +135,8 @@ load_git_aliases() {
     alias grbbi='echo "Running git_rebase_bbedit"; ~/bin/git_rebase_bbedit'
     alias grh="git reset --hard"
     alias grs="git reset --soft"
-    grsh() { git reset --soft "@~$1" }
+    alias grsh="git reset --soft $(git merge-base master HEAD)"
+    grsi() { git reset --soft "@~$1" }
     alias gtd="g todo" # Prints TODO comments in uncommitted changes
     alias gs="git status"
     alias gstas="git stash --staged" # Stash only staged changes
