@@ -24,6 +24,7 @@ brew "yarn"
 brew "zsh-syntax-highlighting"
 
 cask "ankerwork"
+cask "anki"
 cask "appcleaner"
 cask "bbedit"
 cask "calibre"
