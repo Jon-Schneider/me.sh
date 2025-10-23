@@ -164,6 +164,7 @@ load_non_git_aliases() {
     alias cdf='cd "`osascript -e "tell application \\"Finder\\" to get POSIX path of (insertion location as text)"`"' # cd to front finder dir
     alias cht="cht.sh"
     alias ddnuke="rm -rf ~/Library/Developer/Xcode/DerivedData" # Nuke derived data
+    alias dev="open ~/Library/Developer"
     alias dl="cd ~/Downloads"
     alias emptytrash="rm -rf ~/.Trash/*" # Faster than emptying trash through Finder
     alias f="open ."
@@ -177,6 +178,7 @@ load_non_git_aliases() {
     alias hstr="fc -l -20" # Recent History
     alias jks="jekyll serve"
     alias js="cd ~/Developer/jsc"
+    alias lib="open ~/Library"
     alias ls='ls -aG $@'
     alias me="mer && vsc"
     alias mer="cd ~/Developer/jsc/me.sh"
