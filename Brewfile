@@ -63,6 +63,7 @@ cask "xcodegen"
 mas "Amazon Kindle", id: 302584613
 mas "Bitwarden", id: 1352778147
 mas "Brother iPrint&Scan", id: 1193539993
+mas "Collections Database", id: 1568395334
 mas "GoodNotes 5", id: 1444383602
 mas "Glance", id: 1564688210
 mas "MeetingBar", id: 1532419400
