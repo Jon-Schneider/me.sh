@@ -1,7 +1,7 @@
 [user]
     name = Jon Schneider
-[includeIf "gitdir:js/"]
-    path = .gitconfig_js
+[includeIf "gitdir:jsc/"]
+    path = .gitconfig_jsc
 [includeIf "gitdir:ms/"]
     path = .gitconfig_ms
 [difftool]
