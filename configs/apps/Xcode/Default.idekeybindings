@@ -8,6 +8,66 @@
 		<array>
 			<dict>
 				<key>Action</key>
+				<string>_invokeSourceEditorExtensionCommand:</string>
+				<key>Alternate</key>
+				<string>NO</string>
+				<key>CommandID</key>
+				<string>IDESourceEditorExtension:com.airbnb.XcodeAssistant.XcodeAssistantExtension,IDESourceEditorExtensionCommand:com.airbnb.XcodeAssistant.XcodeAssistantExtensionXcode-Assistant.FormatCommand</string>
+				<key>Group</key>
+				<string>Editor Menu for Source Code</string>
+				<key>GroupID</key>
+				<string>Xcode.IDEPegasusSourceEditor.MenuDefinition.Editor</string>
+				<key>GroupedAlternate</key>
+				<string>NO</string>
+				<key>Navigation</key>
+				<string>NO</string>
+				<key>Parent Title</key>
+				<string>Xcode Assistant</string>
+				<key>Title</key>
+				<string>Format Swift code</string>
+			</dict>
+			<dict>
+				<key>Action</key>
+				<string>_invokeSourceEditorExtensionCommand:</string>
+				<key>Alternate</key>
+				<string>NO</string>
+				<key>CommandID</key>
+				<string>IDESourceEditorExtension:com.airbnb.XcodeAssistant.XcodeAssistantExtension,IDESourceEditorExtensionCommand:com.airbnb.XcodeAssistant.XcodeAssistantExtensionXcode-Assistant.GithubCommand</string>
+				<key>Group</key>
+				<string>Editor Menu for Source Code</string>
+				<key>GroupID</key>
+				<string>Xcode.IDEPegasusSourceEditor.MenuDefinition.Editor</string>
+				<key>GroupedAlternate</key>
+				<string>NO</string>
+				<key>Navigation</key>
+				<string>NO</string>
+				<key>Parent Title</key>
+				<string>Xcode Assistant</string>
+				<key>Title</key>
+				<string>Open in Github</string>
+			</dict>
+			<dict>
+				<key>Action</key>
+				<string>_invokeSourceEditorExtensionCommand:</string>
+				<key>Alternate</key>
+				<string>NO</string>
+				<key>CommandID</key>
+				<string>IDESourceEditorExtension:com.airbnb.XcodeAssistant.XcodeAssistantExtension,IDESourceEditorExtensionCommand:com.airbnb.XcodeAssistant.XcodeAssistantExtensionXcode-Assistant.SourcegraphCommand</string>
+				<key>Group</key>
+				<string>Editor Menu for Source Code</string>
+				<key>GroupID</key>
+				<string>Xcode.IDEPegasusSourceEditor.MenuDefinition.Editor</string>
+				<key>GroupedAlternate</key>
+				<string>NO</string>
+				<key>Navigation</key>
+				<string>NO</string>
+				<key>Parent Title</key>
+				<string>Xcode Assistant</string>
+				<key>Title</key>
+				<string>Open in Sourcegraph</string>
+			</dict>
+			<dict>
+				<key>Action</key>
 				<string>showCallHierarchy:</string>
 				<key>Alternate</key>
 				<string>NO</string>
@@ -27,6 +87,52 @@
 				<string>NO</string>
 				<key>Title</key>
 				<string>Find Call Hierarchy</string>
+			</dict>
+			<dict>
+				<key>Action</key>
+				<string>newTab:</string>
+				<key>Alternate</key>
+				<string>NO</string>
+				<key>CommandGroupID</key>
+				<string>Xcode.IDEKit.CmdDefinition.NewEditorTab</string>
+				<key>CommandID</key>
+				<string>Xcode.IDEKit.CmdDefinition.NewEditorTab</string>
+				<key>Group</key>
+				<string>File Menu</string>
+				<key>GroupID</key>
+				<string>Xcode.IDEKit.MenuDefinition.Main</string>
+				<key>GroupedAlternate</key>
+				<string>NO</string>
+				<key>Navigation</key>
+				<string>NO</string>
+				<key>Parent Title</key>
+				<string>New</string>
+				<key>Title</key>
+				<string>Tab</string>
+			</dict>
+			<dict>
+				<key>Action</key>
+				<string>newWindowForTab:</string>
+				<key>Alternate</key>
+				<string>NO</string>
+				<key>CommandGroupID</key>
+				<string>Xcode.IDEKit.CmdDefinition.NewWindowTab</string>
+				<key>CommandID</key>
+				<string>Xcode.IDEKit.CmdDefinition.NewWindowTab</string>
+				<key>Group</key>
+				<string>File Menu</string>
+				<key>GroupID</key>
+				<string>Xcode.IDEKit.MenuDefinition.Main</string>
+				<key>GroupedAlternate</key>
+				<string>NO</string>
+				<key>Keyboard Shortcut</key>
+				<string>@t</string>
+				<key>Navigation</key>
+				<string>NO</string>
+				<key>Parent Title</key>
+				<string>New</string>
+				<key>Title</key>
+				<string>Window Tab</string>
 			</dict>
 			<dict>
 				<key>Action</key>
@@ -50,13 +156,13 @@
 			</dict>
 			<dict>
 				<key>Action</key>
-				<string>searchInSelectedGroups:</string>
+				<string>searchInSelectedItems:</string>
 				<key>Alternate</key>
 				<string>NO</string>
 				<key>CommandGroupID</key>
-				<string>Xcode.IDEKit.CmdDefinition.SearchInSelectedGroups</string>
+				<string>Xcode.IDEKit.CmdDefinition.SearchInSelectedItems</string>
 				<key>CommandID</key>
-				<string>Xcode.IDEKit.CmdDefinition.SearchInSelectedGroups</string>
+				<string>Xcode.IDEKit.CmdDefinition.SearchInSelectedItems</string>
 				<key>Group</key>
 				<string>Find Menu</string>
 				<key>GroupID</key>
@@ -114,6 +220,92 @@
 			</dict>
 			<dict>
 				<key>Action</key>
+				<string>useSelectionForReplace:</string>
+				<key>Alternate</key>
+				<string>NO</string>
+				<key>CommandGroupID</key>
+				<string>Xcode.IDEKit.CmdDefinition.UseSelectionForReplace</string>
+				<key>CommandID</key>
+				<string>Xcode.IDEKit.CmdDefinition.UseSelectionForReplace</string>
+				<key>Group</key>
+				<string>Find Menu</string>
+				<key>GroupID</key>
+				<string>Xcode.IDEKit.MenuDefinition.Main</string>
+				<key>GroupedAlternate</key>
+				<string>NO</string>
+				<key>Navigation</key>
+				<string>NO</string>
+				<key>Title</key>
+				<string>Use Selection for Replace</string>
+			</dict>
+			<dict>
+				<key>Action</key>
+				<string>showHideMacroExpansion:</string>
+				<key>Alternate</key>
+				<string>NO</string>
+				<key>CommandGroupID</key>
+				<string>Xcode.IDEPegasusSourceEditor.CmdDefinition.ExpandMacro</string>
+				<key>CommandID</key>
+				<string>Xcode.IDEPegasusSourceEditor.CmdDefinition.ExpandMacro</string>
+				<key>Group</key>
+				<string>Editor Menu for Asset Catalog Comparison</string>
+				<key>GroupID</key>
+				<string>Xcode.DeltaComparisonEditor.MenuDefinition.Editor</string>
+				<key>GroupedAlternate</key>
+				<string>NO</string>
+				<key>Keyboard Shortcut</key>
+				<string>$@E</string>
+				<key>Navigation</key>
+				<string>NO</string>
+				<key>Title</key>
+				<string>Expand Macro</string>
+			</dict>
+			<dict>
+				<key>Action</key>
+				<string>showHideMacroExpansion:</string>
+				<key>Alternate</key>
+				<string>NO</string>
+				<key>CommandGroupID</key>
+				<string>Xcode.IDEPegasusSourceEditor.CmdDefinition.ExpandMacro</string>
+				<key>CommandID</key>
+				<string>Xcode.IDEPegasusSourceEditor.CmdDefinition.ExpandMacro</string>
+				<key>Group</key>
+				<string>Editor Menu for Playground</string>
+				<key>GroupID</key>
+				<string>Xcode.IDEPlaygroundEditor.MenuDefinition.Editor</string>
+				<key>GroupedAlternate</key>
+				<string>NO</string>
+				<key>Keyboard Shortcut</key>
+				<string>$@E</string>
+				<key>Navigation</key>
+				<string>NO</string>
+				<key>Title</key>
+				<string>Expand Macro</string>
+			</dict>
+			<dict>
+				<key>Action</key>
+				<string>showHideMacroExpansion:</string>
+				<key>Alternate</key>
+				<string>NO</string>
+				<key>CommandGroupID</key>
+				<string>Xcode.IDEPegasusSourceEditor.CmdDefinition.ExpandMacro</string>
+				<key>CommandID</key>
+				<string>Xcode.IDEPegasusSourceEditor.CmdDefinition.ExpandMacro</string>
+				<key>Group</key>
+				<string>Editor Menu for Source Code</string>
+				<key>GroupID</key>
+				<string>Xcode.IDEPegasusSourceEditor.MenuDefinition.Editor</string>
+				<key>GroupedAlternate</key>
+				<string>NO</string>
+				<key>Keyboard Shortcut</key>
+				<string>$@E</string>
+				<key>Navigation</key>
+				<string>NO</string>
+				<key>Title</key>
+				<string>Expand Macro</string>
+			</dict>
+			<dict>
+				<key>Action</key>
 				<string>fixAllIssues:</string>
 				<key>Alternate</key>
 				<string>NO</string>
@@ -287,6 +479,72 @@
 				<string>NO</string>
 				<key>Title</key>
 				<string>Authors</string>
+			</dict>
+			<dict>
+				<key>Action</key>
+				<string>toggleInvisibleCharactersShown:</string>
+				<key>Alternate</key>
+				<string>NO</string>
+				<key>CommandGroupID</key>
+				<string>Xcode.IDEPegasusSourceEditor.CmdDefinition.ShowInvisibles</string>
+				<key>CommandID</key>
+				<string>Xcode.IDEPegasusSourceEditor.CmdDefinition.ShowInvisibles</string>
+				<key>Group</key>
+				<string>Editor Menu for Asset Catalog Comparison</string>
+				<key>GroupID</key>
+				<string>Xcode.DeltaComparisonEditor.MenuDefinition.Editor</string>
+				<key>GroupedAlternate</key>
+				<string>NO</string>
+				<key>Keyboard Shortcut</key>
+				<string>^~@i</string>
+				<key>Navigation</key>
+				<string>NO</string>
+				<key>Title</key>
+				<string>Invisibles</string>
+			</dict>
+			<dict>
+				<key>Action</key>
+				<string>toggleInvisibleCharactersShown:</string>
+				<key>Alternate</key>
+				<string>NO</string>
+				<key>CommandGroupID</key>
+				<string>Xcode.IDEPegasusSourceEditor.CmdDefinition.ShowInvisibles</string>
+				<key>CommandID</key>
+				<string>Xcode.IDEPegasusSourceEditor.CmdDefinition.ShowInvisibles</string>
+				<key>Group</key>
+				<string>Editor Menu for Playground</string>
+				<key>GroupID</key>
+				<string>Xcode.IDEPlaygroundEditor.MenuDefinition.Editor</string>
+				<key>GroupedAlternate</key>
+				<string>NO</string>
+				<key>Keyboard Shortcut</key>
+				<string>^~@i</string>
+				<key>Navigation</key>
+				<string>NO</string>
+				<key>Title</key>
+				<string>Invisibles</string>
+			</dict>
+			<dict>
+				<key>Action</key>
+				<string>toggleInvisibleCharactersShown:</string>
+				<key>Alternate</key>
+				<string>NO</string>
+				<key>CommandGroupID</key>
+				<string>Xcode.IDEPegasusSourceEditor.CmdDefinition.ShowInvisibles</string>
+				<key>CommandID</key>
+				<string>Xcode.IDEPegasusSourceEditor.CmdDefinition.ShowInvisibles</string>
+				<key>Group</key>
+				<string>Editor Menu for Source Code</string>
+				<key>GroupID</key>
+				<string>Xcode.IDEPegasusSourceEditor.MenuDefinition.Editor</string>
+				<key>GroupedAlternate</key>
+				<string>NO</string>
+				<key>Keyboard Shortcut</key>
+				<string>^~@i</string>
+				<key>Navigation</key>
+				<string>NO</string>
+				<key>Title</key>
+				<string>Invisibles</string>
 			</dict>
 		</array>
 		<key>Version</key>
