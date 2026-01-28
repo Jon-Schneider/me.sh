@@ -39,3 +39,14 @@ windowManagementBindings = {
     redo = false
 }
 spoon.Lunette:bindHotkeys(windowManagementBindings)
+
+-- Get rid of cursed Global Protect Disconnected Window
+hs.window.filter.new('GlobalProtect')
+  :subscribe(hs.window.filter.windowCreated, function(window)
+    if window:title() == 'GlobalProtect' then
+      -- Small delay to ensure window is fully rendered
+      hs.timer.doAfter(0.3, function()
+        window:close()
+      end)
+    end
+  end)
