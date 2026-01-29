@@ -68,9 +68,6 @@ zle -C alias-expension complete-word _generic
 bindkey '^a' alias-expension
 zstyle ':completion:alias-expension:*' completer _expand_alias
 
-# Configure fastlane completions
-. ~/.fastlane/completions/completion.zsh
-
 # Utility Functions
 
 function close_xcode_project() {
