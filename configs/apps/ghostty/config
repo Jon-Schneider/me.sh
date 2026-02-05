@@ -57,3 +57,6 @@ keybind = super+shift+right=goto_split:right
 
 # Disable toggling fullscreen
 keybind = super+ctrl+f=unbind
+
+keybind = cmd+left=text:\x1b[H
+keybind = cmd+right=text:\x1b[F
