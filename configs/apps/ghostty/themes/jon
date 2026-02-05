@@ -1,7 +1,10 @@
 font-family = "Monaco"
 font-size = 13
-background = 000000
+background = #14191e
+foreground = #dbdbdb
+cursor-style-blink = true
 background-opacity = 1
+unfocused-split-opacity = 0.5
 
 # ANSI Colors
 # 0-7: Standard Colors (ESC 30-37)
