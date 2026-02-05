@@ -48,17 +48,4 @@
 # # Just for example:
 # resize-overlay-duration = 4s 200ms
 
-font-family = "MesloLGS NF"
-font-size = 13
-background = 000000
-background-opacity = 1
-unfocused-split-opacity = 1
-window-height = 998
-window-width = 3840
-
-
-# theme = dark:shades-of-purple
-# light:default-light
-
-keybind = cmd+/=new_split:right
-keybind = cmd+.=new_split:down
+theme = jon
