@@ -239,3 +239,6 @@ load_non_git_aliases
 source ~/.zshrc_local 2> /dev/null # Load local .zshrc if available. Fail silently
 
 eval "$(starship init zsh)"
+
+# Customize Ghostty config file location
+export XDG_CONFIG_HOME="~/.config"
