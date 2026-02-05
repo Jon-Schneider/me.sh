@@ -49,3 +49,11 @@
 # resize-overlay-duration = 4s 200ms
 
 theme = jon
+
+# Splitscreens keybindings
+keybind = super+enter=new_split:right
+keybind = super+shift+left=goto_split:left
+keybind = super+shift+right=goto_split:right
+
+# Disable toggling fullscreen
+keybind = super+ctrl+f=unbind
