@@ -8,7 +8,7 @@ unfocused-split-opacity = 0.5
 
 # Icon
 macos-icon = custom-style
-macos-icon-frame = aluminum
+macos-icon-frame = plastic
 macos-icon-ghost-color = cyan
 macos-icon-screen-color = black
 
