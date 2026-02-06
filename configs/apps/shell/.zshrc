@@ -68,6 +68,10 @@ zle -C alias-expension complete-word _generic
 bindkey '^a' alias-expension
 zstyle ':completion:alias-expension:*' completer _expand_alias
 
+# Bind Cmd + Arrow Keys to escape sequences for moving cursor to start and end of line
+bindkey "^[[H" beginning-of-line
+bindkey "^[[F" end-of-line
+
 # Utility Functions
 
 function close_xcode_project() {
@@ -239,3 +243,6 @@ load_non_git_aliases
 source ~/.zshrc_local 2> /dev/null # Load local .zshrc if available. Fail silently
 
 eval "$(starship init zsh)"
+
+# Customize Ghostty config file location
+export XDG_CONFIG_HOME="~/.config"

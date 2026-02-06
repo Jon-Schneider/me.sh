@@ -1,0 +1,53 @@
+font-family = "Monaco"
+font-size = 13
+background = #14191e
+foreground = #dbdbdb
+cursor-style-blink = true
+background-opacity = 1
+unfocused-split-opacity = 0.5
+
+# Icon
+macos-icon = custom-style
+macos-icon-frame = aluminum
+macos-icon-ghost-color = cyan
+macos-icon-screen-color = black
+
+# ANSI Colors
+# 0-7: Standard Colors (ESC 30-37)
+# 8–15: Bright Colors (ESC 90-97)
+
+## ANSI Standard Colors
+# Black
+palette = 0=#14191e
+# Red
+palette = 1=red
+# Green
+palette = 2=green
+# Yellow
+palette = 3=yellow
+# Blue
+palette = 4=blue
+# Magenta
+palette = 5=magenta
+# Cyan
+palette = 6=cyan
+# White
+palette = 7=white
+
+## ANSI Bright Colors
+# Bright Black
+palette = 8=#676767
+# Bright Red
+palette = 9=#e23625
+# Bright Green
+palette = 10=#57bf37
+# Bright Yellow
+palette = 11=#ece100
+# Bright Blue 
+palette = 12=#a6aaf1
+# Bright Magenta
+palette = 13=#e07de0
+# Bright Cyan
+palette = 14=#5ffdff
+# Bright White
+palette = 15=#ffffff
