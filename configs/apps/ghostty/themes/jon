@@ -6,6 +6,12 @@ cursor-style-blink = true
 background-opacity = 1
 unfocused-split-opacity = 0.5
 
+# Icon
+macos-icon = custom-style
+macos-icon-frame = aluminum
+macos-icon-ghost-color = cyan
+macos-icon-screen-color = black
+
 # ANSI Colors
 # 0-7: Standard Colors (ESC 30-37)
 # 8–15: Bright Colors (ESC 90-97)
