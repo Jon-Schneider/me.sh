@@ -60,3 +60,6 @@ keybind = super+ctrl+f=unbind
 
 keybind = cmd+left=text:\x1b[H
 keybind = cmd+right=text:\x1b[F
+
+# Enable Shift + Enter going to new line in 'git commit -m "..."'
+keybind = shift+enter=text:\n
