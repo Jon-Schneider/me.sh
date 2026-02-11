@@ -245,4 +245,4 @@ source ~/.zshrc_local 2> /dev/null # Load local .zshrc if available. Fail silent
 eval "$(starship init zsh)"
 
 # Customize Ghostty config file location
-export XDG_CONFIG_HOME="~/.config"
+export XDG_CONFIG_HOME="$HOME/.config"
