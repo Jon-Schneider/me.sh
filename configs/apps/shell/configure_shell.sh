@@ -6,6 +6,6 @@ ln -f $current_dir/.zsh_plugins ~/
 ln -f $current_dir/starship.toml ~/.config
 
 # Setup fastlane completions
-bundle exec fastlane enable_auto_complete
+# bundle exec fastlane enable_auto_complete
 
 touch ~/.zshrc_local # Creates a local-only .zshrc file that is loaded by .zshrc
