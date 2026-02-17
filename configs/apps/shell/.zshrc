@@ -157,6 +157,9 @@ load_non_git_aliases() {
     alias bupc="bu && brew upgrade --cask"
     alias cdf='cd "`osascript -e "tell application \\"Finder\\" to get POSIX path of (insertion location as text)"`"' # cd to front finder dir
     alias cht="cht.sh"
+    alias cld="claude"
+    alias cldc="claude --continue"
+    alias cldr="claude --resume"
     alias ddnuke="rm -rf ~/Library/Developer/Xcode/DerivedData" # Nuke derived data
     alias dev="open ~/Library/Developer"
     alias dl="cd ~/Downloads"
