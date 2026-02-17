@@ -247,5 +247,5 @@ source ~/.zshrc_local 2> /dev/null # Load local .zshrc if available. Fail silent
 
 eval "$(starship init zsh)"
 
-# Customize default config file location (Needed to change default config logic on Mac to .config for Ghostty)
+# Customize config file location for apps that support it (including ghostty)
 export XDG_CONFIG_HOME="$HOME/.config"
