@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "keybinds": {
+    "input_backspace": "ctrl+h,shift+backspace",
+    "input_delete_word_backward": "ctrl+w,ctrl+backspace,alt+backspace,option+backspace,escape",
+    "input_line_end": "super+right",
+    "input_word_backward": "alt+b,alt+left,ctrl+left",
+    "input_word_forward": "alt+f,alt+right,ctrl+right",
+    "session_child_cycle": "shift+right",
+    "session_child_cycle_reverse": "shift+left"
+  },
+  "plugin": ["opencode-gemini-auth@latest"]
+}
