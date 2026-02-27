@@ -1,1 +1,1 @@
-- IMPORTANT When creating branches, use the format 'jsc-yyyy-mm-dd--[description]'
+- IMPORTANT When creating branches, use the format 'jsc/yyyy-mm-dd--[description]'
