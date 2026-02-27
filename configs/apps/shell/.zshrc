@@ -182,6 +182,7 @@ load_non_git_aliases() {
     alias me="mer && vsc"
     alias mer="cd ~/Developer/jsc/me.sh"
     alias oc="opencode"
+    alias occ="oc --continue"
     alias od="cd ~/OneDrive"
     alias oi="open *.jpg *.jpeg *.png" # Open images in dir
     alias pi="pod install"
