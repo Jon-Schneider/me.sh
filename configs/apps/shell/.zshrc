@@ -232,6 +232,35 @@ load_non_git_aliases() {
     alias zr="source ~/.zshrc" # Zshrc Reload
 }
 
+load_worktree_functions() {
+	wtc() {
+	  local name="$1"
+	  if [ -z "$name" ]; then
+		echo "Usage: wtc <branch-name>"
+		return 1
+	  fi
+
+	  local root
+	  root="$(git rev-parse --show-toplevel 2>/dev/null)" || {
+		echo "Not inside a git repository"
+		return 1
+	  }
+
+	  # Enforce running from repo root
+	  if [ "$PWD" != "$root" ]; then
+		echo "Run this from repo root: $root"
+		return 1
+	  fi
+
+	  local dated_branch repo_name worktree_path
+	  dated_branch="jsc/$(date +%F)--$name"
+	  repo_name="$(basename "$root")"
+	  worktree_path="../${repo_name}-${name}"
+	  git worktree add -b "$dated_branch" "$worktree_path" || return 1
+	  cd "$worktree_path" || return 1
+	}
+}
+
 ###
 
 # Antidote
@@ -239,10 +268,11 @@ load_non_git_aliases() {
 source $(brew --prefix)/opt/antidote/share/antidote/antidote.zsh
 antidote load ${ZDOTDIR:-~}/.zsh_plugins
 
-# LOAD ALIASES
+# LOAD ALIASES AND FUNCTIONS
 
 load_git_aliases
 load_non_git_aliases
+load_worktree_functions
 
 # LOCAL ZSH
 
