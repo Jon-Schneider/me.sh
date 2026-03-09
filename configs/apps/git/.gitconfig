@@ -20,7 +20,7 @@
     prune = true
 [core]
 	excludesfile = ~/.gitignore
-    pager = less -+X
+    pager = less --mouse -FR
     preloadIndex = true
     attributesfile = /Users/jsc/.gitattributes
 [alias]
