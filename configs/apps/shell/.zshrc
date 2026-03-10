@@ -282,3 +282,21 @@ eval "$(starship init zsh)"
 
 # Customize config file location for apps that support it (including ghostty)
 export XDG_CONFIG_HOME="$HOME/.config"
+
+# Attach to last Tmux session
+if command -v tmux >/dev/null 2>&1 && [ -z "$TMUX" ]; then
+  tmux attach || tmux new
+fi
+
+# Attach to main session if not already active, create a new tmux session if it is
+if command -v tmux >/dev/null 2>&1 && [[ -z "$TMUX" && -o interactive ]]; then
+  if tmux has-session -t main 2>/dev/null; then
+    if [[ "$(tmux display-message -p -t main '#{session_attached}')" -eq 0 ]]; then
+      exec tmux attach -t main
+    else
+      exec tmux new-session -s "$(basename $PWD)"
+    fi
+  else
+    exec tmux new-session -s main
+  fi
+fi
