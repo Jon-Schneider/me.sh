@@ -1,6 +1,6 @@
 # ENV
 export PATH=$PATH:$HOME/.rbenv/bin:$HOME/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/sbin:/opt/X11/bin:$HOME/Library/Android/sdk/platform-tools:/Users/jsc/.cargo/bin
-export EDITOR="vim"
+export EDITOR="micro"
 export LESS="-R" # Enable mouse scrolling in less.
 export COLOR_RED='\033[0;31m'
 export COLOR_RESET='\033[0m' # No Color
