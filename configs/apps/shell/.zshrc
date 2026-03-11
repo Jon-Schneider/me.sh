@@ -294,7 +294,7 @@ if command -v tmux >/dev/null 2>&1 && [[ -z "$TMUX" && -o interactive ]]; then
     if [[ "$(tmux display-message -p -t main '#{session_attached}')" -eq 0 ]]; then
       exec tmux attach -t main
     else
-      exec tmux new-session -s "$(basename $PWD)"
+      exec tmux new-session
     fi
   else
     exec tmux new-session -s main
