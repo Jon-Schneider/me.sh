@@ -248,6 +248,11 @@ load_non_git_aliases() {
     alias tls="tmux list-sessions"
     alias tk="tmux kill-session -t"
     alias tm="tmux"
+    tmnw() {
+      printf "new window: "
+      read NEW_WINDOW
+      tmux new-window -n $NEW_WINDOW
+    }
     alias tmr="tmux rename-session"
 }
 
