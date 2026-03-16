@@ -1,0 +1,4 @@
+interface:
+  display_name: "Use Jira"
+  short_description: "Operate Jira via Atlassian CLI"
+  default_prompt: "Use $use-jira5 to inspect, search, create, comment on, edit, transition, assign, or link Jira work items with `acli`."
