@@ -28,5 +28,5 @@ ln -f $current_dir/Opencode/opencode.json ~/.config/opencode
 ln -f $current_dir/Opencode/opencode-tmux-agent-status.js ~/.config/opencode/plugins
 
 echo "Configuring Skills..."
-cp -R $current_dir/Skills/. "~/.agents/skills/"
-cp -R $current_dir/Skills/. "~/.claude/skills/"
+ln -Fs $current_dir/Skills/use-jira "~/.agents/skills/"
+ln -Fs $current_dir/Skills/use-jira "~/.claude/skills/"
