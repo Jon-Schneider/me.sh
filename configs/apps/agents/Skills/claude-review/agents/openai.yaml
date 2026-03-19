@@ -1,0 +1,4 @@
+interface:
+  display_name: "Claude Review"
+  short_description: "Iterate with Claude on code review"
+  default_prompt: "Use $claude-review to get feedback from Claude Code on my changes and iterate until the review converges."

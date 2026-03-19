@@ -30,6 +30,8 @@ ln -f "$current_dir/Opencode/opencode.json" "$HOME/.config/opencode"
 ln -f "$current_dir/Opencode/opencode-tmux-agent-status.js" "$HOME/.config/opencode/plugins"
 
 echo "Configuring Skills..."
+ln -Fsn "$current_dir/Skills/claude-review" "$HOME/.agents/skills/"
+
 ln -Fsn "$current_dir/Skills/codex-review" "$HOME/.claude/skills/"
 ln -Fsn "$current_dir/Skills/codex-review" "$HOME/.gemini/skills/"
 
