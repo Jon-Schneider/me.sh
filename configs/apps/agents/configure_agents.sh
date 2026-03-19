@@ -1,14 +1,15 @@
 echo "Configuring Agents..."
 current_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-mkdir ~/.claude
-mkdir ~/.codex
-mkdir ~/.gemini
-mkdir ~/.kimi
-mkdir -p ~/.config/opencode/plugins
-mkdir -p "~/.agents/skills"
-mkdir -p "~/.claude/skills"
-mkdir -p "~/.gemini/skills/"
+mkdir -p "$HOME/.claude"
+mkdir -p "$HOME/.codex"
+mkdir -p "$HOME/.gemini"
+mkdir -p "$HOME/.kimi"
+mkdir -p "$HOME/.config/opencode/plugins"
+mkdir -p "$HOME/.agents/skills"
+mkdir -p "$HOME/.codex/skills"
+mkdir -p "$HOME/.claude/skills"
+mkdir -p "$HOME/.gemini/skills"
 
 echo "Configuring Claude..."
 ln -f $current_dir/AGENTS.md ~/.claude/CLAUDE.md
