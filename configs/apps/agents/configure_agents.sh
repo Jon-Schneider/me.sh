@@ -30,8 +30,8 @@ ln -f "$current_dir/Opencode/opencode.json" "$HOME/.config/opencode"
 ln -f "$current_dir/Opencode/opencode-tmux-agent-status.js" "$HOME/.config/opencode/plugins"
 
 echo "Configuring Skills..."
-ln -f $current_dir/Skills/codex-review "~/.claude/skills/"
-ln -f $current_dir/Skills/codex-review "~/.gemini/skills/"
+ln -Fsn "$current_dir/Skills/codex-review" "$HOME/.claude/skills/"
+ln -Fsn "$current_dir/Skills/codex-review" "$HOME/.gemini/skills/"
 
-ln -Fs $current_dir/Skills/use-jira "~/.agents/skills/"
-ln -Fs $current_dir/Skills/use-jira "~/.claude/skills/"
+ln -Fsn "$current_dir/Skills/use-jira" "$HOME/.agents/skills/"
+ln -Fsn "$current_dir/Skills/use-jira" "$HOME/.claude/skills/"
