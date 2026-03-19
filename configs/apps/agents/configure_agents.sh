@@ -12,22 +12,22 @@ mkdir -p "$HOME/.claude/skills"
 mkdir -p "$HOME/.gemini/skills"
 
 echo "Configuring Claude..."
-ln -f $current_dir/AGENTS.md ~/.claude/CLAUDE.md
-ln -f $current_dir/Claude/settings.json ~/.claude
+ln -f "$current_dir/AGENTS.md" "$HOME/.claude/CLAUDE.md"
+ln -f "$current_dir/Claude/settings.json" "$HOME/.claude"
 
 echo "Configuring Codex..."
-ln -f $current_dir/AGENTS.md ~/.codex/AGENTS.md
-ln -f $current_dir/Codex/config.toml ~/.codex
+ln -f "$current_dir/AGENTS.md" "$HOME/.codex/AGENTS.md"
+ln -f "$current_dir/Codex/config.toml" "$HOME/.codex"
 
 echo "Configuring Gemini..."
-ln -f $current_dir/AGENTS.md ~/.gemini/GEMINI.md
+ln -f "$current_dir/AGENTS.md" "$HOME/.gemini/GEMINI.md"
 
 echo "Configuring Kimi..."
-ln -f $current_dir/AGENTS.md ~/.kimi/AGENTS.md
+ln -f "$current_dir/AGENTS.md" "$HOME/.kimi/AGENTS.md"
 
 echo "Configuring Opencode..."
-ln -f $current_dir/Opencode/opencode.json ~/.config/opencode
-ln -f $current_dir/Opencode/opencode-tmux-agent-status.js ~/.config/opencode/plugins
+ln -f "$current_dir/Opencode/opencode.json" "$HOME/.config/opencode"
+ln -f "$current_dir/Opencode/opencode-tmux-agent-status.js" "$HOME/.config/opencode/plugins"
 
 echo "Configuring Skills..."
 ln -f $current_dir/Skills/codex-review "~/.claude/skills/"
