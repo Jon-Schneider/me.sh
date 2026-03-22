@@ -439,6 +439,26 @@
         ]
       }
     ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/jsc/bin/set_tmux_agent_status running"
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/jsc/bin/set_tmux_agent_status running"
+          }
+        ]
+      }
+    ],
     "PermissionRequest": [
       {
         "hooks": [
