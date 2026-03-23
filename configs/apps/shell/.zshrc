@@ -149,6 +149,9 @@ load_git_aliases() {
     alias gs="git status"
     alias gstas="git stash --staged" # Stash only staged changes
     alias gsu="gs -uno"
+    alias gwtl="git worktree list"
+    alias gwtp="git worktree prune"
+    alias gwtr="git worktree remove"
 }
 
 load_non_git_aliases() {
