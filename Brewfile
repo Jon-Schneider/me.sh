@@ -1,4 +1,4 @@
-brew "atlassian/homebrew-acli/acl"
+brew "atlassian/homebrew-acli/acli"
 brew "antidote"
 brew "chisel"
 brew "cloc"
