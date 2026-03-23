@@ -1,6 +1,5 @@
 brew "atlassian/homebrew-acli/acli"
 brew "antidote"
-brew "chisel"
 brew "cloc"
 brew "duti"
 brew "fastlane"
