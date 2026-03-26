@@ -1,0 +1,4 @@
+interface:
+  display_name: "Rewrite PR History"
+  short_description: "Rewrite branch commits into reviewable slices"
+  default_prompt: "Use $rewrite-pr-history to reset this branch to its base commit and rebuild the same net file changes as a sequence of small, easy-to-review commits."
