@@ -2,6 +2,7 @@
   "permissions": {
     "allow": [
       "Bash(diff:*)",
+      "Bash(git diff:*)",
       "Bash(find:*)",
       "Bash(grep:*)",
       "Bash(wc:*)",
