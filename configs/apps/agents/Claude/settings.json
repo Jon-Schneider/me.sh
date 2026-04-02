@@ -522,5 +522,8 @@
       }
     ]
   },
-  "model": "opus"
+  "model": "opus",
+  "sandbox": {
+    "enabled": true
+  }
 }
