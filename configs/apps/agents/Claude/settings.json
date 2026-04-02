@@ -526,6 +526,13 @@
   },
   "model": "opus",
   "sandbox": {
-    "enabled": true
+    "enabled": true,
+    "filesystem": {
+      "allowRead": ["~/Library/Developer"],
+      "denyRead": ["~/.ssh, ~/Documents, ~/Tmp, ~/Library"]
+    },
+    "network": {
+      "allowedDomains": ["github.com"]
+    }
   }
 }
