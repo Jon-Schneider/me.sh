@@ -246,6 +246,23 @@ load_non_git_aliases() {
     alias zl="bb ~/.zshrc_local"
     alias zr="source ~/.zshrc" # Zshrc Reload
 
+    # Agents and Sandboxing aliases
+
+    safe() { safehouse --enable=xcode --enable=lldb --add-dirs=$HOME/bin:$HOME/Library/Developer/Xcode "$@"; }
+
+    claude() { safe claude --dangerously-skip-permissions "$@"; }
+    alias cld="claude"
+    alias cldc="cld --continue"
+    alias cldr="cld --resume"
+
+    codex() { safe codex --dangerously-bypass-approvals-and-sandbox "$@"; }
+    alias cdx="codex"
+    alias cdxr="codex resume"
+
+	  opencode() { safe opencode --dangerously-skip-permissions "$@"; }
+    alias oc="opencode"
+    alias occ="oc --continue"
+
     # Tmux aliases
     alias ta="tmux attach"
     alias tls="tmux list-sessions"
