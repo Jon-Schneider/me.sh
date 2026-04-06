@@ -282,7 +282,7 @@ load_worktree_functions() {
 	  local dated_branch repo_name worktree_path
 	  dated_branch="jsc/$(date +%F)--$name"
 	  repo_name="$(basename "$root")"
-	  worktree_path="../${repo_name}-worktrees/${repo_name}-${name}"
+	  worktree_path="../worktrees/${repo_name}/${name}"
 	  git worktree add -b "$dated_branch" "$worktree_path" || return 1
 	  cd "$worktree_path" || return 1
 	}
