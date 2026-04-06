@@ -14,6 +14,7 @@ mkdir -p "$HOME/.gemini/skills"
 echo "Configuring Claude..."
 ln -f "$current_dir/AGENTS.md" "$HOME/.claude/CLAUDE.md"
 ln -f "$current_dir/Claude/settings.json" "$HOME/.claude"
+ln -f "$current_dir/Claude/statusline-command.sh" "$HOME/.claude"
 
 echo "Configuring Codex..."
 ln -f "$current_dir/AGENTS.md" "$HOME/.codex/AGENTS.md"

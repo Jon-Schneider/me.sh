@@ -525,6 +525,10 @@
     ]
   },
   "model": "opus",
+  "statusLine": {
+    "type": "command",
+    "command": "bash /Users/jsc/.claude/statusline-command.sh"
+  },
   "sandbox": {
     "enabled": true,
     "filesystem": {
