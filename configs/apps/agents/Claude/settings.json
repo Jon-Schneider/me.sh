@@ -437,7 +437,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/jsc/bin/set_tmux_agent_status running"
+            "command": "/Users/$(whoami)/bin/set_tmux_agent_status running"
           }
         ]
       }
@@ -447,7 +447,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/jsc/bin/set_tmux_agent_status running"
+            "command": "/Users/$(whoami)/bin/set_tmux_agent_status running"
           }
         ]
       }
@@ -457,7 +457,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/jsc/bin/set_tmux_agent_status running"
+            "command": "/Users/$(whoami)/bin/set_tmux_agent_status running"
           }
         ]
       }
@@ -467,7 +467,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/jsc/bin/set_tmux_agent_status needs-input"
+            "command": "/Users/$(whoami)/bin/set_tmux_agent_status needs-input"
           }
         ]
       }
@@ -478,7 +478,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/jsc/bin/set_tmux_agent_status needs-input"
+            "command": "/Users/$(whoami)/bin/set_tmux_agent_status needs-input"
           }
         ]
       },
@@ -487,7 +487,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/jsc/bin/set_tmux_agent_status ready"
+            "command": "/Users/$(whoami)/bin/set_tmux_agent_status ready"
           }
         ]
       }
@@ -497,7 +497,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/jsc/bin/set_tmux_agent_status done"
+            "command": "/Users/$(whoami)/bin/set_tmux_agent_status done"
           }
         ]
       }
@@ -508,7 +508,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/jsc/bin/set_tmux_agent_status ready"
+            "command": "/Users/$(whoami)/bin/set_tmux_agent_status ready"
           }
         ]
       }
@@ -518,7 +518,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/jsc/bin/set_tmux_agent_status \"\""
+            "command": "/Users/$(whoami)/bin/set_tmux_agent_status \"\""
           }
         ]
       }
@@ -527,7 +527,7 @@
   "model": "opus",
   "statusLine": {
     "type": "command",
-    "command": "bash /Users/jsc/.claude/statusline-command.sh"
+    "command": "bash /Users/$(whoami)/.claude/statusline-command.sh"
   },
   "sandbox": {
     "enabled": true,
