@@ -247,7 +247,15 @@ load_non_git_aliases() {
 
     # Agents and Sandboxing aliases
 
-    safe() { safehouse --enable=xcode --enable=lldb --add-dirs=$HOME/bin:$HOME/Library/Developer/Xcode "$@"; }
+    safe() {
+      local safehouse_xcode_override="$HOME/.config/agent-safehouse/profiles/55-integrations-optional/xcode-cli.sb"
+      safehouse \
+        --enable=xcode \
+        --enable=lldb \
+        --append-profile="$safehouse_xcode_override" \
+        --add-dirs="$HOME/bin:$HOME/Library/Developer/Xcode" \
+        "$@"
+    }
 
     claude() { safe claude --dangerously-skip-permissions "$@"; }
     alias cld="claude"

@@ -1,0 +1,28 @@
+;; ---------------------------------------------------------------------------
+;; Local override: Xcode system license plist
+;; Mirrors upstream main after Homebrew stable 0.9.0 and keeps the grant scoped
+;; to the single system preference file xcodebuild reads during license checks.
+;;
+;; Also allow the narrow PackageKit install-status lookup used by
+;; DVTSystemPrerequisites during `xcodebuild -checkFirstLaunchStatus`.
+;; Xcode also probes ~/Library/Developer/Packages for downloaded first-launch
+;; components/version metadata.
+;; XcodeSystemResources installs device chrome assets under
+;; /Library/Developer/DeviceKit, which the first-launch check verifies.
+;; ---------------------------------------------------------------------------
+
+(allow file-read*
+    (literal "/Library/Preferences")
+    (literal "/Library/Preferences/com.apple.dt.Xcode.plist")
+    (literal "/Library/Developer/DeviceKit")
+    (subpath "/Library/Developer/DeviceKit")
+    (home-literal "/Library")
+    (home-literal "/Library/Developer")
+    (home-literal "/Library/Developer/Packages")
+    (home-subpath "/Library/Developer/Packages")
+)
+
+(allow mach-lookup
+    (global-name "system.install.apple-software")
+    (global-name "com.apple.installd")
+)
