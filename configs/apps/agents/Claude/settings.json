@@ -7,8 +7,8 @@
       "Bash(grep:*)",
       "Bash(wc:*)",
       "Bash(xcodebuild:*)",
-      "Edit(/**/*)",
-      "Write(/**/*)"
+      "Edit(~/**/*)",
+      "Write(~/**/*)"
     ],
     "deny": [
       "Bash(swiftformat:*)"
