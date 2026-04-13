@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/jsc/bin/set_tmux_agent_status ready"
+            "command": "$HOME/bin/set_tmux_agent_status ready"
           }
         ]
       }
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/jsc/bin/set_tmux_agent_status running"
+            "command": "$HOME/bin/set_tmux_agent_status running"
           }
         ]
       }
@@ -27,7 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/jsc/bin/set_tmux_agent_status running-tool"
+            "command": "$HOME/bin/set_tmux_agent_status running-tool"
           }
         ]
       }
@@ -38,7 +38,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/jsc/bin/set_tmux_agent_status running"
+            "command": "$HOME/bin/set_tmux_agent_status running"
           }
         ]
       }
@@ -48,7 +48,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/jsc/bin/set_tmux_agent_status done"
+            "command": "$HOME/bin/set_tmux_agent_status done"
           }
         ]
       }
