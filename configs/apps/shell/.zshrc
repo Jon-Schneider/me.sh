@@ -261,6 +261,7 @@ load_non_git_aliases() {
         --env-pass=TMUX,TMUX_PANE \
         --append-profile="$safehouse_xcode_override" \
         --add-dirs="$HOME/.agents:$HOME/bin:$HOME/.claude:$HOME/.codex:$HOME/Developer/jsc/me.sh:$HOME/Library/Caches:$HOME/Library/Developer" \
+        --add-dirs-ro="$HOME/.config/acli" \
         "$@"
     }
 
