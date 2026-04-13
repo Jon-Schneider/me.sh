@@ -191,7 +191,9 @@ load_non_git_aliases() {
     alias hst="history"
     alias hstg="hst | grep"
     alias hstr="fc -l -20" # Recent History
+    alias jira="acli jira"
     alias jks="jekyll serve"
+    alias jr="jira"
     alias js="cd ~/Developer/jsc"
     alias lib="open ~/Library"
     alias ls='ls -aG $@'
