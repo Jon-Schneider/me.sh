@@ -9,6 +9,28 @@
 ;; components/version metadata.
 ;; XcodeSystemResources installs device chrome assets under
 ;; /Library/Developer/DeviceKit, which the first-launch check verifies.
+;; CoreSimulator runtime enumeration also talks to simulator disk-image services
+;; in addition to CoreSimulatorService.
+;; Modern simulator runtime activation also uses GUI launch host/trampoline
+;; services when resolving runtime availability.
+;;
+;; xcodebuildmcp also shells out to `ps` in multiple places
+;; (`build/utils/process-tree.js`, `build/utils/environment.js`,
+;; `build/server/mcp-lifecycle.js`) and keeps daemon state under
+;; ~/.xcodebuildmcp. Safehouse does not currently ship a scoped profile for
+;; xcodebuildmcp, so keep these additions here with the existing Xcode-local
+;; override.
+;;
+;; Current Xcode 26 / Swift macro builds also hit a few host capabilities that
+;; upstream Safehouse only exposes through adjacent integration modules:
+;; - `macos-gui.sb`: HFS hot-file fsctl plus syspolicy / distributed-notification lookups
+;; - `spotlight.sb`: metadata server and power-management lookups
+;; - Xcode-local user state not covered by upstream `xcode.sb`: ~/Library/org.swift.swiftpm
+;; - Additional Xcode 26 build helpers: xcodebuild/CoreSimulator prefs,
+;;   CoreDevice service lookup, mobileassetd runtime checks, ibtool prefs, and
+;;   SwiftPM security/cache state under ~/.config/swiftpm
+;; Keep the grants narrow and limited to the specific denied operations seen in
+;; xcodebuild / SWBBuildService / appintentsmetadataprocessor logs.
 ;; ---------------------------------------------------------------------------
 
 (allow file-read*
@@ -16,13 +38,64 @@
     (literal "/Library/Preferences/com.apple.dt.Xcode.plist")
     (literal "/Library/Developer/DeviceKit")
     (subpath "/Library/Developer/DeviceKit")
+    (literal "/private/var/run/com.apple.security.cryptexd/mnt")
+    (literal "/private/etc/passwd")
     (home-literal "/Library")
     (home-literal "/Library/Developer")
     (home-literal "/Library/Developer/Packages")
+    (home-literal "/Library/org.swift.swiftpm")
+    (home-literal "/Library/Preferences/com.apple.dt.xcodebuild.plist")
+    (home-literal "/Library/Preferences/com.apple.CoreSimulator.plist")
+    (home-literal "/Library/Preferences/com.apple.ibtool.plist")
+    (home-literal "/Library/Preferences/com.apple.finder.plist")
     (home-subpath "/Library/Developer/Packages")
+    (home-subpath "/Library/org.swift.swiftpm")
+)
+
+(allow process-info-pidinfo)
+
+(allow job-creation)
+
+(allow file-read* file-write*
+    (home-subpath "/.xcodebuildmcp")
+    (home-subpath "/.config/swiftpm")
+    (home-subpath "/Library/org.swift.swiftpm")
+)
+
+(allow file-read-metadata
+    (literal "/Volumes")
+    (subpath "/Volumes")
+    (home-literal "/.config/swiftpm")
+    (home-subpath "/.config/swiftpm")
+)
+
+(allow file-read-xattr file-write-xattr
+    (home-subpath "/.config/swiftpm")
 )
 
 (allow mach-lookup
     (global-name "system.install.apple-software")
     (global-name "com.apple.installd")
+    (global-name "com.apple.CoreSimulator.simdiskimaged")
+    (global-name "com.apple.CoreSimulator.SimDiskImageManager")
+    (global-name "com.apple.CoreSimulator.SimLaunchHost-arm64")
+    (global-name "com.apple.CoreSimulator.SimulatorTrampoline")
+    (global-name "com.apple.CoreDevice.CoreDeviceService")
+    (global-name "com.apple.security.syspolicy.exec")
+    (global-name "com.apple.metadata.mds")
+    (global-name "com.apple.PowerManagement.control")
+    (global-name "com.apple.mobileassetd.v2")
+    (global-name "com.apple.dt.automationmode.reader")
+    (global-name-prefix "com.apple.distributed_notifications@")
+)
+
+(allow system-fsctl
+    (fsctl-command (_IO "h" 47))
+    (fsctl-command (_IO "A" 20))
+    (fsctl-command (_IO "J" 32))
+)
+
+(allow iokit-open-user-client
+    (iokit-user-client-class "IOSurfaceRootUserClient")
+    (iokit-user-client-class "AGXDeviceUserClient")
 )

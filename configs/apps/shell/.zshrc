@@ -171,7 +171,7 @@ load_non_git_aliases() {
     alias bsc="brew search --cask"
     alias bun="brew uninstall"
     alias bu="brew update"
-    alias bup="bu && brew upgrade"
+    alias bup="brew upgrade"
     alias bupc="bu && brew upgrade --cask"
     alias cdf='cd "`osascript -e "tell application \\"Finder\\" to get POSIX path of (insertion location as text)"`"' # cd to front finder dir
     alias cht="cht.sh"
@@ -250,25 +250,29 @@ load_non_git_aliases() {
 
     safe() {
       local safehouse_xcode_override="$HOME/.config/agent-safehouse/profiles/55-integrations-optional/xcode-cli.sb"
+
       safehouse \
         --enable=xcode \
         --enable=lldb \
+        --enable=macos-gui \
+        --enable=keychain \
+        --env-pass=TMUX,TMUX_PANE \
         --append-profile="$safehouse_xcode_override" \
-        --add-dirs="$HOME/bin:$HOME/Library/Developer/Xcode" \
+        --add-dirs="$HOME/.agents:$HOME/bin:$HOME/.claude:$HOME/.codex:$HOME/Developer/jsc/me.sh:$HOME/Library/Caches:$HOME/Library/Developer" \
         "$@"
     }
 
-    claude() { safe claude --dangerously-skip-permissions "$@"; }
-    alias cld="claude"
+    claude-sb() { safe claude --permission-mode bypassPermissions 		--dangerously-skip-permissions "$@"; }
+    alias cld="claude-sb"
     alias cldc="cld --continue"
     alias cldr="cld --resume"
 
-    codex() { safe codex --dangerously-bypass-approvals-and-sandbox "$@"; }
-    alias cdx="codex"
-    alias cdxr="codex resume"
+    codex-sb() { safe codex --dangerously-bypass-approvals-and-sandbox "$@"; }
+    alias cdx="codex-sb"
+    alias cdxr="cdx-sb resume"
 
-	  opencode() { safe opencode --dangerously-skip-permissions "$@"; }
-    alias oc="opencode"
+    opencode-sb() { safe opencode --dangerously-skip-permissions "$@"; }
+    alias oc="opencode-sb"
     alias occ="oc --continue"
 
     # Tmux aliases
