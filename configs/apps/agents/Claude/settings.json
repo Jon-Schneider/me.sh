@@ -6,7 +6,6 @@
       "Bash(find:*)",
       "Bash(grep:*)",
       "Bash(wc:*)",
-      "Bash(xcodebuild:*)",
       "Edit(~/**/*)",
       "Write(~/**/*)"
     ],
