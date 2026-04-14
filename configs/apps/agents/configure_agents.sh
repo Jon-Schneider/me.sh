@@ -11,6 +11,9 @@ mkdir -p "$HOME/.codex/skills"
 mkdir -p "$HOME/.claude/skills"
 mkdir -p "$HOME/.gemini/skills"
 
+echo "Configiring ~/.agents..."
+ln -f "$current_dir/AGENTS.md" "$HOME/.agents/AGENTS.md"
+
 echo "Configuring Claude..."
 ln -f "$current_dir/AGENTS.md" "$HOME/.claude/CLAUDE.md"
 ln -f "$current_dir/Claude/settings.json" "$HOME/.claude"
