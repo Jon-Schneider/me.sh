@@ -272,7 +272,7 @@ load_non_git_aliases() {
 
     codex-sb() { safe codex --dangerously-bypass-approvals-and-sandbox "$@"; }
     alias cdx="codex-sb"
-    alias cdxr="cdx-sb resume"
+    alias cdxr="cdx resume"
 
     opencode-sb() { safe opencode --dangerously-skip-permissions "$@"; }
     alias oc="opencode-sb"
