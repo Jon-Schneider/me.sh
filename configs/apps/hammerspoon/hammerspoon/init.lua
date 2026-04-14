@@ -50,3 +50,59 @@ hs.window.filter.new('GlobalProtect')
       end)
     end
   end)
+
+
+--local function isChromeFrontmost()
+--    local app = hs.application.frontmostApplication()
+--    return app and app:name() == "Google Chrome"
+--end
+--
+--local function saveCurrentChromeTab()
+--    local ok, result =
+--        hs.osascript.applescript(
+--        [[
+--      tell application "Google Chrome"
+--        if (count of windows) = 0 then
+--          return ""
+--        end if
+--        return URL of active tab of front window
+--      end tell
+--    ]]
+--    )
+--
+--    if not ok then
+--        hs.alert.show("Could not read Chrome URL")
+--        return
+--    end
+--
+--    if result == nil or result == "" then
+--        hs.alert.show("No active Chrome tab")
+--        return
+--    end
+--
+--    local previousApp = hs.application.frontmostApplication()
+--    local deeplink = "stache-reader://x-callback-url/save?url=" .. hs.http.encodeForQuery(result)
+--
+--    hs.urlevent.openURL(deeplink)
+--
+--    hs.timer.doAfter(
+--        1,
+--        function()
+--            if previousApp and previousApp:isRunning() then
+--                previousApp:activate()
+--            end
+--        end
+--    )
+--end
+--
+--hs.hotkey.bind(
+--    {"cmd", "shift"},
+--    "S",
+--    function()
+--        if not isChromeFrontmost() then
+--            return
+--        end
+--
+--        saveCurrentChromeTab()
+--    end
+--)
