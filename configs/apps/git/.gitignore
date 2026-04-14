@@ -2,6 +2,9 @@
 **/*TODO.md
 TODO/
 
+# I put worktrees inside main project repo for convenience
+.worktrees
+
 ### macOS (899509f, https://github.com/github/gitignore/blob/master/Global/macOS.gitignore)
 
 *.DS_Store
