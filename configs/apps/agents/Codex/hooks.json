@@ -30,6 +30,15 @@
             "command": "$HOME/bin/set_tmux_agent_status running-tool"
           }
         ]
+      },
+      {
+        "hooks" : [
+          {
+            "command" : "$HOME/bin/codex-block-raw-apple-build-tools",
+            "type" : "command"
+          }
+        ],
+        "matcher" : "Bash"
       }
     ],
     "PostToolUse": [

@@ -1,0 +1,87 @@
+#!/bin/zsh
+set -euo pipefail
+
+payload="$(cat)"
+
+HOOK_PAYLOAD="$payload" python3 <<'PY'
+import json
+import os
+import shlex
+import sys
+
+
+def parse_tool_args(raw):
+    if isinstance(raw, dict):
+        return raw
+    if isinstance(raw, str) and raw:
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            return {}
+    return {}
+
+
+def unwrap(tokens):
+    tokens = list(tokens)
+
+    while tokens:
+        first = os.path.basename(tokens[0])
+
+        if first in {"rtk", "command"}:
+            tokens = tokens[1:]
+            continue
+
+        if first == "env":
+            tokens = tokens[1:]
+            while tokens and "=" in tokens[0] and not tokens[0].startswith("-"):
+                tokens = tokens[1:]
+            continue
+
+        if first in {"bash", "sh", "zsh"} and len(tokens) >= 3 and tokens[1] in {"-c", "-lc"}:
+            try:
+                tokens = shlex.split(tokens[2], posix=True)
+            except ValueError:
+                return tokens
+            continue
+
+        break
+
+    return tokens
+
+
+payload = json.loads(os.environ["HOOK_PAYLOAD"])
+tool_name = str(payload.get("toolName", "")).lower()
+if tool_name and tool_name != "bash":
+    sys.exit(0)
+
+tool_args = parse_tool_args(payload.get("toolArgs"))
+command = tool_args.get("command") or payload.get("command") or ""
+if not command:
+    sys.exit(0)
+
+try:
+    tokens = unwrap(shlex.split(command, posix=True))
+except ValueError:
+    sys.exit(0)
+
+if not tokens:
+    sys.exit(0)
+
+first = os.path.basename(tokens[0])
+second = os.path.basename(tokens[1]) if len(tokens) > 1 else ""
+
+blocked = (
+    first in {"xcodebuild", "simctl"} or
+    (first == "xcrun" and second == "simctl")
+)
+
+if blocked:
+    print(json.dumps({
+        "decision": "block",
+        "reason": (
+            "Raw xcodebuild/xcrun simctl/simctl is banned. Use XcodeBuildMCP instead. "
+            "If XcodeBuildMCP lacks the needed capability, stop and report that gap rather "
+            "than falling back to Apple CLI tools."
+        ),
+    }))
+PY

@@ -442,6 +442,17 @@
         ]
       }
     ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/$(whoami)/bin/claude-block-raw-apple-build-tools"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "hooks": [

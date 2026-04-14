@@ -16,11 +16,13 @@ ln -f "$current_dir/AGENTS.md" "$HOME/.agents/AGENTS.md"
 
 echo "Configuring Claude..."
 ln -f "$current_dir/AGENTS.md" "$HOME/.claude/CLAUDE.md"
+ln -f "$current_dir/bin/claude-block-raw-apple-build-tools" "$HOME/bin"
 ln -f "$current_dir/Claude/settings.json" "$HOME/.claude"
 ln -f "$current_dir/Claude/statusline-command.sh" "$HOME/.claude"
 
 echo "Configuring Codex..."
 ln -f "$current_dir/AGENTS.md" "$HOME/.codex/AGENTS.md"
+ln -f "$current_dir/bin/codex-block-raw-apple-build-tools" "$HOME/bin"
 ln -f "$current_dir/Codex/config.toml" "$HOME/.codex"
 ln -f "$current_dir/Codex/hooks.json" "$HOME/.codex"
 
