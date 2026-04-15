@@ -9,10 +9,15 @@ export COLOR_RESET='\033[0m' # No Color
 # 'rbenv init' would not work for me, so set it up manually
 eval "$(rbenv init -)"
 
-# Add Brew Autocompletions
+# Add local + Brew autocompletions
+fpath=("$HOME/.zsh/completions" $fpath)
+
 if type brew &>/dev/null; then
-  FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
+  fpath=("$(brew --prefix)/share/zsh/site-functions"
+$fpath)
 fi
+
+setopt completealiases # Enable autocompletions for aliases
 
 # ZSH CONFIG
 
