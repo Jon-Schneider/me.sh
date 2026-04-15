@@ -51,58 +51,74 @@ hs.window.filter.new('GlobalProtect')
     end
   end)
 
-
+--local HOLD_THRESHOLD = 0.5
+--local saveHotkeyPressTime = nil
+--local saveHotkeyPreviousApp = nil
+--
 --local function isChromeFrontmost()
 --    local app = hs.application.frontmostApplication()
 --    return app and app:name() == "Google Chrome"
 --end
 --
---local function saveCurrentChromeTab()
---    local ok, result =
---        hs.osascript.applescript(
---        [[
---      tell application "Google Chrome"
---        if (count of windows) = 0 then
---          return ""
---        end if
---        return URL of active tab of front window
---      end tell
---    ]]
---    )
+--local function currentChromeURL()
+--    local ok, result = hs.osascript.applescript([[
+--        tell application "Google Chrome"
+--            if (count of windows) = 0 then
+--                return ""
+--            end if
+--            return URL of active tab of front window
+--        end tell
+--    ]])
 --
 --    if not ok then
 --        hs.alert.show("Could not read Chrome URL")
---        return
+--        return nil
 --    end
 --
 --    if result == nil or result == "" then
 --        hs.alert.show("No active Chrome tab")
---        return
+--        return nil
 --    end
 --
---    local previousApp = hs.application.frontmostApplication()
---    local deeplink = "stache-reader://x-callback-url/save?url=" .. hs.http.encodeForQuery(result)
---
---    hs.urlevent.openURL(deeplink)
---
---    hs.timer.doAfter(
---        1,
---        function()
---            if previousApp and previousApp:isRunning() then
---                previousApp:activate()
---            end
---        end
---    )
+--    return result
 --end
 --
---hs.hotkey.bind(
---    {"cmd", "shift"},
---    "S",
---    function()
+--hs.hotkey.bind({"cmd", "shift"}, "S",
+--    function() -- pressed
 --        if not isChromeFrontmost() then
 --            return
 --        end
 --
---        saveCurrentChromeTab()
+--        local url = currentChromeURL()
+--        if not url then
+--            return
+--        end
+--
+--        saveHotkeyPressTime = hs.timer.secondsSinceEpoch()
+--        saveHotkeyPreviousApp = hs.application.frontmostApplication()
+--
+--        local deeplink = "stache-reader://x-callback-url/save?url=" .. hs.http.encodeForQuery(url)
+--        hs.urlevent.openURL(deeplink)
+--    end,
+--
+--    function() -- released
+--        if not saveHotkeyPressTime then
+--            return
+--        end
+--
+--        local heldFor = hs.timer.secondsSinceEpoch() - saveHotkeyPressTime
+--        local previousApp = saveHotkeyPreviousApp
+--
+--        saveHotkeyPressTime = nil
+--        saveHotkeyPreviousApp = nil
+--
+--        if heldFor < HOLD_THRESHOLD then
+--            hs.timer.doAfter(0.1, function()
+--                if previousApp and previousApp:isRunning() then
+--                    previousApp:activate()
+--                end
+--            end)
+--        end
+--        -- else: held long enough, stay in the deeplinked app
 --    end
 --)
