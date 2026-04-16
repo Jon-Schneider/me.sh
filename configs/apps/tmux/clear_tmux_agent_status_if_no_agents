@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+target="${1:-${TMUX_PANE:-}}"
+[ -n "$target" ] || exit 0
+
+window_id="$(tmux display-message -p -t "$target" "#{window_id}" 2>/dev/null)" || exit 0
+
+ttys="$(tmux list-panes -t "$window_id" -F "#{pane_tty}" 2>/dev/null || true)"
+
+for tty in $ttys; do
+  if ps -t "$tty" -o state= -o comm= 2>/dev/null | grep -iqE '^[^TXZ ]+ +(\S+/)?(safehouse|codex|claude|opencode|gemini|kimi)$'; then
+    exit 0
+  fi
+done
+
+tmux set-window-option -q -t "$window_id" @agent_status ""
