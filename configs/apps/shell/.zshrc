@@ -226,10 +226,12 @@ load_non_git_aliases() {
     alias sscl="pushd -q ~/Developer/jsc/me.sh && gl && ./sync_sys_config.sh && popd -q"
     alias src="cd ~/Developer"
     alias spd="speedtest"
+    alias tc="tokencount"
     alias thmr="cd ~/Developer/jsc/jon.zsh-theme"
     alias thm="thmr && vsc"
     alias tldr="cht.sh"
     alias tmp="cd ~/Tmp"
+    alias tokencount="npx tiktoken-cli"
     alias tr="tree -C -L 2"
     alias vsc="code ."
     alias wst="osascript -e 'tell application \"Messages\" to send \"How are you?\" to buddy \"Wife\"'" # Wife Status
