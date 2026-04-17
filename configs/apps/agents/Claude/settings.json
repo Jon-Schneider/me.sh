@@ -539,6 +539,9 @@
     "type": "command",
     "command": "bash /Users/$(whoami)/.claude/statusline-command.sh"
   },
+  "env": {
+    "ENABLE_CLAUDEAI_MCP_SERVERS": "false"
+  },
   "sandbox": {
     "enabled": true,
     "filesystem": {
