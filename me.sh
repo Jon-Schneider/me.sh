@@ -72,5 +72,12 @@ message "Creating ~/Tmp dir..."
 mkdir ~/Tmp
 sudo rm -rf ~/Downloads && ln -s ~/Tmp ~/Downloads # Redirect Downloads to Tmp dir
 
+# Configure repo link for cd
+mkdir -p ~/Develper/jsc
+ln -s ~/Developer/jsc repo
+ln -s ~/Developer/jsc repos
+ln -s ~/Developer/jsc ~/repo
+ln -s ~/Developer/jsc ~/repos
+
 ./sync_app_config.sh
 ./sync_sys_config.sh
