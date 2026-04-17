@@ -212,6 +212,7 @@ load_non_git_aliases() {
     alias pru="pod repo update"
     alias ra="sudo pkill -9 coreaudiod" # Restart Audio
     alias pw="pwgen -ysB1 20 | pbcopy"
+    alias repos="cd ~/Developer/jsc"
     alias rz="source ~/.zshrc && source ~/.zshrc_local && source ~/.zshrc_ms" # Reload zsh
     alias sac="pushd -q ~/Developer/jsc/me.sh && ./sync_app_config.sh && popd -q"
     alias sacl="pushd -q ~/Developer/jsc/me.sh && gl && ./sync_app_config.sh && popd -q"
