@@ -286,6 +286,12 @@ load_non_git_aliases() {
 
     # Github
     alias ghst="gh stack"
+    ghlc() { # "GitHub Last Commit", opens last commit on GitHub
+      local url
+      url=$(git remote get-url origin \
+        | sed -E 's#git@github.com:(.*)\.git#https://github.com/\1#; s#\.git$##')
+      open "$url/commit/$(git rev-parse HEAD)"
+    }
 
     # Tmux aliases
     alias ta="tmux attach"
