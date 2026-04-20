@@ -356,20 +356,26 @@ eval "$(starship init zsh)"
 # Customize config file location for apps that support it (including ghostty)
 export XDG_CONFIG_HOME="$HOME/.config"
 
-# Attach to last Tmux session
-if command -v tmux >/dev/null 2>&1 && [ -z "$TMUX" ]; then
-  tmux attach || tmux new
-fi
+# Skip tmux autostart when the terminal was opened for a specific directory.
+shell_has_preassigned_directory() {
+  [[ "${PWD:A}" != "${HOME:A}" ]]
+}
 
 # Attach to main session if not already active, create a new tmux session if it is
 if command -v tmux >/dev/null 2>&1 && [[ -z "$TMUX" && -o interactive ]]; then
-  if tmux has-session -t main 2>/dev/null; then
-    if [[ "$(tmux display-message -p -t main '#{session_attached}')" -eq 0 ]]; then
+  if shell_has_preassigned_directory; then
+    if tmux has-session -t main 2>/dev/null; then
+      new_window="$(tmux new-window -P -F '#{window_id}' -t main -c "$PWD")"
+      tmux select-window -t "$new_window"
       exec tmux attach -t main
     else
-      exec tmux new-session
+      exec tmux new-session -s main -c "$PWD"
     fi
   else
-    exec tmux new-session -s main
+    if tmux has-session -t main 2>/dev/null; then
+      exec tmux attach -t main
+    else
+      exec tmux new-session -s main
+    fi
   fi
 fi
