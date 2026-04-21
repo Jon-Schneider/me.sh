@@ -7,6 +7,9 @@ description: Rewrite a feature branch into a clean, reviewable commit stack with
 
 Preserve the exact net file changes while replacing the branch's commit history with smaller, reviewable commits.
 
+## Guidelines
+- Tests should always be committed separately from features, before or after the feature
+
 ## Guardrails
 
 - Do not modify file contents during this workflow.
