@@ -154,6 +154,7 @@ load_git_aliases() {
     alias gtd="g todo" # Prints TODO comments in uncommitted changes
     alias gs="git status"
     alias gstas="git stash --staged" # Stash only staged changes
+    alias gstau="git stash push --keep-index" # Stash only unstaged changes
     alias gsu="gs -uno"
     alias gwtl="git worktree list"
     alias gwtp="git worktree prune"
