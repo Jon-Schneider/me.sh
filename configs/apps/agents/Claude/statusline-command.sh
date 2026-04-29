@@ -684,7 +684,7 @@ main() {
     lines+=("$(join_by "$SEP" \
         "$(segment_project)")")
 
-    # 3. Usage / limits (5h, 7d, extra)
+    # 3. Usage / limits (5h, 7d, extra) — hidden on API billing (no OAuth token)
     if has_builtin_rate_limits; then
         lines+=("$(join_by "$SEP" \
             "$(segment_five_hour_builtin)" \
@@ -694,9 +694,11 @@ main() {
             "$(segment_five_hour_api "$usage_data")" \
             "$(segment_seven_day_api "$usage_data")" \
             "$(segment_extra_usage_api "$usage_data")")")
-    else
+    elif [ -n "$(get_oauth_token)" ]; then
+        # Has OAuth token but API returned no data yet — show placeholders
         lines+=("$(segment_usage_placeholders)")
     fi
+    # API billing users have no OAuth token: skip the usage line entirely
 
     local update_line
     update_line=$(segment_update_notice)
