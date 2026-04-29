@@ -10,3 +10,4 @@ exclude_tmpdir_env_var = true
 
 [features]
 codex_hooks = true
+computer_use = false
