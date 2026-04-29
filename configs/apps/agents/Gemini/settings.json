@@ -2,5 +2,78 @@
   "general": {
     "previewFeatures": true,
     "defaultApprovalMode": "auto_edit"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/bin/set_tmux_agent_status ready"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/bin/set_tmux_agent_status \"\""
+          }
+        ]
+      }
+    ],
+    "BeforeAgent": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/bin/set_tmux_agent_status running"
+          }
+        ]
+      }
+    ],
+    "AfterAgent": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/bin/set_tmux_agent_status ready"
+          }
+        ]
+      }
+    ],
+    "BeforeTool": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/bin/set_tmux_agent_status running-tool"
+          }
+        ]
+      }
+    ],
+    "AfterTool": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/bin/set_tmux_agent_status running"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "ActionRequired",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/bin/set_tmux_agent_status needs-input"
+          }
+        ]
+      }
+    ]
   }
 }
