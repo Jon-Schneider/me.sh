@@ -1,0 +1,6 @@
+{
+  "general": {
+    "previewFeatures": true,
+    "defaultApprovalMode": "auto_edit"
+  }
+}
