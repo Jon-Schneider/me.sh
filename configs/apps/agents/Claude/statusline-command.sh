@@ -461,46 +461,6 @@ get_usage_data() {
 }
 
 # ============================================================
-# Update check
-# ============================================================
-
-fetch_latest_version_data() {
-    curl -s --max-time 5 \
-        -H "Accept: application/vnd.github+json" \
-        "https://api.github.com/repos/daniel3303/ClaudeCodeStatusLine/releases/latest" 2>/dev/null
-}
-
-get_version_data() {
-    local cache_file="/tmp/claude/statusline-version-cache.json"
-    local cache_max_age=86400
-    local version_data=""
-    local now age mtime
-
-    if [ -f "$cache_file" ]; then
-        mtime=$(cache_mtime "$cache_file")
-        now=$(date +%s)
-        age=$(( now - mtime ))
-        if [ "$age" -lt "$cache_max_age" ]; then
-            cat "$cache_file" 2>/dev/null
-            return
-        fi
-        version_data=$(cat "$cache_file" 2>/dev/null)
-    fi
-
-    touch "$cache_file" 2>/dev/null
-
-    local response
-    response=$(fetch_latest_version_data)
-    if [ -n "$response" ] && echo "$response" | jq -e '.tag_name' >/dev/null 2>&1; then
-        echo "$response" > "$cache_file"
-        printf "%s" "$response"
-        return
-    fi
-
-    printf "%s" "$version_data"
-}
-
-# ============================================================
 # Segment builders
 # ============================================================
 
@@ -649,19 +609,6 @@ segment_usage_placeholders() {
     printf "%b" "${white}5h${reset} ${dim}-${reset}${SEP}${white}7d${reset} ${dim}-${reset}"
 }
 
-segment_update_notice() {
-    local version_data latest_tag
-    version_data=$(get_version_data)
-    [ -z "$version_data" ] && return
-
-    latest_tag=$(echo "$version_data" | jq -r '.tag_name // empty')
-    [ -z "$latest_tag" ] && return
-
-    if version_gt "$latest_tag" "$VERSION"; then
-        printf "%b" "${dim}Update available: ${latest_tag} → https://github.com/daniel3303/ClaudeCodeStatusLine${reset}"
-    fi
-}
-
 # ============================================================
 # Final composition
 # ============================================================
@@ -699,10 +646,6 @@ main() {
         lines+=("$(segment_usage_placeholders)")
     fi
     # API billing users have no OAuth token: skip the usage line entirely
-
-    local update_line
-    update_line=$(segment_update_notice)
-    [ -n "$update_line" ] && lines+=("$update_line")
 
     printf "%b" "$(join_by "\n" "${lines[@]}")"
 }
