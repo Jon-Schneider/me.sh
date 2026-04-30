@@ -387,3 +387,31 @@ if command -v tmux >/dev/null 2>&1 && [[ -z "$TMUX" && -o interactive ]]; then
     fi
   fi
 fi
+
+# Custom tmux pane title logic
+
+autoload -Uz add-zsh-hook
+
+tmux_window_name_for_pwd() {
+  local root
+
+  if root="$(git -C "$PWD" rev-parse --show-toplevel 2>/dev/null)"; then
+    basename "$root"
+  elif [[ "$PWD" == "$HOME" ]]; then
+    printf "home"
+  else
+    basename "$PWD"
+  fi
+}
+
+rename_tmux_window_for_pwd() {
+  [[ -n "$TMUX" ]] || return
+
+  # Skip auto rename if this tmux window is marked manual.
+  [[ "$(tmux show-option -wqv @manual_window_name)" == "1" ]] && return
+
+  tmux rename-window "$(tmux_window_name_for_pwd)"
+}
+
+add-zsh-hook chpwd rename_tmux_window_for_pwd
+rename_tmux_window_for_pwd # Apply custom pane name on start
