@@ -370,12 +370,14 @@ shell_has_preassigned_directory() {
 # Attach to main session if not already active, create a new tmux session if it is
 if command -v tmux >/dev/null 2>&1 && [[ -z "$TMUX" && -o interactive ]]; then
   if shell_has_preassigned_directory; then
+    dir_name="${PWD:t}"  # <-- last path component
+
     if tmux has-session -t main 2>/dev/null; then
-      new_window="$(tmux new-window -P -F '#{window_id}' -t main -c "$PWD")"
+      new_window="$(tmux new-window -P -F '#{window_id}' -t main -c "$PWD" -n "$dir_name")"
       tmux select-window -t "$new_window"
       exec tmux attach -t main
     else
-      exec tmux new-session -s main -c "$PWD"
+      exec tmux new-session -s main -c "$PWD" -n "$dir_name"
     fi
   else
     if tmux has-session -t main 2>/dev/null; then
