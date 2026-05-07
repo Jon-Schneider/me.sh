@@ -51,7 +51,8 @@
 theme = jon
 
 # Splitscreens keybindings
-keybind = super+enter=new_split:right
+keybind = super+enter=unbind
+keybind = cmd+d=unbind
 keybind = super+shift+left=goto_split:left
 keybind = super+shift+right=goto_split:right
 
