@@ -810,6 +810,32 @@
                                     }
                                 ],
                                 "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "bundle_identifiers": [
+                                            "^com.apple.finder"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "o",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "control",
+                                            "option",
+                                            "command"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "shell_command": "dir=\"$(~/bin/get_finder_selected_item_paths | /usr/bin/head -n 1)\"; [ -f \"$dir\" ] && dir=\"$(/usr/bin/dirname \"$dir\")\"; [ -d \"$dir\" ] || exit 0; if /opt/homebrew/bin/tmux has-session -t main 2>/dev/null; then window_id=\"$(/opt/homebrew/bin/tmux new-window -P -F '#{window_id}' -t main -c \"$dir\")\"; /opt/homebrew/bin/tmux select-window -t \"$window_id\"; else /opt/homebrew/bin/tmux new-session -d -s main -c \"$dir\"; fi; /usr/bin/open -a Ghostty.app"
+                                    }
+                                ],
+                                "type": "basic"
                             }
                         ]
                     },
