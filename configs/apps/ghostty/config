@@ -59,6 +59,8 @@ keybind = super+shift+up=text:\x00K
 keybind = super+shift+down=text:\x00J
 keybind = super+w=text:\x17
 keybind = super+n=text:\x0e
+keybind = ctrl+tab=text:\x00n
+keybind = ctrl+shift+tab=text:\x00p
 
 # Disable toggling fullscreen
 keybind = super+ctrl+f=unbind
