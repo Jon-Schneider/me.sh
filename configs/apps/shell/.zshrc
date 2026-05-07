@@ -272,7 +272,7 @@ load_non_git_aliases() {
         "$@"
     }
 
-    claude-sb() { safe claude --permission-mode bypassPermissions 		--dangerously-skip-permissions "$@"; }
+    claude-sb() { safe claude --permission-mode bypassPermissions --dangerously-skip-permissions "$@"; }
     alias cld="claude-sb"
     alias cldc="cld --continue"
     alias cldr="cld --resume"
