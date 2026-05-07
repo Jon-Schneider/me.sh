@@ -51,10 +51,14 @@
 theme = jon
 
 # Splitscreens keybindings
-keybind = super+enter=unbind
+keybind = super+enter=text:\x00v
 keybind = cmd+d=unbind
-keybind = super+shift+left=goto_split:left
-keybind = super+shift+right=goto_split:right
+keybind = super+shift+left=text:\x00H
+keybind = super+shift+right=text:\x00L
+keybind = super+shift+up=text:\x00K
+keybind = super+shift+down=text:\x00J
+keybind = super+w=text:\x17
+keybind = super+n=text:\x0e
 
 # Disable toggling fullscreen
 keybind = super+ctrl+f=unbind
