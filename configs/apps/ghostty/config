@@ -52,6 +52,7 @@ theme = jon
 
 # Splitscreens keybindings
 keybind = super+enter=text:\x00v
+keybind = cmd+z=text:\x00z
 keybind = cmd+d=unbind
 keybind = super+shift+left=text:\x00H
 keybind = super+shift+right=text:\x00L
