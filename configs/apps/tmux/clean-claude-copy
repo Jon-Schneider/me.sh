@@ -1,0 +1,250 @@
+#!/usr/bin/env python3
+"""Clean text copied from Claude's terminal UI.
+
+The cleaner removes Claude/TUI left margins and joins terminal-wrapped prose
+while preserving code fences, indented code, lists, prompts, and diffs.
+"""
+
+from __future__ import annotations
+
+import re
+import sys
+
+
+ANSI_RE = re.compile(
+    r"\x1b(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~]|\][^\a]*(?:\a|\x1b\\))"
+)
+BOX_MARGIN_CHARS = "\u2502\u2503\u254f\u254e\u258c\u258d\u258e\u258f\u2551"
+BOX_MARGIN_RE = re.compile(rf"^[ \t]*[{BOX_MARGIN_CHARS}][ \t]?")
+ASCII_MARGIN_RE = re.compile(r"^[ \t]+\|[ \t]?")
+LIST_ITEM_RE = re.compile(r"^\s*(?:[-*+]|\d+[.)]|[a-zA-Z][.)])\s+")
+FENCE_RE = re.compile(r"^\s*(?:```|~~~)")
+CODE_KEYWORDS = (
+    "async",
+    "await",
+    "case",
+    "catch",
+    "class",
+    "const",
+    "def",
+    "else",
+    "enum",
+    "export",
+    "finally",
+    "for",
+    "from",
+    "func",
+    "function",
+    "guard",
+    "if",
+    "import",
+    "interface",
+    "let",
+    "local",
+    "package",
+    "private",
+    "protected",
+    "public",
+    "return",
+    "struct",
+    "switch",
+    "try",
+    "type",
+    "var",
+    "while",
+)
+CODE_KEYWORD_RE = re.compile(rf"^\s*(?:{'|'.join(CODE_KEYWORDS)})\b")
+AMBIGUOUS_PROSE_KEYWORDS = {"case", "for", "from", "if", "let", "try", "while"}
+
+
+def strip_ansi(line: str) -> str:
+    return ANSI_RE.sub("", line)
+
+
+def split_lines(text: str) -> list[str]:
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    if text.endswith("\n"):
+        return text[:-1].split("\n")
+    return text.split("\n")
+
+
+def leading_spaces(line: str) -> int:
+    return len(line) - len(line.lstrip(" "))
+
+
+def remove_common_indent(lines: list[str]) -> list[str]:
+    non_empty_indents = [leading_spaces(line) for line in lines if line.strip()]
+    if not non_empty_indents:
+        return lines
+
+    common = min(non_empty_indents)
+    if common == 0:
+        two_space_margin_lines = sum(1 for indent in non_empty_indents if indent >= 2)
+        if two_space_margin_lines / len(non_empty_indents) < 0.65:
+            return lines
+        common = 2
+
+    return [line[common:] if leading_spaces(line) >= common else line for line in lines]
+
+
+def strip_tui_margins(lines: list[str]) -> list[str]:
+    cleaned = [strip_ansi(line).rstrip() for line in lines]
+    non_empty = [line for line in cleaned if line.strip()]
+    ascii_margin_count = sum(1 for line in non_empty if ASCII_MARGIN_RE.match(line))
+    use_ascii_margin = bool(non_empty) and ascii_margin_count / len(non_empty) >= 0.5
+
+    stripped: list[str] = []
+    for line in cleaned:
+        box_margin = BOX_MARGIN_RE.match(line)
+        if box_margin:
+            stripped.append(line[box_margin.end() :])
+            continue
+
+        ascii_margin = ASCII_MARGIN_RE.match(line) if use_ascii_margin else None
+        if ascii_margin:
+            stripped.append(line[ascii_margin.end() :])
+            continue
+
+        stripped.append(line)
+
+    return remove_common_indent(stripped)
+
+
+def is_indented_code(line: str) -> bool:
+    return line.startswith("\t") or re.match(r"^ {4,}\S", line) is not None
+
+
+def starts_with_code_keyword(line: str) -> bool:
+    match = CODE_KEYWORD_RE.match(line)
+    if not match:
+        return False
+
+    keyword = match.group(0).strip()
+    if keyword in AMBIGUOUS_PROSE_KEYWORDS and not re.search(r"[(){}\[\];=]", line):
+        return False
+    return True
+
+
+def is_line_numbered_code(line: str) -> bool:
+    stripped = line.strip()
+    if re.match(r"^\d+\s+[+-]\s", stripped):
+        return True
+    return re.match(r"^\d+\s+(?:" + "|".join(CODE_KEYWORDS) + r")\b", stripped) is not None
+
+
+def is_diff_line(line: str) -> bool:
+    stripped = line.strip()
+    return bool(
+        stripped.startswith(("diff --git", "@@", "index ", "--- ", "+++ "))
+        or stripped.startswith("\\ No newline")
+        or re.match(r"^[+-](?![ \t])", stripped)
+        or re.match(r"^\d+\s+[+-]\s", stripped)
+    )
+
+
+def is_code_like(line: str) -> bool:
+    stripped = line.strip()
+    if not stripped:
+        return False
+    if FENCE_RE.match(stripped) or is_line_numbered_code(stripped) or is_diff_line(stripped):
+        return True
+    if starts_with_code_keyword(stripped):
+        return True
+    if stripped.startswith(("//", "/*", "*/")):
+        return True
+    if re.match(r"^[{}\[\](),;]+$", stripped):
+        return True
+    if re.search(r"[{};]|=>|::", stripped):
+        return True
+    if re.match(r"^[\w.:\[\]\"'`-]+\s*=\s*[^=]", stripped):
+        return True
+    if re.match(r"^[\w.:\[\]]+\(.*\)\s*[{:]?$", stripped):
+        return True
+    return False
+
+
+def is_structural(line: str) -> bool:
+    stripped = line.strip()
+    return bool(
+        not stripped
+        or LIST_ITEM_RE.match(stripped)
+        or FENCE_RE.match(stripped)
+        or is_indented_code(line)
+        or is_code_like(line)
+        or re.match(r"^#{1,6}\s", stripped)
+        or re.match(r"^[-*_]{3,}$", stripped)
+        or re.match(r"^[$#>] ", stripped)
+        or re.match(r"^[^:]{1,40}:\s*$", stripped)
+        or re.match(r"^(?:error|warning):\s+", stripped, re.IGNORECASE)
+        or re.match(r"^\|?(?:\s*:?-{3,}:?\s*\|)+\s*$", stripped)
+    )
+
+
+def can_continue_wrapped_text(line: str) -> bool:
+    return bool(line.strip()) and not is_structural(line)
+
+
+def join_wrapped(left: str, right: str) -> str:
+    right = right.strip()
+    if not right:
+        return left
+    if left.endswith(("/", "-")) or right.startswith((",", ".", ":", ";", ")", "]")):
+        return left + right
+    return left + " " + right
+
+
+def reflow_wrapped_prose(lines: list[str]) -> list[str]:
+    result: list[str] = []
+    in_code_fence = False
+    i = 0
+
+    while i < len(lines):
+        line = lines[i]
+        stripped = line.strip()
+
+        if FENCE_RE.match(stripped):
+            in_code_fence = not in_code_fence
+            result.append(line)
+            i += 1
+            continue
+
+        if in_code_fence or not stripped:
+            result.append(line)
+            i += 1
+            continue
+
+        if LIST_ITEM_RE.match(line) and not is_code_like(line):
+            item = line.rstrip()
+            while i + 1 < len(lines) and can_continue_wrapped_text(lines[i + 1]):
+                i += 1
+                item = join_wrapped(item, lines[i])
+            result.append(item)
+            i += 1
+            continue
+
+        if is_structural(line):
+            result.append(line)
+            i += 1
+            continue
+
+        paragraph = stripped
+        while i + 1 < len(lines) and can_continue_wrapped_text(lines[i + 1]):
+            i += 1
+            paragraph = join_wrapped(paragraph, lines[i])
+        result.append(paragraph)
+        i += 1
+
+    return result
+
+
+def clean(text: str) -> str:
+    lines = split_lines(text)
+    stripped = strip_tui_margins(lines)
+    cleaned = "\n".join(reflow_wrapped_prose(stripped)).strip("\n")
+    if text.endswith("\n"):
+        cleaned += "\n"
+    return cleaned
+
+
+if __name__ == "__main__":
+    sys.stdout.write(clean(sys.stdin.read()))

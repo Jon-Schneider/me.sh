@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+"""Dispatch tmux copied text through an agent-specific cleaner."""
+
+from __future__ import annotations
+
+import os
+import re
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+
+AGENT_CLEANERS = {
+    "claude": "clean-claude-copy",
+    "codex": "clean-codex-copy",
+    "gemini": "clean-gemini-copy",
+}
+PROCESS_RE = re.compile(r"^[^TXZ ]+\s+(.+?)\s*$")
+
+
+def run(argv: list[str]) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(argv, capture_output=True, text=True, check=False)
+
+
+def current_pane() -> str | None:
+    if len(sys.argv) > 1 and sys.argv[1] and not sys.argv[1].startswith("#{"):
+        return sys.argv[1]
+    if os.environ.get("TMUX_PANE"):
+        return os.environ["TMUX_PANE"]
+
+    tmux = shutil.which("tmux")
+    if not tmux:
+        return None
+
+    pane = run([tmux, "display-message", "-p", "#{pane_id}"])
+    if pane.returncode != 0:
+        return None
+    return pane.stdout.strip() or None
+
+
+def pane_tty(target: str) -> str | None:
+    tmux = shutil.which("tmux")
+    if not tmux:
+        return None
+
+    tty = run([tmux, "display-message", "-p", "-t", target, "#{pane_tty}"])
+    if tty.returncode != 0:
+        return None
+    return tty.stdout.strip() or None
+
+
+def process_names_for_tty(tty: str) -> list[str]:
+    ps = run(["ps", "-t", tty, "-o", "state=", "-o", "comm="])
+    if ps.returncode != 0:
+        return []
+
+    names: list[str] = []
+    for line in ps.stdout.splitlines():
+        match = PROCESS_RE.match(line)
+        if not match:
+            continue
+        names.append(Path(match.group(1)).name.lower())
+    return names
+
+
+def detect_agent(target: str | None) -> str | None:
+    if not target:
+        return None
+
+    tty = pane_tty(target)
+    if not tty:
+        return None
+
+    for name in process_names_for_tty(tty):
+        if name in AGENT_CLEANERS:
+            return name
+    return None
+
+
+def clean_with(agent: str, text: str) -> int:
+    cleaner_name = AGENT_CLEANERS[agent]
+    sibling_cleaner = Path(__file__).with_name(cleaner_name)
+    cleaner = str(sibling_cleaner) if sibling_cleaner.exists() else cleaner_name
+    try:
+        proc = subprocess.run([cleaner], input=text, capture_output=True, text=True, check=False)
+    except FileNotFoundError:
+        sys.stdout.write(text)
+        return 0
+    sys.stdout.write(proc.stdout)
+    sys.stderr.write(proc.stderr)
+    return proc.returncode
+
+
+def main() -> int:
+    text = sys.stdin.read()
+    agent = detect_agent(current_pane())
+
+    if agent:
+        return clean_with(agent, text)
+
+    sys.stdout.write(text)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
