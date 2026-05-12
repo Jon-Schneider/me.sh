@@ -1,0 +1,29 @@
+#!/bin/sh
+
+set -u
+
+cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/starship-github-pr"
+session_cache="${STARSHIP_GITHUB_PR_SESSION_CACHE:-}"
+
+if [ -n "$session_cache" ]; then
+  [ -s "$session_cache" ] || exit 1
+  IFS= read -r pr < "$session_cache" || exit 1
+  [ -n "$pr" ] || exit 1
+  printf "%s" "$pr"
+  exit 0
+fi
+
+git_root="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 1
+branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)" || exit 1
+
+[ "$branch" != "HEAD" ] || exit 1
+
+key="$(printf '%s\n%s\n' "$git_root" "$branch" | shasum -a 256 | awk '{print $1}')"
+cache_file="$cache_dir/$key"
+
+[ -s "$cache_file" ] || exit 1
+
+IFS= read -r pr < "$cache_file" || exit 1
+[ -n "$pr" ] || exit 1
+
+printf "%s" "$pr"

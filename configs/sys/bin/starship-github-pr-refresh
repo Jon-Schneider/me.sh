@@ -1,0 +1,94 @@
+#!/bin/sh
+
+set -u
+
+cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/starship-github-pr"
+cache_ttl="${STARSHIP_GITHUB_PR_CACHE_TTL:-300}"
+lock_ttl=30
+session_cache="${STARSHIP_GITHUB_PR_SESSION_CACHE:-}"
+
+cache_mtime() {
+  stat -f %m "$1" 2>/dev/null || stat -c %Y "$1" 2>/dev/null || printf "0"
+}
+
+is_fresh() {
+  file="$1"
+  ttl="$2"
+
+  [ -e "$file" ] || return 1
+
+  now="$(date +%s)"
+  mtime="$(cache_mtime "$file")"
+  age=$((now - mtime))
+
+  [ "$age" -lt "$ttl" ]
+}
+
+copy_to_session_cache() {
+  [ -n "$session_cache" ] || return
+  mkdir -p "$(dirname "$session_cache")" 2>/dev/null || return
+  cp "$1" "$session_cache" 2>/dev/null || : > "$session_cache"
+}
+
+clear_session_cache() {
+  [ -n "$session_cache" ] || return
+  mkdir -p "$(dirname "$session_cache")" 2>/dev/null || return
+  : > "$session_cache"
+}
+
+git_root="$(git rev-parse --show-toplevel 2>/dev/null)" || {
+  clear_session_cache
+  exit 0
+}
+
+branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)" || {
+  clear_session_cache
+  exit 0
+}
+
+if [ "$branch" = "HEAD" ]; then
+  clear_session_cache
+  exit 0
+fi
+
+mkdir -p "$cache_dir" || exit 0
+
+key="$(printf '%s\n%s\n' "$git_root" "$branch" | shasum -a 256 | awk '{print $1}')"
+cache_file="$cache_dir/$key"
+lock_dir="$cache_file.lock"
+
+if is_fresh "$cache_file" "$cache_ttl"; then
+  copy_to_session_cache "$cache_file"
+  exit 0
+fi
+
+if ! mkdir "$lock_dir" 2>/dev/null; then
+  [ -e "$cache_file" ] && copy_to_session_cache "$cache_file"
+  is_fresh "$lock_dir" "$lock_ttl" && exit 0
+  rm -rf "$lock_dir"
+  mkdir "$lock_dir" 2>/dev/null || exit 0
+fi
+
+trap 'rm -rf "$lock_dir"' EXIT HUP INT TERM
+
+tmp_file="$cache_file.$$"
+pr="$(GH_PROMPT_DISABLED=1 gh pr view --json number --jq '"#\(.number)"' 2>/dev/null || true)"
+pr="$(printf "%s" "$pr" | sed -n '1p')"
+
+case "$pr" in
+  "#"|"#null")
+    pr=""
+    ;;
+esac
+
+if [ -n "$pr" ]; then
+  printf "%s\n" "$pr" > "$tmp_file"
+else
+  : > "$tmp_file"
+fi
+
+if mv "$tmp_file" "$cache_file" 2>/dev/null; then
+  copy_to_session_cache "$cache_file"
+else
+  rm -f "$tmp_file"
+fi

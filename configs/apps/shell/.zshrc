@@ -392,6 +392,23 @@ fi
 
 autoload -Uz add-zsh-hook
 
+export STARSHIP_GITHUB_PR_SESSION_CACHE="${TMPDIR:-/tmp}/starship-github-pr-${USER:-user}-$$"
+: >| "$STARSHIP_GITHUB_PR_SESSION_CACHE"
+
+refresh_starship_github_pr_cache() {
+  command -v starship-github-pr-refresh >/dev/null 2>&1 || return
+  starship-github-pr-refresh >/dev/null 2>&1 &!
+}
+
+reset_starship_github_pr_cache() {
+  : >| "$STARSHIP_GITHUB_PR_SESSION_CACHE"
+  refresh_starship_github_pr_cache
+}
+
+cleanup_starship_github_pr_cache() {
+  rm -f "$STARSHIP_GITHUB_PR_SESSION_CACHE"
+}
+
 tmux_window_name_for_pwd() {
   local root
 
@@ -413,5 +430,9 @@ rename_tmux_window_for_pwd() {
   tmux rename-window "$(tmux_window_name_for_pwd)"
 }
 
+add-zsh-hook precmd refresh_starship_github_pr_cache
+add-zsh-hook chpwd reset_starship_github_pr_cache
+add-zsh-hook zshexit cleanup_starship_github_pr_cache
 add-zsh-hook chpwd rename_tmux_window_for_pwd
+refresh_starship_github_pr_cache
 rename_tmux_window_for_pwd # Apply custom pane name on start
