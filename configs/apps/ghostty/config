@@ -59,6 +59,7 @@ keybind = super+shift+right=text:\x00L
 keybind = super+shift+up=text:\x00K
 keybind = super+shift+down=text:\x00J
 keybind = super+w=text:\x17
+keybind = super+s=text:\x00S
 keybind = super+n=text:\x0e
 keybind = ctrl+tab=text:\x00n
 keybind = ctrl+shift+tab=text:\x00p

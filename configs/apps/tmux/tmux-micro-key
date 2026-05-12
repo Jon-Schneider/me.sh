@@ -1,0 +1,113 @@
+#!/usr/bin/env python3
+"""Send a key to micro in the current tmux pane, otherwise run a tmux fallback."""
+
+from __future__ import annotations
+
+import os
+import re
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+
+PROCESS_RE = re.compile(r"^[^TXZ ]+\s+(.+?)\s*$")
+
+
+def run(argv: list[str]) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(argv, capture_output=True, text=True, check=False)
+
+
+def usage() -> int:
+    print(
+        "usage: tmux-micro-key <pane-id> <micro-key> [-- <fallback tmux command...>]",
+        file=sys.stderr,
+    )
+    return 64
+
+
+def current_pane(tmux: str, arg: str | None) -> str | None:
+    if arg and not arg.startswith("#{"):
+        return arg
+    if os.environ.get("TMUX_PANE"):
+        return os.environ["TMUX_PANE"]
+
+    pane = run([tmux, "display-message", "-p", "#{pane_id}"])
+    if pane.returncode != 0:
+        return None
+    return pane.stdout.strip() or None
+
+
+def pane_tty(tmux: str, target: str) -> str | None:
+    tty = run([tmux, "display-message", "-p", "-t", target, "#{pane_tty}"])
+    if tty.returncode != 0:
+        return None
+    return tty.stdout.strip() or None
+
+
+def process_names_for_tty(tty: str) -> list[str] | None:
+    try:
+        ps = subprocess.run(
+            ["ps", "-t", tty, "-o", "state=", "-o", "comm="],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError as error:
+        print(f"tmux-micro-key: failed to run ps: {error}", file=sys.stderr)
+        return None
+
+    if ps.returncode != 0:
+        return []
+
+    names: list[str] = []
+    for line in ps.stdout.splitlines():
+        match = PROCESS_RE.match(line)
+        if not match:
+            continue
+        names.append(Path(match.group(1)).name.lower())
+    return names
+
+
+def micro_is_running(tmux: str, target: str) -> bool | None:
+    tty = pane_tty(tmux, target)
+    if not tty:
+        return False
+    names = process_names_for_tty(tty)
+    if names is None:
+        return None
+    return "micro" in names
+
+
+def main() -> int:
+    args = sys.argv[1:]
+    if not args or args[0] in {"-h", "--help"}:
+        return usage()
+
+    tmux = shutil.which("tmux")
+    if not tmux:
+        print("tmux-micro-key: tmux not found", file=sys.stderr)
+        return 127
+
+    target = current_pane(tmux, args.pop(0))
+    if not target or not args:
+        return usage()
+
+    micro_key = args.pop(0)
+    if args[:1] == ["--"]:
+        args.pop(0)
+
+    is_micro = micro_is_running(tmux, target)
+    if is_micro is None:
+        return 1
+
+    if is_micro:
+        return subprocess.run([tmux, "send-keys", "-t", target, micro_key], check=False).returncode
+
+    if args:
+        return subprocess.run([tmux, *args], check=False).returncode
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
