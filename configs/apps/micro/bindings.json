@@ -1,3 +1,21 @@
 {
-    "Ctrl-w": "Quit"
+    "Ctrl-w": "Quit",
+    "\u001bmicro-delete-start": "SelectToStartOfLine,Backspace",
+    "\u001bmicro-start-of-line": "StartOfLine",
+    "\u001bmicro-select-start": "SelectToStartOfLine",
+    "\u001bmicro-select-end": "SelectToEndOfLine",
+    "\u001bmicro-cut": "Cut",
+    "\u001bmicro-copy": "Copy",
+    "\u001bmicro-select-left": "SelectLeft",
+    "\u001bmicro-select-right": "SelectRight",
+    "\u001bmicro-select-word-left": "SelectWordLeft",
+    "\u001bmicro-select-word-right": "SelectWordRight",
+    "CtrlLeft": "StartOfLine",
+    "CtrlRight": "EndOfLine",
+    "CtrlShiftLeft": "SelectToStartOfLine",
+    "CtrlShiftRight": "SelectToEndOfLine",
+    "ShiftLeft": "SelectLeft",
+    "ShiftRight": "SelectRight",
+    "AltShiftLeft": "SelectWordLeft",
+    "AltShiftRight": "SelectWordRight"
 }

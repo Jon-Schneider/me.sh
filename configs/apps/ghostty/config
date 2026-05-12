@@ -49,17 +49,20 @@
 # resize-overlay-duration = 4s 200ms
 
 theme = jon
+copy-on-select = clipboard
 
 # Splitscreens keybindings
 keybind = super+enter=text:\x00v
 keybind = cmd+z=text:\x00z
 keybind = cmd+d=unbind
-keybind = super+shift+left=text:\x00H
+keybind = super+shift+left=text:\x00Y
 keybind = super+shift+right=text:\x00L
 keybind = super+shift+up=text:\x00K
 keybind = super+shift+down=text:\x00J
 keybind = super+w=text:\x17
 keybind = super+s=text:\x00S
+keybind = super+x=text:\x00G
+keybind = super+c=text:\x00F
 keybind = super+n=text:\x0e
 keybind = ctrl+tab=text:\x00n
 keybind = ctrl+shift+tab=text:\x00p
@@ -67,8 +70,9 @@ keybind = ctrl+shift+tab=text:\x00p
 # Disable toggling fullscreen
 keybind = super+ctrl+f=unbind
 
-keybind = cmd+left=text:\x1b[H
+keybind = cmd+left=text:\x00B
 keybind = cmd+right=text:\x1b[F
+keybind = cmd+backspace=text:\x00D
 
 # Enable Shift + Enter going to new line in 'git commit -m "..."'
 keybind = shift+enter=text:\n

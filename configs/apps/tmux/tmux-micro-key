@@ -12,6 +12,18 @@ from pathlib import Path
 
 
 PROCESS_RE = re.compile(r"^[^TXZ ]+\s+(.+?)\s*$")
+MICRO_RAW_KEYS = {
+    "MicroDeleteStart": "\x1bmicro-delete-start",
+    "MicroStartOfLine": "\x1bmicro-start-of-line",
+    "MicroSelectStart": "\x1bmicro-select-start",
+    "MicroSelectEnd": "\x1bmicro-select-end",
+    "MicroCut": "\x1bmicro-cut",
+    "MicroCopy": "\x1bmicro-copy",
+    "MicroSelectLeft": "\x1bmicro-select-left",
+    "MicroSelectRight": "\x1bmicro-select-right",
+    "MicroSelectWordLeft": "\x1bmicro-select-word-left",
+    "MicroSelectWordRight": "\x1bmicro-select-word-right",
+}
 
 
 def run(argv: list[str]) -> subprocess.CompletedProcess[str]:
@@ -102,6 +114,11 @@ def main() -> int:
         return 1
 
     if is_micro:
+        if micro_key in MICRO_RAW_KEYS:
+            return subprocess.run(
+                [tmux, "send-keys", "-t", target, "-l", MICRO_RAW_KEYS[micro_key]],
+                check=False,
+            ).returncode
         return subprocess.run([tmux, "send-keys", "-t", target, micro_key], check=False).returncode
 
     if args:
