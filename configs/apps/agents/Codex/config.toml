@@ -9,5 +9,5 @@ exclude_slash_tmp = true
 exclude_tmpdir_env_var = true
 
 [features]
-codex_hooks = true
+hooks = true
 computer_use = false
