@@ -64,6 +64,7 @@ keybind = super+s=text:\x00S
 keybind = super+x=text:\x00G
 keybind = super+c=text:\x00F
 keybind = super+n=text:\x0e
+keybind = super+t=text:\x0e
 keybind = ctrl+tab=text:\x00n
 keybind = ctrl+shift+tab=text:\x00p
 
