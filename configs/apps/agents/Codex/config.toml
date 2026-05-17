@@ -11,3 +11,49 @@ exclude_tmpdir_env_var = true
 [features]
 hooks = true
 computer_use = false
+
+[[hooks.SessionStart]]
+matcher = "startup|resume"
+
+[[hooks.SessionStart.hooks]]
+type = "command"
+command = "$HOME/bin/set_tmux_agent_status ready"
+
+[[hooks.UserPromptSubmit]]
+
+[[hooks.UserPromptSubmit.hooks]]
+type = "command"
+command = "$HOME/bin/set_tmux_agent_status running"
+
+[[hooks.PreToolUse]]
+matcher = "Bash"
+
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "$HOME/bin/set_tmux_agent_status running-tool"
+
+[[hooks.PreToolUse]]
+matcher = "Bash"
+
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "$HOME/bin/codex-block-raw-apple-build-tools"
+
+[[hooks.PostToolUse]]
+matcher = "Bash"
+
+[[hooks.PostToolUse.hooks]]
+type = "command"
+command = "$HOME/bin/set_tmux_agent_status running"
+
+[[hooks.PermissionRequest]]
+
+[[hooks.PermissionRequest.hooks]]
+type = "command"
+command = "$HOME/bin/set_tmux_agent_status needs-input"
+
+[[hooks.Stop]]
+
+[[hooks.Stop.hooks]]
+type = "command"
+command = "$HOME/bin/set_tmux_agent_status done"
