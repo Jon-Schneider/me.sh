@@ -156,6 +156,7 @@ load_git_aliases() {
     alias gstas="git stash --staged" # Stash only staged changes
     alias gstau="git stash push --keep-index" # Stash only unstaged changes
     alias gsu="gs -uno"
+    gul() { rm "$(git rev-parse --git-dir)/index.lock" }
     alias gwtl="git worktree list"
     alias gwtp="git worktree prune"
     alias gwtr="git worktree remove"
