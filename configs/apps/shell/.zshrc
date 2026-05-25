@@ -130,6 +130,8 @@ load_git_aliases() {
     alias gbl="git branches-latest" # Lists git branches with last commit date, sorted from least recently to most recently updated
     alias gbr="g branch --sort=-committerdate"
     alias gbrn="gb -m" # Git current branch rename - 'git branch -m <newname>
+    unalias gbs 2>/dev/null
+    alias gbs="git-branch-select" # script in ~/bin
     alias gcdi="g cdi"
     alias gchi="g chi" # Git checkout head at index. Discards local changes to file at index
     alias gcml="gcm && gl" # Get checkout main and pull latest

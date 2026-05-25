@@ -1,0 +1,79 @@
+#!/usr/bin/env zsh
+
+emulate -L zsh
+
+n="${1:-10}"
+
+current_branch="$(git branch --show-current)"
+
+rows=("${(@f)$(
+  git branches-latest |
+    awk -v current="$current_branch" '$2 != current' |
+    tail -"$n"
+)}")
+
+selected=${#rows[@]}
+
+if [[ ${#rows[@]} -eq 0 ]]; then
+  echo "No recent branches found"
+  exit 1
+fi
+
+cleanup() {
+  printf '\033[?25h'
+}
+
+trap cleanup EXIT INT TERM
+
+render() {
+  printf '\033[?25l'
+  printf '\r\033[KPick a branch with ↑/↓, Enter to switch, q to cancel\n'
+
+  local i
+  for i in {1..${#rows[@]}}; do
+    if [[ "$i" -eq "$selected" ]]; then
+      printf '\033[K\033[7m  %s  \033[0m\n' "${rows[$i]}"
+    else
+      printf '\033[K  %s\n' "${rows[$i]}"
+    fi
+  done
+}
+
+render
+
+while true; do
+  IFS= read -rs -k 1 key
+
+  case "$key" in
+    $'\e')
+      IFS= read -rs -k 2 rest
+
+      case "$rest" in
+        '[A')
+          (( selected > 1 )) && (( selected-- ))
+          ;;
+        '[B')
+          (( selected < ${#rows[@]} )) && (( selected++ ))
+          ;;
+        *)
+          printf '\n'
+          exit 1
+          ;;
+      esac
+      ;;
+
+    $'\n'|$'\r')
+      branch="${rows[$selected]#* }"
+      printf '\n'
+      exec git switch "$branch"
+      ;;
+
+    q)
+      printf '\nCancelled\n'
+      exit 1
+      ;;
+  esac
+
+  printf '\033[%dA' "$(( ${#rows[@]} + 1 ))"
+  render
+done
