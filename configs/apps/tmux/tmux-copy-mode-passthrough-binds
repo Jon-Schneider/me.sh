@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Bind every printable ASCII char in tmux copy-mode so that pressing it
+# cancels copy mode AND sends the character to the active pane.
+# This makes mouse-scrolled copy mode "get out of the way" the moment
+# you start typing, instead of intercepting keys (e.g. `g` -> goto-line).
+
+set -euo pipefail
+
+# Lowercase + uppercase letters
+chars=()
+for c in {a..z} {A..Z} {0..9}; do chars+=("$c"); done
+
+# Common punctuation that's safe to bind. We deliberately skip a few that
+# are useful in copy mode itself: Space (selection), / and ? (search),
+# and we leave : alone so command-prompt still works in copy mode.
+for c in '`' '~' '!' '@' '#' '$' '%' '^' '&' '*' '(' ')' \
+         '-' '_' '=' '+' '[' ']' '{' '}' '|' \
+         "'" '"' ',' '.' '<' '>'; do
+  chars+=("$c")
+done
+# Note: `;` and `\` are tmux command-parser metacharacters and are
+# omitted intentionally to avoid escaping headaches. They're unlikely
+# to be the first key you type after scrolling.
+
+for table in copy-mode copy-mode-vi; do
+  for c in "${chars[@]}"; do
+    # `send-keys -X cancel` exits copy mode; then send the literal char.
+    # The `-l` (literal) flag on the second send-keys is important so
+    # that special characters aren't interpreted as key names.
+    # The literal "\;" (backslash-semicolon, quoted) is required so that
+    # tmux's argument parser reads it as a command separator. A bare \;
+    # gets stripped by the shell before tmux sees it, leaving only the
+    # first command bound.
+    tmux bind-key -T "$table" "$c" \
+      send-keys -X cancel "\;" \
+      send-keys -l "$c"
+  done
+done

@@ -11,3 +11,4 @@ cp -v $current_dir/clean-codex-copy ~/bin/
 cp -v $current_dir/clean-gemini-copy ~/bin/
 cp -v $current_dir/clean-agent-copy ~/bin/
 cp -v $current_dir/tmux-micro-key ~/bin/
+cp -v $current_dir/tmux-copy-mode-passthrough-binds ~/bin/
