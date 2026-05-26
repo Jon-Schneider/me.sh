@@ -46,7 +46,9 @@ while true; do
 
   case "$key" in
     $'\e')
-      IFS= read -rs -k 2 rest
+      if ! IFS= read -rs -t 0.01 -k 2 rest; then
+        exit 1
+      fi
 
       case "$rest" in
         '[A')
