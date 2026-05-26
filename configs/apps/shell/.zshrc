@@ -335,10 +335,23 @@ load_worktree_functions() {
 		return 1
 	  fi
 
+	  local default_branch
+	  default_branch=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|^refs/remotes/origin/||')
+	  if [ -z "$default_branch" ]; then
+		if git show-ref --verify --quiet refs/heads/main; then
+		  default_branch="main"
+		elif git show-ref --verify --quiet refs/heads/master; then
+		  default_branch="master"
+		else
+		  echo "Could not detect default branch (neither main nor master exists locally)"
+		  return 1
+		fi
+	  fi
+
 	  local dated_branch repo_name worktree_path
 	  dated_branch="jsc/$(date +%F)--$name"
 	  worktree_path="./.worktrees/${name}"
-	  git worktree add -b "$dated_branch" "$worktree_path" || return 1
+	  git worktree add -b "$dated_branch" "$worktree_path" "$default_branch" || return 1
 	  cd "$worktree_path" || return 1
 	}
 }
