@@ -321,9 +321,13 @@ load_non_git_aliases() {
 
 load_worktree_functions() {
 	wtc() {
+	  local base_branch
+	  zparseopts -D -F -K -E -- b:=base_branch -base:=base_branch || return 1
+	  base_branch="${base_branch[-1]}"
+
 	  local name="$1"
 	  if [ -z "$name" ]; then
-		echo "Usage: wtc <branch-name>"
+		echo "Usage: wtc [--base/-b <base-branch>] <branch-name>"
 		return 1
 	  fi
 
@@ -339,23 +343,24 @@ load_worktree_functions() {
 		return 1
 	  fi
 
-	  local default_branch
-	  default_branch=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|^refs/remotes/origin/||')
-	  if [ -z "$default_branch" ]; then
-		if git show-ref --verify --quiet refs/heads/main; then
-		  default_branch="main"
-		elif git show-ref --verify --quiet refs/heads/master; then
-		  default_branch="master"
-		else
-		  echo "Could not detect default branch (neither main nor master exists locally)"
-		  return 1
+	  if [ -z "$base_branch" ]; then
+		base_branch=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|^refs/remotes/origin/||')
+		if [ -z "$base_branch" ]; then
+		  if git show-ref --verify --quiet refs/heads/main; then
+			base_branch="main"
+		  elif git show-ref --verify --quiet refs/heads/master; then
+			base_branch="master"
+		  else
+			echo "Could not detect default branch (neither main nor master exists locally)"
+			return 1
+		  fi
 		fi
 	  fi
 
 	  local dated_branch repo_name worktree_path
 	  dated_branch="jsc/$(date +%F)--$name"
 	  worktree_path="./.worktrees/${name}"
-	  git worktree add -b "$dated_branch" "$worktree_path" "$default_branch" || return 1
+	  git worktree add -b "$dated_branch" "$worktree_path" "$base_branch" || return 1
 	  cd "$worktree_path" || return 1
 	}
 }
