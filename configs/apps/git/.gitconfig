@@ -23,6 +23,9 @@
     pager = hunk pager
     preloadIndex = true
     attributesfile = /Users/jsc/.gitattributes
+[pager]
+    log = less -FRX
+    show = less -FRX
 [alias]
     ai = "!f() { git add \"$(git diff --name-only | sed -n $1p)\"; }; f"
     api = "!f() { git add --patch \"$(git diff --name-only | sed -n $1p)\"; }; f"
