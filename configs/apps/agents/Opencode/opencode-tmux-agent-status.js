@@ -1,4 +1,6 @@
 const STATUS_SCRIPT = "/Users/jsc/bin/set_tmux_agent_status";
+const SUBMARINE_SOUND = "/System/Library/Sounds/Submarine.aiff";
+const FUNK_SOUND = "/System/Library/Sounds/Funk.aiff";
 
 export const TmuxAgentStatusPlugin = async ({ $ }) => {
   let currentStatus;
@@ -10,6 +12,12 @@ export const TmuxAgentStatusPlugin = async ({ $ }) => {
 
     currentStatus = nextStatus;
     await $`${STATUS_SCRIPT} ${nextStatus}`.quiet().nothrow();
+
+    if (nextStatus === "done") {
+      await $`afplay ${SUBMARINE_SOUND}`.quiet().nothrow();
+    } else if (nextStatus === "needs-input") {
+      await $`afplay ${FUNK_SOUND}`.quiet().nothrow();
+    }
   };
 
   await setStatus("ready");

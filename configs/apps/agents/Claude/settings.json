@@ -478,6 +478,10 @@
           {
             "type": "command",
             "command": "/Users/$(whoami)/bin/set_tmux_agent_status needs-input"
+          },
+          {
+            "type": "command",
+            "command": "afplay /System/Library/Sounds/Funk.aiff"
           }
         ]
       }
@@ -489,6 +493,10 @@
           {
             "type": "command",
             "command": "/Users/$(whoami)/bin/set_tmux_agent_status needs-input"
+          },
+          {
+            "type": "command",
+            "command": "afplay /System/Library/Sounds/Funk.aiff"
           }
         ]
       },
@@ -508,6 +516,10 @@
           {
             "type": "command",
             "command": "/Users/$(whoami)/bin/set_tmux_agent_status done"
+          },
+          {
+            "type": "command",
+            "command": "afplay /System/Library/Sounds/Submarine.aiff"
           }
         ]
       }

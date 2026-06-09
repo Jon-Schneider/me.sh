@@ -52,8 +52,16 @@ command = "$HOME/bin/set_tmux_agent_status running"
 type = "command"
 command = "$HOME/bin/set_tmux_agent_status needs-input"
 
+[[hooks.PermissionRequest.hooks]]
+type = "command"
+command = "afplay /System/Library/Sounds/Funk.aiff"
+
 [[hooks.Stop]]
 
 [[hooks.Stop.hooks]]
 type = "command"
 command = "$HOME/bin/set_tmux_agent_status done"
+
+[[hooks.Stop.hooks]]
+type = "command"
+command = "afplay /System/Library/Sounds/Submarine.aiff"
