@@ -182,7 +182,8 @@ load_non_git_aliases() {
     alias bu="brew update"
     alias bup="brew upgrade"
     alias bupc="bu && brew upgrade --cask"
-    alias caf="caffeine -i" # Prevents system sleeping as long as process is running
+    alias caf="caffeinate" # Prevents system from sleeping until caffeine is terminated by user
+    alias cafi="caffeinate -i" # Prevents system sleeping as long as passed process is running
     alias caf5="caffeinate -t 300" # Prevents system sleeping for five minutes
     alias caf10="caffeinate -t 600" # Prevents system sleeping for ten minutes
     alias caf20="caffeinate -t 1200" # Prevents system sleeping for twenty minutes
