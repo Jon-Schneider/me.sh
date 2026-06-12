@@ -24,8 +24,8 @@
     preloadIndex = true
     attributesfile = /Users/jsc/.gitattributes
 [pager]
-    log = less -FRX
-    show = less -FRX
+    log = less --mouse -FR
+    show = less --mouse -FR
 [alias]
     ai = "!f() { git add \"$(git diff --name-only | sed -n $1p)\"; }; f"
     api = "!f() { git add --patch \"$(git diff --name-only | sed -n $1p)\"; }; f"
