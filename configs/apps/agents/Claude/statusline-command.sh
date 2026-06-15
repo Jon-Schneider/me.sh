@@ -272,6 +272,36 @@ get_cwd() {
     json '.cwd'
 }
 
+get_session_id() {
+    json '.session_id'
+}
+
+# Detect whether we're running inside an externally-imposed sandbox (e.g. the
+# `safehouse` wrapper). The statusline script runs in the same sandbox context
+# as the Claude session, so we can probe directly: a sandbox that restricts
+# process access makes /bin/ps fail ("operation not permitted"), whereas an
+# unsandboxed shell runs it fine. Result is cached per session_id because the
+# sandbox state cannot change mid-session, avoiding a `ps` exec on every render.
+is_sandboxed() {
+    local session_id cache_file result
+    session_id=$(get_session_id)
+    cache_file="/tmp/claude/statusline-sandbox-${session_id:-default}"
+
+    if [ -f "$cache_file" ]; then
+        cat "$cache_file" 2>/dev/null
+        return
+    fi
+
+    mkdir -p /tmp/claude
+    if /bin/ps -p "$$" >/dev/null 2>&1; then
+        result="no"
+    else
+        result="yes"
+    fi
+    printf "%s" "$result" > "$cache_file"
+    printf "%s" "$result"
+}
+
 get_display_dir() {
     local cwd
     cwd=$(get_cwd)
@@ -489,6 +519,14 @@ segment_project() {
     printf "%b" "$out"
 }
 
+segment_sandbox() {
+    if [ "$(is_sandboxed)" = "yes" ]; then
+        printf "%b" "${green}🔒 sandbox${reset}"
+    else
+        printf "%b" "${red}⚠ unsandboxed${reset}"
+    fi
+}
+
 segment_context_usage() {
     local used total pct
     used=$(format_tokens "$(get_total_used_tokens)")
@@ -621,11 +659,12 @@ main() {
         usage_data=$(get_usage_data)
     fi
 
-    # 1. Model + effort + context
+    # 1. Model + effort + context + sandbox state
     lines+=("$(join_by "$SEP" \
         "$(segment_model)" \
         "$(segment_effort)" \
-        "$(segment_context_usage)")")
+        "$(segment_context_usage)" \
+        "$(segment_sandbox)")")
 
     # 2. Dir + git
     lines+=("$(join_by "$SEP" \
