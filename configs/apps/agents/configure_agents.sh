@@ -42,13 +42,13 @@ ln -Fsn "$current_dir/Skills/claude-review" "$HOME/.agents/skills/"
 ln -Fsn "$current_dir/Skills/codex-review" "$HOME/.claude/skills/"
 ln -Fsn "$current_dir/Skills/codex-review" "$HOME/.gemini/skills/"
 
+ln -Fsn "$current_dir/Skills/patch-commit" "$HOME/.agents/skills/"
+ln -Fsn "$current_dir/Skills/patch-commit" "$HOME/.claude/skills/"
+ln -Fsn "$current_dir/Skills/patch-commit" "$HOME/.codex/skills/"
+ln -Fsn "$current_dir/Skills/patch-commit" "$HOME/.gemini/skills/"
+
 ln -Fsn "$current_dir/Skills/rewrite-pr-history" "$HOME/.agents/skills/"
 ln -Fsn "$current_dir/Skills/rewrite-pr-history" "$HOME/.claude/skills/"
 
 ln -Fsn "$current_dir/Skills/use-jira" "$HOME/.agents/skills/"
 ln -Fsn "$current_dir/Skills/use-jira" "$HOME/.claude/skills/"
-
-ln -Fsn "$current_dir/Skills/commit-by-patch" "$HOME/.agents/skills/"
-ln -Fsn "$current_dir/Skills/commit-by-patch" "$HOME/.claude/skills/"
-ln -Fsn "$current_dir/Skills/commit-by-patch" "$HOME/.codex/skills/"
-ln -Fsn "$current_dir/Skills/commit-by-patch" "$HOME/.gemini/skills/"

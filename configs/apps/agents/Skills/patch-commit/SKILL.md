@@ -1,9 +1,9 @@
 ---
-name: commit-by-patch
+name: patch-commit
 description: Commit only your own changes by staging individual hunks via patch, never `git add .` or `git add -A`. Use whenever you are about to stage or commit in a repository that may contain changes from other agents, parallel sessions, or the user working concurrently — which is the default assumption.
 ---
 
-# Commit by Patch
+# Patch Commit
 
 You are almost never the only actor making changes in the active repository. Other
 agents, parallel sessions, background tooling, and the user may all be editing files
