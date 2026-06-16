@@ -49,12 +49,6 @@ brew update
 brew doctor
 brew bundle
 
-# Install cheat.sh, which is unfortunately not available via brew
-message "Installing cheat.sh"
-mkdir -p ~/bin/
-curl https://cht.sh/:cht.sh > ~/bin/cht.sh
-chmod +x ~/bin/cht.sh
-
 # Install trash command-line util, not available via brew
 npm install --global trash-cli
 
