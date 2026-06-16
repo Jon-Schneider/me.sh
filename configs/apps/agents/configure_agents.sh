@@ -47,3 +47,8 @@ ln -Fsn "$current_dir/Skills/rewrite-pr-history" "$HOME/.claude/skills/"
 
 ln -Fsn "$current_dir/Skills/use-jira" "$HOME/.agents/skills/"
 ln -Fsn "$current_dir/Skills/use-jira" "$HOME/.claude/skills/"
+
+ln -Fsn "$current_dir/Skills/commit-by-patch" "$HOME/.agents/skills/"
+ln -Fsn "$current_dir/Skills/commit-by-patch" "$HOME/.claude/skills/"
+ln -Fsn "$current_dir/Skills/commit-by-patch" "$HOME/.codex/skills/"
+ln -Fsn "$current_dir/Skills/commit-by-patch" "$HOME/.gemini/skills/"
