@@ -27,18 +27,6 @@ autoload -Uz compinit && compinit # Enable completions
 
 _comp_options+=(globdots) # Completions include hidden files
 
-# Add Graphite (gt) Autocompletions
-_gt_yargs_completions()
-{
-  local reply
-  local si=$IFS
-  IFS=$'
-' reply=($(COMP_CWORD="$((CURRENT-1))" COMP_LINE="$BUFFER" COMP_POINT="$CURSOR" gt --get-yargs-completions "${words[@]}"))
-  IFS=$si
-  _describe 'values' reply
-}
-compdef _gt_yargs_completions gt
-
 unsetopt nomatch # Disable no-match globbing error zsh enables by default
 setopt nocaseglob # Enable case-insensitive pattern matching
 setopt autocd  # Enable cding by just tying the dir name.
