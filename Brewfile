@@ -1,6 +1,5 @@
 brew "atlassian/homebrew-acli/acli"
 brew "antidote"
-brew "claude-code"
 brew "cloc"
 brew "codex"
 brew "duti"

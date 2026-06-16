@@ -49,6 +49,10 @@ brew update
 brew doctor
 brew bundle
 
+# Cladue
+messge "Installing Claude CLI"
+curl -fsSL https://chatgpt.com/codex/install.sh | sh
+
 # Install trash command-line util, not available via brew
 npm install --global trash-cli
 
