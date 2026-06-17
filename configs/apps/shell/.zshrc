@@ -424,10 +424,28 @@ cleanup_starship_github_pr_cache() {
 }
 
 tmux_window_name_for_pwd() {
-  local root
+  local toplevel git_dir common_dir repo_name
 
-  if root="$(git -C "$PWD" rev-parse --show-toplevel 2>/dev/null)"; then
-    basename "$root"
+  if toplevel="$(git -C "$PWD" rev-parse --show-toplevel 2>/dev/null)"; then
+    # Detect a linked worktree by comparing the per-worktree git dir against the
+    # shared common git dir. They match in the repo's main working tree and
+    # differ inside any linked worktree (e.g. ./Repo/.worktrees/<name>).
+    # Resolve both through `cd && pwd` so any symlinks are normalized
+    # identically and the comparison below is reliable.
+    git_dir="$(git -C "$PWD" rev-parse --git-dir 2>/dev/null)"
+    git_dir="$(cd "$git_dir" 2>/dev/null && pwd -P)"
+    common_dir="$(git -C "$PWD" rev-parse --git-common-dir 2>/dev/null)"
+    common_dir="$(cd "$common_dir" 2>/dev/null && pwd -P)"
+
+    if [[ -n "$common_dir" && "$git_dir" != "$common_dir" ]]; then
+      # In a worktree: name as "RepoName (worktree)". RepoName comes from the
+      # main repo (parent of the shared .git); the worktree label is the
+      # worktree's own directory name.
+      repo_name="$(basename "$(dirname "$common_dir")")"
+      printf "%s (%s)" "$repo_name" "$(basename "$toplevel")"
+    else
+      basename "$toplevel"
+    fi
   elif [[ "$PWD" == "$HOME" ]]; then
     printf "home"
   else
