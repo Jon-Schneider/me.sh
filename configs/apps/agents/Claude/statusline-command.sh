@@ -495,7 +495,13 @@ get_usage_data() {
 # ============================================================
 
 segment_model() {
-    printf "%b" "${blue}$(get_model_name)${reset}"
+    local icon
+    if [ "$(is_sandboxed)" = "yes" ]; then
+        icon="${green}🔒${reset} "
+    else
+        icon="${red}⚠${reset} "
+    fi
+    printf "%b" "${icon}${blue}$(get_model_name)${reset}"
 }
 
 segment_project() {
@@ -517,14 +523,6 @@ segment_project() {
     fi
 
     printf "%b" "$out"
-}
-
-segment_sandbox() {
-    if [ "$(is_sandboxed)" = "yes" ]; then
-        printf "%b" "${green}🔒 sandbox${reset}"
-    else
-        printf "%b" "${red}⚠ unsandboxed${reset}"
-    fi
 }
 
 segment_context_usage() {
@@ -659,12 +657,11 @@ main() {
         usage_data=$(get_usage_data)
     fi
 
-    # 1. Model + effort + context + sandbox state
+    # 1. Model (sandbox icon prefix) + effort + context
     lines+=("$(join_by "$SEP" \
         "$(segment_model)" \
         "$(segment_effort)" \
-        "$(segment_context_usage)" \
-        "$(segment_sandbox)")")
+        "$(segment_context_usage)")")
 
     # 2. Dir + git
     lines+=("$(join_by "$SEP" \
