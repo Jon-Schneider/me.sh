@@ -273,9 +273,13 @@ load_non_git_aliases() {
     alias cldc="cld --continue"
     alias cldr="cld --resume"
 
+    alias cldus="claude --permission-mode bypassPermissions --dangerously-skip-permissions" # Claude unsafe
+
     codex-sb() { safe codex --dangerously-bypass-approvals-and-sandbox "$@"; }
     alias cdx="codex-sb"
     alias cdxr="cdx resume"
+
+    alias cdxus="codex --dangerously-bypass-approvals-and-sandbox" # Codex unsafe
 
     gemini-sb() { safe gemini "$@" }
     alias gemi="gemini-sb --approval-mode=yolo"
