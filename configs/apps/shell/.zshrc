@@ -374,6 +374,7 @@ load_worktree_functions
 # LOCAL ZSH
 
 source ~/.zshrc_local 2> /dev/null # Load local .zshrc if available. Fail silently
+source ~/.env 2> /dev/null # Load local .env if available. Fail silently
 
 eval "$(starship init zsh)"
 
