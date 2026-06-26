@@ -104,5 +104,5 @@ auth       sufficient     pam_tid.so\
 fi
 
 # Reduce obnoxious spacing between menu bar icons
-defaults -currentHost write -globalDomain NSStatusItemSelectionPadding -int 7
-defaults -currentHost write -globalDomain NSStatusItemSpacing -int 7
+defaults -currentHost write -globalDomain NSStatusItemSelectionPadding -int 8
+defaults -currentHost write -globalDomain NSStatusItemSpacing -int 12
