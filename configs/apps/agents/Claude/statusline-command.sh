@@ -501,7 +501,14 @@ segment_model() {
     else
         icon="${red}⚠${reset} "
     fi
-    printf "%b" "${icon}${blue}$(get_model_name)${reset}"
+
+    # Effort is appended to the model name in the same color (blue), with a
+    # plain space separator so it reads as one unit: "Opus 4.8 high".
+    local effort
+    effort=$(get_effort_level)
+    [ "$effort" = "medium" ] && effort="med"
+
+    printf "%b" "${icon}${blue}$(get_model_name) ${effort}${reset}"
 }
 
 segment_project() {
@@ -532,26 +539,6 @@ segment_context_usage() {
     pct=$(get_pct_used)
 
     printf "%b" "${orange}${used}/${total}${reset} ${dim}(${reset}${green}${pct}%${reset}${dim})${reset}"
-}
-
-segment_effort() {
-    local effort
-    effort=$(get_effort_level)
-
-    case "$effort" in
-        low)
-            printf "%b" "effort: ${dim}${effort}${reset}"
-            ;;
-        medium)
-            printf "%b" "effort: ${orange}med${reset}"
-            ;;
-        max)
-            printf "%b" "effort: ${red}${effort}${reset}"
-            ;;
-        *)
-            printf "%b" "effort: ${green}${effort}${reset}"
-            ;;
-    esac
 }
 
 segment_five_hour_builtin() {
@@ -657,10 +644,9 @@ main() {
         usage_data=$(get_usage_data)
     fi
 
-    # 1. Model (sandbox icon prefix) + effort + context
+    # 1. Model (sandbox icon prefix, effort suffix) + context
     lines+=("$(join_by "$SEP" \
         "$(segment_model)" \
-        "$(segment_effort)" \
         "$(segment_context_usage)")")
 
     # 2. Dir + git
