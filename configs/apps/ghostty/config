@@ -51,8 +51,18 @@
 theme = jon
 copy-on-select = clipboard
 
-# Splitscreens keybindings
+# Split keybindings. Each Cmd combo sends Ctrl-Space (tmux prefix \x00) + a
+# letter bound in .tmux.conf. Option = "stay" (keep focus on original pane).
+#   Cmd+Enter            -> prefix+v -> split right, focus NEW pane
+#   Cmd+Opt+Enter        -> prefix+o -> split right, stay on original (-d)
+#   Cmd+Shift+Enter      -> prefix+s -> split down,  focus NEW pane
+#   Cmd+Shift+Opt+Enter  -> prefix+e -> split down,  stay on original (-d)
+# NB: super+shift+enter must be explicitly bound here to override Ghostty's
+# built-in toggle_split_zoom ("Zoom Split"), which otherwise eats the key.
 keybind = super+enter=text:\x00v
+keybind = super+alt+enter=text:\x00o
+keybind = super+shift+enter=text:\x00s
+keybind = super+shift+alt+enter=text:\x00e
 keybind = cmd+z=text:\x00z
 keybind = cmd+d=unbind
 keybind = super+shift+left=text:\x00Y
