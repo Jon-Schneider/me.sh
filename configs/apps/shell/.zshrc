@@ -365,6 +365,9 @@ load_worktree_functions() {
 source $(brew --prefix)/opt/antidote/share/antidote/antidote.zsh
 antidote load ${ZDOTDIR:-~}/.zsh_plugins
 
+# Per-directory .env loader (replaces the ohmyzsh dotenv plugin). See ~/bin/autoenv.zsh
+source ~/bin/autoenv.zsh
+
 # LOAD ALIASES AND FUNCTIONS
 
 load_git_aliases

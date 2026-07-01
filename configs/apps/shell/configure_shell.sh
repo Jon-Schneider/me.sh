@@ -4,6 +4,7 @@ mkdir -p ~/.config/htop 2> /dev/null # Redirect stderr to suppress dir already e
 ln -f $current_dir/.zshrc ~/
 ln -f $current_dir/.zsh_plugins ~/
 ln -f $current_dir/starship.toml ~/.config
+ln -f $current_dir/autoenv.zsh ~/bin
 
 # Setup fastlane completions
 # bundle exec fastlane enable_auto_complete
