@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Send a key to micro in the current tmux pane, otherwise run a tmux fallback."""
+"""Send a key to micro (or another named app) in the current tmux pane, otherwise run a tmux fallback.
+
+Extra apps are checked with repeated `--app <process-name> <key>` arguments;
+micro takes priority, then apps in the order given, then the fallback.
+"""
 
 from __future__ import annotations
 
@@ -32,7 +36,8 @@ def run(argv: list[str]) -> subprocess.CompletedProcess[str]:
 
 def usage() -> int:
     print(
-        "usage: tmux-micro-key <pane-id> <micro-key> [-- <fallback tmux command...>]",
+        "usage: tmux-micro-key <pane-id> <micro-key> "
+        "[--app <process-name> <key>]... [-- <fallback tmux command...>]",
         file=sys.stderr,
     )
     return 64
@@ -81,14 +86,11 @@ def process_names_for_tty(tty: str) -> list[str] | None:
     return names
 
 
-def micro_is_running(tmux: str, target: str) -> bool | None:
+def pane_process_names(tmux: str, target: str) -> list[str] | None:
     tty = pane_tty(tmux, target)
     if not tty:
-        return False
-    names = process_names_for_tty(tty)
-    if names is None:
-        return None
-    return "micro" in names
+        return []
+    return process_names_for_tty(tty)
 
 
 def main() -> int:
@@ -106,20 +108,34 @@ def main() -> int:
         return usage()
 
     micro_key = args.pop(0)
+
+    app_keys: list[tuple[str, str]] = []
+    while args[:1] == ["--app"]:
+        if len(args) < 3:
+            return usage()
+        args.pop(0)
+        app_keys.append((args.pop(0).lower(), args.pop(0)))
+
     if args[:1] == ["--"]:
         args.pop(0)
 
-    is_micro = micro_is_running(tmux, target)
-    if is_micro is None:
+    names = pane_process_names(tmux, target)
+    if names is None:
         return 1
 
-    if is_micro:
+    if "micro" in names:
         if micro_key in MICRO_RAW_KEYS:
             return subprocess.run(
                 [tmux, "send-keys", "-t", target, "-l", MICRO_RAW_KEYS[micro_key]],
                 check=False,
             ).returncode
         return subprocess.run([tmux, "send-keys", "-t", target, micro_key], check=False).returncode
+
+    for app_name, app_key in app_keys:
+        if app_name in names:
+            return subprocess.run(
+                [tmux, "send-keys", "-t", target, app_key], check=False
+            ).returncode
 
     if args:
         return subprocess.run([tmux, *args], check=False).returncode
