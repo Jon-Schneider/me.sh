@@ -53,3 +53,4 @@ format = " [$symbol$output]($style)"
 symbol = " "
 style = "green"
 description = "GitHub pull request for the current branch"
+unsafe_no_escape = true

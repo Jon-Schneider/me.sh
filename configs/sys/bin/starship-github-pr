@@ -5,11 +5,35 @@ set -u
 cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/starship-github-pr"
 session_cache="${STARSHIP_GITHUB_PR_SESSION_CACHE:-}"
 
+print_pr() {
+  pr="$1"
+  url="${2:-}"
+
+  case "$url" in
+    http://*|https://*)
+      printf '\033]8;;%s\007%s\033]8;;\007' "$url" "$pr"
+      ;;
+    *)
+      printf "%s" "$pr"
+      ;;
+  esac
+}
+
+read_cached_pr() {
+  file="$1"
+
+  {
+    IFS= read -r pr || return 1
+    IFS= read -r url || url=""
+  } < "$file"
+
+  [ -n "$pr" ] || return 1
+  print_pr "$pr" "$url"
+}
+
 if [ -n "$session_cache" ]; then
   [ -s "$session_cache" ] || exit 1
-  IFS= read -r pr < "$session_cache" || exit 1
-  [ -n "$pr" ] || exit 1
-  printf "%s" "$pr"
+  read_cached_pr "$session_cache" || exit 1
   exit 0
 fi
 
@@ -23,7 +47,4 @@ cache_file="$cache_dir/$key"
 
 [ -s "$cache_file" ] || exit 1
 
-IFS= read -r pr < "$cache_file" || exit 1
-[ -n "$pr" ] || exit 1
-
-printf "%s" "$pr"
+read_cached_pr "$cache_file"
