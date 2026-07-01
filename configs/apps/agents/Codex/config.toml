@@ -35,10 +35,6 @@ command = "$HOME/bin/set_tmux_agent_status running-tool"
 [[hooks.PreToolUse]]
 matcher = "Bash"
 
-[[hooks.PreToolUse.hooks]]
-type = "command"
-command = "$HOME/bin/codex-block-raw-apple-build-tools"
-
 [[hooks.PostToolUse]]
 matcher = "Bash"
 
