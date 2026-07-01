@@ -62,3 +62,4 @@ venv/*
 
 # dotenv
 .env
+**/.claude/settings.local.json
