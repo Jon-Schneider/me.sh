@@ -2,7 +2,7 @@
 add_newline = true
 
 format = """
-╭─$directory$git_branch${custom.github_pr}$git_status
+╭─$directory$git_branch$git_status
 ╰──$character"""
 
 # Right-aligned elements (rbenv + time)
@@ -44,12 +44,3 @@ format = ' ($modified$staged$untracked$deleted )'
 [ruby]
 symbol = " " # U+F219, Unicode Ruby
 format = " [$symbol$version](red)"
-
-[custom.github_pr]
-command = "starship-github-pr"
-when = "test -s \"${STARSHIP_GITHUB_PR_SESSION_CACHE:-/dev/null}\""
-shell = ["sh"]
-format = " [$symbol$output]($style)"
-symbol = " "
-style = "green"
-description = "GitHub pull request for the current branch"
