@@ -24,6 +24,20 @@ is_fresh() {
   [ "$age" -lt "$ttl" ]
 }
 
+has_cached_url() {
+  file="$1"
+  url="$(sed -n '2p' "$file" 2>/dev/null)"
+
+  case "$url" in
+    http://*|https://*)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 copy_to_session_cache() {
   [ -n "$session_cache" ] || return
   mkdir -p "$(dirname "$session_cache")" 2>/dev/null || return
@@ -58,8 +72,10 @@ cache_file="$cache_dir/$key"
 lock_dir="$cache_file.lock"
 
 if is_fresh "$cache_file" "$cache_ttl"; then
-  copy_to_session_cache "$cache_file"
-  exit 0
+  if [ ! -s "$cache_file" ] || has_cached_url "$cache_file"; then
+    copy_to_session_cache "$cache_file"
+    exit 0
+  fi
 fi
 
 if ! mkdir "$lock_dir" 2>/dev/null; then
@@ -72,8 +88,9 @@ fi
 trap 'rm -rf "$lock_dir"' EXIT HUP INT TERM
 
 tmp_file="$cache_file.$$"
-pr="$(GH_PROMPT_DISABLED=1 gh pr view --json number --jq '"#\(.number)"' 2>/dev/null || true)"
-pr="$(printf "%s" "$pr" | sed -n '1p')"
+pr_data="$(GH_PROMPT_DISABLED=1 gh pr view --json number,url --jq '"#\(.number)\n\(.url)"' 2>/dev/null || true)"
+pr="$(printf "%s\n" "$pr_data" | sed -n '1p')"
+url="$(printf "%s\n" "$pr_data" | sed -n '2p')"
 
 case "$pr" in
   "#"|"#null")
@@ -82,7 +99,7 @@ case "$pr" in
 esac
 
 if [ -n "$pr" ]; then
-  printf "%s\n" "$pr" > "$tmp_file"
+  printf "%s\n%s\n" "$pr" "$url" > "$tmp_file"
 else
   : > "$tmp_file"
 fi
