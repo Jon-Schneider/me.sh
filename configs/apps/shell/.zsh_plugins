@@ -5,4 +5,4 @@ ohmyzsh/ohmyzsh path:lib
 ohmyzsh/ohmyzsh path:plugins/git
 
 zsh-users/zsh-syntax-highlighting
-marlonrichert/zsh-autocomplete
+marlonrichert/zsh-autocomplete branch:fe6c658
