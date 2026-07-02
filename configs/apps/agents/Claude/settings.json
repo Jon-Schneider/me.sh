@@ -129,14 +129,4 @@
   "env": {
     "ENABLE_CLAUDEAI_MCP_SERVERS": "false"
   },
-  "sandbox": {
-    "enabled": true,
-    "filesystem": {
-      "allowRead": ["~/Library/Developer"],
-      "denyRead": ["~/.ssh, ~/Documents, ~/Tmp, ~/Library"]
-    },
-    "network": {
-      "allowedDomains": ["github.com"]
-    }
-  }
 }
