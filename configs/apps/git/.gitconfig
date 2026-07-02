@@ -66,3 +66,5 @@
 	autoSetupRemote = true
 [status]
 	showUntrackedFile = all
+[url "git@github.com:"]
+	insteadOf = https://github.com/
