@@ -8,7 +8,6 @@ defaults write com.apple.finder FXArrangeGroupViewBy -string "Name" # Sort group
 defaults write com.apple.Finder AppleShowAllFiles true
 defaults write NSGlobalDomain AppleShowAllExtensions -bool true
 defaults write com.apple.finder ShowPathbar -bool true
-defaults write com.apple.finder NewWindowTargetPath -string "file://${HOME}/OneDrive/"
 defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false # Disable the warning when changing a file extension
 defaults write com.apple.finder FXPreferredViewStyle -string "clmv" # Use Column View by default
 defaults write com.apple.finder WarnOnEmptyTrash -bool false
