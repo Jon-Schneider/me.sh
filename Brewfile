@@ -78,6 +78,7 @@ mas "Microsoft Word", id: 462054704
 mas "Shortcut Keeper", id: 1585404175
 mas "Spotica Menu", id: 570549457
 mas "Pixelmator Pro", id: 1289583905
+mas "TestFlight", id: 899247664
 mas "Vimlike", id: 1584519802
 mas "Wireguard", id: 1451685025
 mas "Xcode", id: 497799835
