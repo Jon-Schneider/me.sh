@@ -126,7 +126,8 @@
     "type": "command",
     "command": "bash /Users/$(whoami)/.claude/statusline-command.sh"
   },
-  "env": {
-    "ENABLE_CLAUDEAI_MCP_SERVERS": "false"
-  },
+  "effortLevel": "high",
+  "tui": "fullscreen",
+  "skipDangerousModePermissionPrompt": true,
+  "agentPushNotifEnabled": true
 }
