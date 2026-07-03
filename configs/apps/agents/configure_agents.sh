@@ -24,7 +24,7 @@ ln -f "$current_dir/AGENTS.md" "$HOME/.codex/AGENTS.md"
 ln -f "$current_dir/Codex/config.toml" "$HOME/.codex"
 
 echo "Configuring Gemini..."
-ln -f "$current_dir/Gemini/settings.json" "$HOME/.gemini"
+ln -f "$current_dir/Gemini/settings.json" "$HOME/.gemini/"
 ln -f "$current_dir/AGENTS.md" "$HOME/.gemini/GEMINI.md"
 
 echo "Configuring Kimi..."
