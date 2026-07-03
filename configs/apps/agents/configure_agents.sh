@@ -40,6 +40,9 @@ ln -Fsn "$current_dir/Skills/claude-review" "$HOME/.agents/skills/"
 ln -Fsn "$current_dir/Skills/codex-review" "$HOME/.claude/skills/"
 ln -Fsn "$current_dir/Skills/codex-review" "$HOME/.gemini/skills/"
 
+ln -Fsn "$current_dir/Skills/hate-review" "$HOME/.agents/skills/"
+ln -Fsn "$current_dir/Skills/hate-review" "$HOME/.claude/skills/"
+
 ln -Fsn "$current_dir/Skills/patch-commit" "$HOME/.agents/skills/"
 ln -Fsn "$current_dir/Skills/patch-commit" "$HOME/.claude/skills/"
 ln -Fsn "$current_dir/Skills/patch-commit" "$HOME/.codex/skills/"
