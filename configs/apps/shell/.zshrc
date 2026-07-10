@@ -231,6 +231,15 @@ load_non_git_aliases() {
     alias tmp="cd ~/Tmp"
     alias tokencount="npx tiktoken-cli"
     alias tr="tree -C -L 2"
+    # Unquarantine file
+    uq() {
+      if (( $# == 0 )); then
+          echo "usage: uq <file-or-folder> [...]" >&2
+          return 2
+      fi
+
+        xattr -d com.apple.quarantine "$@"
+      }
     alias vsc="code ."
     alias wst="osascript -e 'tell application \"Messages\" to send \"How are you?\" to buddy \"Wife\"'" # Wife Status
     alias xcg="xcodegen"
