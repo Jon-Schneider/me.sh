@@ -55,3 +55,6 @@ ln -Fsn "$current_dir/Skills/rewrite-pr-history" "$HOME/.claude/skills/"
 
 ln -Fsn "$current_dir/Skills/use-jira" "$HOME/.agents/skills/"
 ln -Fsn "$current_dir/Skills/use-jira" "$HOME/.claude/skills/"
+
+echo "Configuring Agent bin..."
+ln -f $current_dir/bin/xcsift-for-apple-build-tools ~/bin/ 

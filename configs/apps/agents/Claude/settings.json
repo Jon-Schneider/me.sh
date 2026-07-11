@@ -27,6 +27,17 @@
         ]
       }
     ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/$(whoami)/bin/xcsift-for-apple-build-tools --then-rtk-claude"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "hooks": [

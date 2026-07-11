@@ -1,0 +1,226 @@
+#!/bin/zsh
+set -euo pipefail
+
+payload="$(cat)"
+
+HOOK_PAYLOAD="$payload" python3 - "$@" <<'PY'
+import json
+import os
+import re
+import shlex
+import shutil
+import subprocess
+import sys
+
+
+SPM_SUBCOMMANDS = {"build", "test", "run", "package"}
+SEGMENT_SEPARATORS = {"&&", ";"}
+RTK_BEFORE_BUILD = re.compile(
+    r"(^|[\s;&(])rtk\s+(?:proxy\s+|test\s+)?"
+    r"(?=(?:command\s+)?(?:xcodebuild|swift\s+(?:build|test|run|package))\b)"
+)
+
+
+def parse_tool_args(raw):
+    if isinstance(raw, dict):
+        return raw
+    if isinstance(raw, str) and raw:
+        try:
+            parsed = json.loads(raw)
+            return parsed if isinstance(parsed, dict) else {}
+        except json.JSONDecodeError:
+            return {}
+    return {}
+
+
+def command_from_payload(payload):
+    tool_name = str(payload.get("tool_name") or payload.get("toolName") or "").lower()
+    if tool_name and tool_name != "bash":
+        return ""
+
+    tool_input = payload.get("tool_input")
+    if isinstance(tool_input, dict):
+        command = tool_input.get("command")
+        if isinstance(command, str):
+            return command
+
+    tool_args = parse_tool_args(payload.get("toolArgs"))
+    command = tool_args.get("command") or payload.get("command")
+    return command if isinstance(command, str) else ""
+
+
+def xcsift_command():
+    path = shutil.which("xcsift")
+    if path:
+        return shlex.quote(path)
+    for fallback in ("/opt/homebrew/bin/xcsift", "/usr/local/bin/xcsift"):
+        if os.path.isfile(fallback) and os.access(fallback, os.X_OK):
+            return shlex.quote(fallback)
+    return ""
+
+
+def join_shell_parts(parts):
+    result = ""
+    for part in parts:
+        if part in SEGMENT_SEPARATORS:
+            result = f"{result} {part} "
+        else:
+            result += part
+    return result.strip()
+
+
+def split_segments(tokens):
+    segments = []
+    current = []
+    for token in tokens:
+        if token in SEGMENT_SEPARATORS:
+            segments.append(current)
+            segments.append(token)
+            current = []
+        else:
+            current.append(token)
+    segments.append(current)
+    return segments
+
+
+def rewrite_command(command, xcsift):
+    if not command.strip():
+        return None, False
+
+    if "xcsift" in command:
+        stripped = RTK_BEFORE_BUILD.sub(lambda match: match.group(1), command, count=1)
+        return (stripped if stripped != command else None), True
+
+    try:
+        tokens = shlex.split(command, posix=True)
+    except ValueError:
+        return None, False
+
+    rewritten = rewrite_tokens(tokens, command, xcsift)
+    return rewritten, rewritten is not None
+
+
+def rewrite_tokens(tokens, original, xcsift):
+    if not tokens:
+        return None
+
+    first = os.path.basename(tokens[0])
+    if first in {"bash", "sh", "zsh"} and len(tokens) >= 3 and tokens[1] in {"-c", "-lc"}:
+        inner_rewrite, matched = rewrite_command(tokens[2], xcsift)
+        if inner_rewrite:
+            replaced = list(tokens)
+            replaced[2] = inner_rewrite
+            return shlex.join(replaced)
+        return None if not matched else None
+
+    if any(token in SEGMENT_SEPARATORS for token in tokens):
+        parts = split_segments(tokens)
+        for index in range(len(parts) - 1, -1, -1):
+            part = parts[index]
+            if isinstance(part, list):
+                rewritten = rewrite_simple_tokens(part, shlex.join(part), xcsift)
+                if rewritten:
+                    parts[index] = rewritten
+                    return join_shell_parts(
+                        shlex.join(p) if isinstance(p, list) else p for p in parts
+                    )
+        return None
+
+    return rewrite_simple_tokens(tokens, original, xcsift)
+
+
+def rewrite_simple_tokens(tokens, original, xcsift):
+    if not tokens or "|" in tokens:
+        return None
+
+    prefix = []
+    index = 0
+
+    while index < len(tokens):
+        first = os.path.basename(tokens[index])
+
+        if first == "env":
+            prefix.append(tokens[index])
+            index += 1
+            while index < len(tokens) and "=" in tokens[index] and not tokens[index].startswith("-"):
+                prefix.append(tokens[index])
+                index += 1
+            continue
+
+        if first == "command":
+            prefix.append(tokens[index])
+            index += 1
+            continue
+
+        if first == "rtk":
+            index += 1
+            if index < len(tokens) and tokens[index] in {"proxy", "test"}:
+                index += 1
+            continue
+
+        break
+
+    target = tokens[index:]
+    if not target:
+        return None
+
+    target_name = os.path.basename(target[0])
+    is_xcodebuild = target_name == "xcodebuild"
+    is_spm = target_name == "swift" and len(target) >= 2 and target[1] in SPM_SUBCOMMANDS
+
+    if not is_xcodebuild and not is_spm:
+        return None
+
+    build_command = shlex.join(prefix + target)
+    if "2>&1" not in original:
+        build_command = f"{build_command} 2>&1"
+
+    return f"{build_command} | {xcsift} -f toon"
+
+
+def delegate_to_rtk_claude(payload_text):
+    if shutil.which("rtk") is None:
+        return 0
+
+    completed = subprocess.run(
+        ["rtk", "hook", "claude"],
+        input=payload_text,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if completed.stdout:
+        sys.stdout.write(completed.stdout)
+    if completed.stderr:
+        sys.stderr.write(completed.stderr)
+    return completed.returncode
+
+
+payload_text = os.environ.get("HOOK_PAYLOAD", "")
+try:
+    payload = json.loads(payload_text)
+except json.JSONDecodeError:
+    sys.exit(0)
+
+command = command_from_payload(payload)
+xcsift = xcsift_command()
+if command and xcsift:
+    rewritten, handled = rewrite_command(command, xcsift)
+    if rewritten:
+        print(json.dumps({
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "permissionDecision": "allow",
+                "updatedInput": {"command": rewritten},
+            },
+        }))
+        sys.exit(0)
+    if handled:
+        sys.exit(0)
+
+if "--then-rtk-claude" in sys.argv[1:]:
+    sys.exit(delegate_to_rtk_claude(payload_text))
+
+sys.exit(0)
+PY
