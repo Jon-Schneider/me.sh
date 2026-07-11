@@ -8,4 +8,8 @@
 * Don't name types with 'Helper' or 'Util' suffixes. They're vague and don't convey what the type actually does. A specific name (e.g., `OrchestrationPersistenceCoordinator` instead of `TranslationCoreDataHelper`) communicates responsibility better.
 * Don't use closure-based `Dependencies` structs for injecting behavior.  Prefers real types that can be named and reasoned about. Pass typed protocols instead (e.g., `DataFileWriting` protocol with a concrete `DataFileWriter` and test doubles). When a type needs an injected dependency for I/O or side effects, define a protocol and a lightweight concrete implementation. In tests, use spy/stub/failing conformances rather than inline closures.
 
+## Testing
+
+* The `axe` CLI tool is available for driving the iOS simulator. Run `axe --help` to see options.
+
 @RTK.md
