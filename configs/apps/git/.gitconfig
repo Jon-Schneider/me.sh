@@ -6,16 +6,6 @@
     path = .gitconfig_ms
 [difftool]
     prompt = false
-[difftool "Kaleidoscope"]
-    cmd = ksdiff --partial-changeset --relative-path \"$MERGED\" -- \"$LOCAL\" \"$REMOTE\"
-[merge]
-    tool = Kaleidoscope
-    keepBackup = false
-[mergetool]
-    prompt = false
-[mergetool "Kaleidoscope"]
-    cmd = ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
-    trustExitCode = true
 [fetch]
     prune = true
 [core]
@@ -50,8 +40,6 @@
 	    git --no-pager diff -U0 \"$base_branch\" | \
     	grep \"^+.*TODO\" | sed \"s/^+//\" | \
 	    git --no-pager grep -nFf - -- $(git --no-pager diff --name-only \"$base_branch\") 2>/dev/null' -"
-[diff]
-	tool = Kaleidoscope
 [diff "localizablestrings"]
 	textconv = "iconv -f utf-16 -t utf-8"
 	binary = false
