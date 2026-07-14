@@ -363,6 +363,9 @@ load_worktree_functions() {
 	  dated_branch="jsc/$(date +%F)--$name"
 	  worktree_path="./.worktrees/${name}"
 	  git worktree add -b "$dated_branch" "$worktree_path" "$base_branch" || return 1
+	  if [ -f "$root/.env" ]; then
+		cp "$root/.env" "$worktree_path/.env" || return 1
+	  fi
 	  cd "$worktree_path" || return 1
 	}
 }
