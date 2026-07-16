@@ -69,12 +69,15 @@ keybind = super+shift+left=text:\x00Y
 keybind = super+shift+right=text:\x00L
 keybind = super+shift+up=text:\x00K
 keybind = super+shift+down=text:\x00J
+# Route macOS window-management chords through tmux so Herdr can use them for
+# spaces and tabs while other panes retain their existing behavior.
 keybind = super+w=text:\x17
 keybind = super+s=text:\x00S
 keybind = super+x=text:\x00G
 keybind = super+c=text:\x00F
-keybind = super+n=text:\x0e
-keybind = super+t=text:\x0e
+keybind = super+n=text:\x00N
+keybind = super+t=text:\x00T
+keybind = super+q=text:\x00Q
 keybind = ctrl+tab=text:\x00n
 keybind = ctrl+shift+tab=text:\x00p
 
@@ -83,6 +86,12 @@ keybind = super+ctrl+f=unbind
 
 keybind = cmd+left=text:\x00B
 keybind = cmd+right=text:\x1b[F
+# Karabiner consumes Cmd+Ctrl+Arrow before AppKit can emit NSBeep and sends
+# these otherwise-unused function keys instead.
+keybind = f13=text:\x00\x1b[D
+keybind = f14=text:\x00\x1b[C
+keybind = f15=text:\x00\x1b[A
+keybind = f16=text:\x00\x1b[B
 keybind = cmd+backspace=text:\x00D
 
 # Enable Shift + Enter going to new line in 'git commit -m "..."'

@@ -1,0 +1,252 @@
+#!/usr/bin/env python3
+"""Send a key to micro (or another named app) in the current tmux pane, otherwise run a fallback.
+
+Extra apps are checked with repeated `--app <process-name> <key>` arguments;
+micro takes priority, then apps in the order given, then the fallback.
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+
+PROCESS_RE = re.compile(r"^[^TXZ ]+\s+(.+?)\s*$")
+MICRO_RAW_KEYS = {
+    "MicroDeleteStart": "\x1bmicro-delete-start",
+    "MicroStartOfLine": "\x1bmicro-start-of-line",
+    "MicroSelectStart": "\x1bmicro-select-start",
+    "MicroSelectEnd": "\x1bmicro-select-end",
+    "MicroCut": "\x1bmicro-cut",
+    "MicroCopy": "\x1bmicro-copy",
+    "MicroSelectLeft": "\x1bmicro-select-left",
+    "MicroSelectRight": "\x1bmicro-select-right",
+    "MicroSelectWordLeft": "\x1bmicro-select-word-left",
+    "MicroSelectWordRight": "\x1bmicro-select-word-right",
+}
+HERDR_ACTIONS = {
+    "HerdrNewWorkspace": ("workspace", "create"),
+    "HerdrNewTab": ("tab", "create"),
+    "HerdrCloseTab": ("tab", "close"),
+    "HerdrCloseWorkspace": ("workspace", "close"),
+    "HerdrPreviousWorkspace": ("workspace", "previous"),
+    "HerdrNextWorkspace": ("workspace", "next"),
+    "HerdrPreviousTab": ("tab", "previous"),
+    "HerdrNextTab": ("tab", "next"),
+}
+
+
+def run(argv: list[str]) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(argv, capture_output=True, text=True, check=False)
+
+
+def usage() -> int:
+    print(
+        "usage: tmux-app-key <pane-id> (<micro-key> | --no-micro) "
+        "[--app <process-name> <key>]... "
+        "[-- <fallback tmux command...> | --exec <fallback command...>]",
+        file=sys.stderr,
+    )
+    return 64
+
+
+def current_pane(tmux: str, arg: str | None) -> str | None:
+    if arg and not arg.startswith("#{"):
+        return arg
+    if os.environ.get("TMUX_PANE"):
+        return os.environ["TMUX_PANE"]
+
+    pane = run([tmux, "display-message", "-p", "#{pane_id}"])
+    if pane.returncode != 0:
+        return None
+    return pane.stdout.strip() or None
+
+
+def pane_tty(tmux: str, target: str) -> str | None:
+    tty = run([tmux, "display-message", "-p", "-t", target, "#{pane_tty}"])
+    if tty.returncode != 0:
+        return None
+    return tty.stdout.strip() or None
+
+
+def process_names_for_tty(tty: str) -> list[str] | None:
+    try:
+        ps = subprocess.run(
+            ["ps", "-t", tty, "-o", "state=", "-o", "comm="],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError as error:
+        print(f"tmux-app-key: failed to run ps: {error}", file=sys.stderr)
+        return None
+
+    if ps.returncode != 0:
+        return []
+
+    names: list[str] = []
+    for line in ps.stdout.splitlines():
+        match = PROCESS_RE.match(line)
+        if not match:
+            continue
+        names.append(Path(match.group(1)).name.lower())
+    return names
+
+
+def pane_process_names(tmux: str, target: str) -> list[str] | None:
+    tty = pane_tty(tmux, target)
+    if not tty:
+        return []
+    return process_names_for_tty(tty)
+
+
+def focused_herdr_resource(
+    herdr: str, resource: str
+) -> tuple[dict[str, object], list[dict[str, object]]] | None:
+    result = run([herdr, resource, "list"])
+    if result.returncode != 0:
+        print(result.stderr.strip() or result.stdout.strip(), file=sys.stderr)
+        return None
+
+    try:
+        payload = json.loads(result.stdout)
+    except json.JSONDecodeError as error:
+        print(f"tmux-app-key: invalid Herdr response: {error}", file=sys.stderr)
+        return None
+
+    resources = payload.get("result", {}).get(f"{resource}s", [])
+    focused = next((item for item in resources if item.get("focused")), None)
+    if not focused:
+        print(f"tmux-app-key: Herdr has no focused {resource}", file=sys.stderr)
+        return None
+    return focused, resources
+
+
+def run_herdr_action(app_key: str) -> int:
+    action = HERDR_ACTIONS.get(app_key)
+    if not action:
+        return 64
+
+    herdr = shutil.which("herdr")
+    if not herdr:
+        print("tmux-app-key: herdr not found", file=sys.stderr)
+        return 127
+
+    resource, operation = action
+    command = [herdr, resource, operation]
+    if operation == "create":
+        command.append("--focus")
+    else:
+        focused_result = focused_herdr_resource(herdr, resource)
+        if not focused_result:
+            return 1
+        focused_resource, resources = focused_result
+        resource_id = focused_resource.get(f"{resource}_id")
+        if not isinstance(resource_id, str):
+            print(f"tmux-app-key: Herdr returned no {resource} id", file=sys.stderr)
+            return 1
+
+        if operation in {"previous", "next"}:
+            navigation_resources = resources
+            if resource == "tab":
+                workspace_id = focused_resource.get("workspace_id")
+                navigation_resources = [
+                    item
+                    for item in resources
+                    if item.get("workspace_id") == workspace_id
+                ]
+
+            if len(navigation_resources) == 1:
+                return 0
+            focused_index = navigation_resources.index(focused_resource)
+            offset = -1 if operation == "previous" else 1
+            target_resource = navigation_resources[
+                (focused_index + offset) % len(navigation_resources)
+            ]
+            target_id = target_resource.get(f"{resource}_id")
+            if not isinstance(target_id, str):
+                print(f"tmux-app-key: Herdr returned no {resource} id", file=sys.stderr)
+                return 1
+            command = [herdr, resource, "focus", target_id]
+        # Herdr refuses to close a workspace's final tab. Match macOS Cmd+W
+        # behavior by closing that workspace instead.
+        elif resource == "tab":
+            workspace_id = focused_resource.get("workspace_id")
+            workspace_tab_count = sum(
+                item.get("workspace_id") == workspace_id for item in resources
+            )
+            if isinstance(workspace_id, str) and workspace_tab_count == 1:
+                command = [herdr, "workspace", "close", workspace_id]
+            else:
+                command.append(resource_id)
+        else:
+            command.append(resource_id)
+
+    result = run(command)
+    if result.returncode != 0:
+        print(result.stderr.strip() or result.stdout.strip(), file=sys.stderr)
+    return result.returncode
+
+
+def main() -> int:
+    args = sys.argv[1:]
+    if not args or args[0] in {"-h", "--help"}:
+        return usage()
+
+    tmux = shutil.which("tmux")
+    if not tmux:
+        print("tmux-app-key: tmux not found", file=sys.stderr)
+        return 127
+
+    target = current_pane(tmux, args.pop(0))
+    if not target or not args:
+        return usage()
+
+    micro_key = None if args[:1] == ["--no-micro"] else args[0]
+    args.pop(0)
+
+    app_keys: list[tuple[str, str]] = []
+    while args[:1] == ["--app"]:
+        if len(args) < 3:
+            return usage()
+        args.pop(0)
+        app_keys.append((args.pop(0).lower(), args.pop(0)))
+
+    fallback_is_external = args[:1] == ["--exec"]
+    if args[:1] in (["--"], ["--exec"]):
+        args.pop(0)
+
+    names = pane_process_names(tmux, target)
+    if names is None:
+        return 1
+
+    if micro_key and "micro" in names:
+        if micro_key in MICRO_RAW_KEYS:
+            return subprocess.run(
+                [tmux, "send-keys", "-t", target, "-l", MICRO_RAW_KEYS[micro_key]],
+                check=False,
+            ).returncode
+        return subprocess.run([tmux, "send-keys", "-t", target, micro_key], check=False).returncode
+
+    for app_name, app_key in app_keys:
+        if app_name in names:
+            if app_name == "herdr" and app_key in HERDR_ACTIONS:
+                return run_herdr_action(app_key)
+            return subprocess.run(
+                [tmux, "send-keys", "-t", target, app_key], check=False
+            ).returncode
+
+    if args:
+        if fallback_is_external:
+            return subprocess.run(args, check=False).returncode
+        return subprocess.run([tmux, *args], check=False).returncode
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
