@@ -1,0 +1,195 @@
+#!/bin/sh
+
+set -eu
+
+program_name="${0##*/}"
+config_file="${OPENCODE_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/opencode/opencode.json}"
+omlx_settings_file="${OMLX_SETTINGS_FILE:-$HOME/.omlx/settings.json}"
+dry_run=false
+
+usage() {
+  cat <<EOF
+Usage: $program_name [--dry-run] [--config PATH]
+
+Replace the OpenCode oMLX model list with the language models reported by
+oMLX's configured /v1/models endpoint. Existing metadata is preserved when an
+exact model ID still exists.
+
+Options:
+  --config PATH  Use a specific OpenCode configuration file.
+  --dry-run      Report model additions and removals without changing the file.
+  -h, --help     Show this help.
+
+Environment:
+  OPENCODE_CONFIG    Default OpenCode configuration path.
+  OMLX_SETTINGS_FILE oMLX settings path used to determine the output-token cap.
+EOF
+}
+
+fail() {
+  printf '%s: %s\n' "$program_name" "$*" >&2
+  exit 1
+}
+
+require_command() {
+  command -v "$1" >/dev/null 2>&1 || fail "required command not found: $1"
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --config)
+      [ "$#" -ge 2 ] || fail "--config requires a path"
+      config_file="$2"
+      shift 2
+      ;;
+    --dry-run)
+      dry_run=true
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      fail "unknown argument: $1"
+      ;;
+  esac
+done
+
+require_command curl
+require_command jq
+
+[ -f "$config_file" ] || fail "OpenCode configuration not found: $config_file"
+
+if ! jq -e '
+  (.provider.omlx | type) == "object"
+  and (.provider.omlx.models | type) == "object"
+  and (.provider.omlx.options.baseURL | type) == "string"
+  and (.provider.omlx.options.baseURL | length) > 0
+' "$config_file" >/dev/null; then
+  fail "configuration must contain provider.omlx.models and provider.omlx.options.baseURL"
+fi
+
+base_url="$(jq -r '.provider.omlx.options.baseURL' "$config_file")"
+api_key="$(jq -r '.provider.omlx.options.apiKey // "" | strings' "$config_file")"
+models_url="${base_url%/}/models"
+
+config_dir="$(dirname "$config_file")"
+temporary_dir="$(mktemp -d "$config_dir/.sync-opencode-omlx.XXXXXX")"
+chmod 700 "$temporary_dir"
+
+cleanup() {
+  rm -rf "$temporary_dir"
+}
+trap cleanup EXIT HUP INT TERM
+
+response_file="$temporary_dir/models.json"
+auth_header_file="$temporary_dir/auth-header"
+candidate_file="$temporary_dir/opencode.json"
+existing_ids_file="$temporary_dir/existing-ids"
+synced_ids_file="$temporary_dir/synced-ids"
+
+if [ -n "$api_key" ]; then
+  printf 'Authorization: Bearer %s\n' "$api_key" > "$auth_header_file"
+  chmod 600 "$auth_header_file"
+  if ! curl --fail --silent --show-error --header @"$auth_header_file" \
+    "$models_url" > "$response_file"; then
+    fail "could not query $models_url; ensure oMLX is running (try: omlx start)"
+  fi
+else
+  if ! curl --fail --silent --show-error "$models_url" > "$response_file"; then
+    fail "could not query $models_url; ensure oMLX is running (try: omlx start)"
+  fi
+fi
+
+if ! jq -e '
+  (.data | type) == "array"
+  and ([.data[] | select(
+    (.id | type) == "string"
+    and (.id | length) > 0
+    and (.max_model_len | type) == "number"
+    and .max_model_len > 0
+  )] | length) > 0
+' "$response_file" >/dev/null; then
+  fail "oMLX returned no language models with valid context-window metadata"
+fi
+
+output_token_cap=32768
+if [ -f "$omlx_settings_file" ]; then
+  configured_output_token_cap="$(
+    jq -r '.sampling.max_tokens | select(type == "number" and . > 0)' \
+      "$omlx_settings_file" 2>/dev/null || true
+  )"
+  if [ -n "$configured_output_token_cap" ]; then
+    output_token_cap="$configured_output_token_cap"
+  fi
+fi
+
+jq --slurpfile response "$response_file" --argjson outputTokenCap "$output_token_cap" '
+  .provider.omlx.models as $existing
+  | (
+      $response[0].data
+      | map(select(
+          (.id | type) == "string"
+          and (.id | length) > 0
+          and (.max_model_len | type) == "number"
+          and .max_model_len > 0
+        ))
+      | sort_by(.id)
+      | map(
+          . as $model
+          | {
+              key: $model.id,
+              value: (
+                $existing[$model.id]
+                // {
+                  name: $model.id,
+                  limit: {
+                    context: $model.max_model_len,
+                    output: ([$model.max_model_len, $outputTokenCap] | min)
+                  }
+                }
+              )
+            }
+        )
+      | from_entries
+    ) as $synced
+  | .provider.omlx.models = $synced
+' "$config_file" > "$candidate_file"
+
+jq -r '.provider.omlx.models | keys[]' "$config_file" | sort > "$existing_ids_file"
+jq -r '.provider.omlx.models | keys[]' "$candidate_file" | sort > "$synced_ids_file"
+
+model_count="$(wc -l < "$synced_ids_file" | tr -d ' ')"
+added_models="$(comm -13 "$existing_ids_file" "$synced_ids_file")"
+removed_models="$(comm -23 "$existing_ids_file" "$synced_ids_file")"
+
+report_changes() {
+  if [ -n "$added_models" ]; then
+    printf 'Added:\n%s\n' "$added_models" | sed '2,$s/^/  /'
+  fi
+  if [ -n "$removed_models" ]; then
+    printf 'Removed:\n%s\n' "$removed_models" | sed '2,$s/^/  /'
+  fi
+}
+
+if cmp -s "$config_file" "$candidate_file"; then
+  printf 'OpenCode oMLX models are already in sync (%s models).\n' "$model_count"
+  exit 0
+fi
+
+if [ "$dry_run" = true ]; then
+  printf 'Would sync %s oMLX models in %s.\n' "$model_count" "$config_file"
+  report_changes
+  exit 0
+fi
+
+timestamp="$(date '+%Y%m%d-%H%M%S')"
+backup_file="${config_file}.bak-${timestamp}"
+cp -p "$config_file" "$backup_file"
+chmod --reference="$config_file" "$candidate_file" 2>/dev/null || chmod 600 "$candidate_file"
+mv "$candidate_file" "$config_file"
+
+printf 'Synced %s oMLX models in %s.\n' "$model_count" "$config_file"
+report_changes
+printf 'Backup: %s\n' "$backup_file"
