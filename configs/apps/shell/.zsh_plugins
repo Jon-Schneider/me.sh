@@ -1,8 +1,10 @@
 # Load oh-my-zsh deps for OMZ plugins
 getantidote/use-omz
+# Load after use-omz's deferred initializer, but before plugins call compdef.
+marlonrichert/zsh-autocomplete branch:fe6c658
 ohmyzsh/ohmyzsh path:lib
 
 ohmyzsh/ohmyzsh path:plugins/git
 
+# Syntax highlighting must load after plugins that create ZLE widgets.
 zsh-users/zsh-syntax-highlighting
-marlonrichert/zsh-autocomplete branch:fe6c658
