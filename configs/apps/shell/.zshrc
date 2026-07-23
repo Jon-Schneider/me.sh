@@ -23,8 +23,6 @@ setopt completealiases # Enable autocompletions for aliases
 
 zmodload zsh/complist
 
-autoload -Uz compinit && compinit # Enable completions
-
 _comp_options+=(globdots) # Completions include hidden files
 
 unsetopt nomatch # Disable no-match globbing error zsh enables by default
@@ -36,6 +34,7 @@ setopt promptsubst # Required for prompt colors to work right
 zstyle ':completion:*' completer _extensions _complete _approximate # Give priority to completing extensions first, then regular completions, then possible typos/fixes
 
 zstyle ':autocomplete:*' min-input 2 # Minimum number of characters that must be typed before marlonrichert/zsh-autocomplete starts showing options
+zstyle ':autocomplete:*:*' list-lines 10 # Limit autocomplete suggestions to 10 visible lines
 zstyle ':autocomplete:tab:*' insert-unambiguous yes # Autocomplete tab first inserts substrings before full matching patterns
 zstyle ':autocomplete:tab:*' widget-style menu-select
 zstyle ':completion:*' menu select # Use completion menu
@@ -50,8 +49,8 @@ zstyle ':completion:*' cache-path "$XDG_CACHE_HOME/zsh/.zcompcache"
 
 # Completion menu styles
 zstyle ':completion:*' group-name '' # Enable completion menu groupings
-zstyle ':completion:*:*:*:*:descriptions' format '%F{green}-- %d --%f' # Style completion menu section headers
-zstyle ':completion:*:*:*:*:corrections' format '%F{yellow}!- %d (errors: %e) -!%f' # Style completion menu correction suggestions header
+# zsh-autocomplete's default description and correction formats are required
+# for its list-lines cap; overriding them causes zsh to render the full list.
 zstyle ':completion:*:messages' format ' %F{purple} -- %d --%f'
 zstyle ':completion:*:warnings' format ' %F{red}-- no matches found --%f' # Style no matches found text
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS} # Style directory names in completion menu
