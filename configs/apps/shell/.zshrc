@@ -202,9 +202,6 @@ load_non_git_aliases() {
     alias mer="cd ~/Developer/jsc/me.sh"
     alias od="cd ~/OneDrive"
     alias oi="open *.jpg *.jpeg *.png" # Open images in dir
-    alias pi="pod install"
-    alias piru="pod install --repo-update"
-    alias pru="pod repo update"
     alias ra="sudo pkill -9 coreaudiod" # Restart Audio
     alias pw="pwgen -ysB1 20 | pbcopy"
     alias repos="cd ~/Developer/jsc"
