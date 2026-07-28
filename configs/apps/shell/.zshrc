@@ -472,6 +472,13 @@ tmux_window_name_for_pwd() {
 rename_tmux_window_for_pwd() {
   [[ -n "$TMUX" ]] || return
 
+  local pane_pid
+  # TMUX_PANE is inherited by nested agent shells. Only the pane's root shell
+  # owns its window name; otherwise a child shell can rename the window for its
+  # temporary working directory (for example, document-translation-<UUID>).
+  pane_pid="$(tmux display-message -p -t "$TMUX_PANE" '#{pane_pid}')" || return
+  [[ "$pane_pid" == "$$" ]] || return
+
   # Skip auto rename if this tmux window is marked manual.
   [[ "$(tmux show-option -wqv @manual_window_name)" == "1" ]] && return
 
