@@ -1,8 +1,10 @@
 # Load oh-my-zsh deps for OMZ plugins
 getantidote/use-omz
-# Load after use-omz's deferred initializer, but before plugins call compdef.
-marlonrichert/zsh-autocomplete branch:fe6c658
 ohmyzsh/ohmyzsh path:lib
+
+# Load after OMZ's libraries so autocomplete owns the final key bindings, but
+# before plugins such as OMZ Git call compdef.
+marlonrichert/zsh-autocomplete branch:fe6c658
 
 ohmyzsh/ohmyzsh path:plugins/git
 
