@@ -329,15 +329,13 @@ load_worktree_functions() {
 		return 1
 	  fi
 
-	  local root
-	  root="$(git rev-parse --show-toplevel 2>/dev/null)" || {
+	  # Resolve the repo's main worktree (always listed first by `git worktree
+	  # list`), so new worktrees land in the primary checkout no matter whether
+	  # wtc was invoked from a subdirectory or from inside another worktree.
+	  local main_root
+	  main_root="$(git worktree list --porcelain 2>/dev/null | sed -n '1s/^worktree //p')"
+	  if [ -z "$main_root" ]; then
 		echo "Not inside a git repository"
-		return 1
-	  }
-
-	  # Enforce running from repo root
-	  if [ "$PWD" != "$root" ]; then
-		echo "Run this from repo root: $root"
 		return 1
 	  fi
 
@@ -355,12 +353,12 @@ load_worktree_functions() {
 		fi
 	  fi
 
-	  local dated_branch repo_name worktree_path
+	  local dated_branch worktree_path
 	  dated_branch="jsc/$(date +%F)--$name"
-	  worktree_path="./.worktrees/${name}"
-	  git worktree add -b "$dated_branch" "$worktree_path" "$base_branch" || return 1
-	  if [ -f "$root/.env" ]; then
-		cp "$root/.env" "$worktree_path/.env" || return 1
+	  worktree_path="$main_root/.worktrees/${name}"
+	  git -C "$main_root" worktree add -b "$dated_branch" "$worktree_path" "$base_branch" || return 1
+	  if [ -f "$main_root/.env" ]; then
+		cp "$main_root/.env" "$worktree_path/.env" || return 1
 	  fi
 	  cd "$worktree_path" || return 1
 	}
