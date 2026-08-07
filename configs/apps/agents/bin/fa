@@ -1,0 +1,26 @@
+#!/bin/zsh
+
+# fa - Fork Agent
+# Forks a running Codex CLI or Claude CLI session into a new tmux split pane
+
+if [[ -z "$TMUX" ]]; then
+    echo "fa: not running inside tmux"
+    exit 1
+fi
+
+if [[ -n "$CODEX_THREAD_ID" ]]; then
+    # Codex
+    command=(codex fork "$CODEX_THREAD_ID")
+
+elif [[ -n "$CLAUDE_CODE_SESSION_ID" ]]; then
+    # Claude Code
+    command=(claude --resume "$CLAUDE_CODE_SESSION_ID" --fork-session)
+
+else
+    echo "fa: couldn't detect Codex or Claude Code"
+    exit 1
+fi
+
+tmux split-window -h \
+    -c "$PWD" \
+    "$(printf '%q ' "${command[@]}")"
