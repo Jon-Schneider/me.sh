@@ -176,9 +176,6 @@ load_non_git_aliases() {
     alias caf20="caffeinate -t 1200" # Prevents system sleeping for twenty minutes
     alias cdf='cd "`osascript -e "tell application \\"Finder\\" to get POSIX path of (insertion location as text)"`"' # cd to front finder dir
     alias cht="cht.sh"
-    alias cld="claude"
-    alias cldc="claude --continue"
-    alias cldr="claude --resume"
     alias ddnuke="rm -rf ~/Library/Developer/Xcode/DerivedData" # Nuke derived data
     alias dev="open ~/Library/Developer"
     alias dl="cd ~/Downloads"
@@ -276,17 +273,18 @@ load_non_git_aliases() {
     }
 
     claude-sb() { safe claude --permission-mode bypassPermissions --dangerously-skip-permissions "$@"; }
-    alias cld="claude-sb"
+    alias cldsb="claude-sb"
+    alias cldus="claude --permission-mode bypassPermissions --dangerously-skip-permissions" # Claude unsafe
+
+    alias cld="claude"
     alias cldc="cld --continue"
     alias cldr="cld --resume"
 
-    alias cldus="claude --permission-mode bypassPermissions --dangerously-skip-permissions" # Claude unsafe
-
     codex-sb() { safe codex --dangerously-bypass-approvals-and-sandbox "$@"; }
-    alias cdx="codex-sb"
-    alias cdxr="cdx resume"
+    alias cdxsb="codex-sb"
+    alias cdxus="codex -- --dangerously-bypass-approvals-and-sandbox" # Codex unsafe
 
-    alias cdxus="codex --dangerously-bypass-approvals-and-sandbox" # Codex unsafe
+    alias cdxr="cdx resume"
 
     gemini-sb() { safe gemini "$@" }
     alias gemi="gemini-sb --approval-mode=yolo"
