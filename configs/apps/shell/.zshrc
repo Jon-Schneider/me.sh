@@ -204,6 +204,7 @@ load_non_git_aliases() {
     alias od="cd ~/OneDrive"
     alias oi="open *.jpg *.jpeg *.png" # Open images in dir
     alias ra="sudo pkill -9 coreaudiod" # Restart Audio
+    alias rgp="launchctl unload -S Aqua /Library/LaunchAgents/com.paloaltonetworks.gp.pangpa.plist && launchctl unload -S Aqua /Library/LaunchAgents/com.paloaltonetworks.gp.pangps.plist && launchctl load -S Aqua /Library/LaunchAgents/com.paloaltonetworks.gp.pangpa.plist && launchctl load -S Aqua /Library/LaunchAgents/com.paloaltonetworks.gp.pangps.plist" # Restart Global Protect Service
     alias pw="pwgen -ysB1 20 | pbcopy"
     alias repos="cd ~/Developer/jsc"
     alias rz="source ~/.zshrc && source ~/.zshrc_local && source ~/.zshrc_ms" # Reload zsh
