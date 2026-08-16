@@ -169,11 +169,14 @@ load_non_git_aliases() {
     alias bu="brew update"
     alias bup="brew upgrade"
     alias bupc="bu && brew upgrade --cask"
-    alias caf="caffeinate" # Prevents system from sleeping until caffeine is terminated by user
+    caf() { # Prevents system sleeping for N minutes (e.g. caf 5)
+        if [[ -z "$1" ]]; then
+            caffeinate
+        else
+            caffeinate -t $(( $1 * 60 ))
+        fi
+    }
     alias cafi="caffeinate -i" # Prevents system sleeping as long as passed process is running
-    alias caf5="caffeinate -t 300" # Prevents system sleeping for five minutes
-    alias caf10="caffeinate -t 600" # Prevents system sleeping for ten minutes
-    alias caf20="caffeinate -t 1200" # Prevents system sleeping for twenty minutes
     alias cdf='cd "`osascript -e "tell application \\"Finder\\" to get POSIX path of (insertion location as text)"`"' # cd to front finder dir
     alias cht="cht.sh"
     alias ddnuke="rm -rf ~/Library/Developer/Xcode/DerivedData" # Nuke derived data
