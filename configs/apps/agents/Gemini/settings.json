@@ -50,6 +50,17 @@
     ],
     "BeforeTool": [
       {
+        "matcher": "run_shell_command",
+        "hooks": [
+          {
+            "name": "dcg",
+            "type": "command",
+            "command": "/Users/jsc/.local/bin/dcg",
+            "timeout": 5000
+          }
+        ]
+      },
+      {
         "hooks": [
           {
             "type": "command",

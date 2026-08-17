@@ -30,6 +30,9 @@ export const TmuxAgentStatusPlugin = async ({ $ }) => {
     async event({ event }) {
       switch (event.type) {
         case "server.connected":
+          await setStatus("ready");
+          break;
+
         case "session.created":
           await setStatus("ready");
           break;
