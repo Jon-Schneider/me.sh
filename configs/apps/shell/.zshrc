@@ -287,10 +287,14 @@ load_non_git_aliases() {
     alias cdxsb="codex-sb"
     alias cdxus="codex -- --dangerously-bypass-approvals-and-sandbox" # Codex unsafe
 
+    alias cdx="codex"
     alias cdxr="cdx resume"
 
     opencode-sb() { safe opencode "$@"; }
-    alias oc="opencode-sb"
+    alias ocsb="opencode-sb"
+    alias ocus="oc -- --yolo"
+
+    alias oc="opencode"
     alias occ="oc --continue"
 
     # Github
