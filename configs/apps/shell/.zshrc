@@ -469,20 +469,44 @@ tmux_window_name_for_pwd() {
   fi
 }
 
-rename_tmux_window_for_pwd() {
-  [[ -n "$TMUX" ]] || return
+# Stable identity for "the repo/dir this window is currently in". Used to decide
+# when a manual window name should be dropped (we've left the repo it was set in).
+tmux_repo_key_for_pwd() {
+  git -C "$PWD" rev-parse --show-toplevel 2>/dev/null || printf "%s" "$PWD"
+}
 
-  local pane_pid
+rename_tmux_window_for_pwd() {
+  [[ -n "$TMUX" && -n "$TMUX_PANE" ]] || return
+
+  local target_window pane_pid name key
   # TMUX_PANE is inherited by nested agent shells. Only the pane's root shell
   # owns its window name; otherwise a child shell can rename the window for its
   # temporary working directory (for example, document-translation-<UUID>).
   pane_pid="$(tmux display-message -p -t "$TMUX_PANE" '#{pane_pid}')" || return
   [[ "$pane_pid" == "$$" ]] || return
 
-  # Skip auto rename if this tmux window is marked manual.
-  [[ "$(tmux show-option -wqv @manual_window_name)" == "1" ]] && return
+  # Resolve the window that owns this shell before doing any slower path/Git
+  # work. Without an explicit target, tmux operates on whichever window the
+  # client has selected when each command runs.
+  target_window="$(tmux display-message -p -t "$TMUX_PANE" '#{window_id}')" || return
+  [[ -n "$target_window" ]] || return
 
-  tmux rename-window "$(tmux_window_name_for_pwd)"
+  name="$(tmux_window_name_for_pwd)"
+  # Never set an empty name (e.g. a transient git failure / vanished path):
+  # an empty rename is exactly the "wrong name" drift we're trying to avoid.
+  [[ -n "$name" ]] || return
+  key="$(tmux_repo_key_for_pwd)"
+
+  # A window can be pinned to a manual name (prefix ,). Honor it only while we
+  # stay in the same repo/dir; once the repo key changes we've left the repo, so
+  # drop the override and resume automatic naming.
+  if [[ "$(tmux show-option -wqv -t "$target_window" @manual_window_name)" == "1" ]]; then
+    [[ "$key" == "$(tmux show-option -wqv -t "$target_window" @window_repo_root)" ]] && return
+    tmux set-option -uw -t "$target_window" @manual_window_name
+  fi
+
+  tmux rename-window -t "$target_window" "$name"
+  tmux set-option -w -t "$target_window" @window_repo_root "$key"
 }
 
 add-zsh-hook precmd refresh_starship_github_pr_cache
