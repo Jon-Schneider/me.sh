@@ -9,5 +9,5 @@
     "session_child_cycle": "shift+right",
     "session_child_cycle_reverse": "shift+left"
   },
-  "plugin": ["opencode-gemini-auth@latest"]
+  "plugin": []
 }

@@ -3,13 +3,11 @@ current_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 mkdir -p "$HOME/.claude"
 mkdir -p "$HOME/.codex"
-mkdir -p "$HOME/.gemini"
 mkdir -p "$HOME/.kimi"
 mkdir -p "$HOME/.config/opencode/plugins"
 mkdir -p "$HOME/.agents/skills"
 mkdir -p "$HOME/.codex/skills"
 mkdir -p "$HOME/.claude/skills"
-mkdir -p "$HOME/.gemini/skills"
 
 echo "Configiring ~/.agents..."
 ln -f "$current_dir/AGENTS.md" "$HOME/.agents/AGENTS.md"
@@ -23,9 +21,7 @@ echo "Configuring Codex..."
 ln -f "$current_dir/AGENTS.md" "$HOME/.codex/AGENTS.md"
 ln -f "$current_dir/Codex/config.toml" "$HOME/.codex"
 
-echo "Configuring Gemini..."
-ln -f "$current_dir/Gemini/settings.json" "$HOME/.gemini/"
-ln -f "$current_dir/AGENTS.md" "$HOME/.gemini/GEMINI.md"
+
 
 echo "Configuring Kimi..."
 ln -f "$current_dir/AGENTS.md" "$HOME/.kimi/AGENTS.md"
@@ -38,7 +34,6 @@ echo "Configuring Skills..."
 ln -Fsn "$current_dir/Skills/claude-review" "$HOME/.agents/skills/"
 
 ln -Fsn "$current_dir/Skills/codex-review" "$HOME/.claude/skills/"
-ln -Fsn "$current_dir/Skills/codex-review" "$HOME/.gemini/skills/"
 
 ln -Fsn "$current_dir/Skills/hate-review" "$HOME/.agents/skills/"
 ln -Fsn "$current_dir/Skills/hate-review" "$HOME/.claude/skills/"
@@ -48,7 +43,6 @@ ln -Fsn "$current_dir/Skills/hate-reviewer-cycle" "$HOME/.claude/skills/"
 ln -Fsn "$current_dir/Skills/patch-commit" "$HOME/.agents/skills/"
 ln -Fsn "$current_dir/Skills/patch-commit" "$HOME/.claude/skills/"
 ln -Fsn "$current_dir/Skills/patch-commit" "$HOME/.codex/skills/"
-ln -Fsn "$current_dir/Skills/patch-commit" "$HOME/.gemini/skills/"
 
 ln -Fsn "$current_dir/Skills/rewrite-pr-history" "$HOME/.agents/skills/"
 ln -Fsn "$current_dir/Skills/rewrite-pr-history" "$HOME/.claude/skills/"
