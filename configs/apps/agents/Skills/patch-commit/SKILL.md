@@ -10,6 +10,8 @@ agents, parallel sessions, background tooling, and the user may all be editing f
 at the same time. The working tree you see is shared. Treat every uncommitted change
 as suspect until you have confirmed *you* are the one who made it.
 
+**Because there are other agents working in the active repository never create or change branches unless the user asks.**
+
 ## Core rule
 
 Commit **only the changes you made**, and stage them by patch. Never blindly stage
