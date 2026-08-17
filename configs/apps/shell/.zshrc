@@ -289,11 +289,6 @@ load_non_git_aliases() {
 
     alias cdxr="cdx resume"
 
-    gemini-sb() { safe gemini "$@" }
-    alias gemi="gemini-sb --approval-mode=yolo"
-    alias gemil="gemi lastest"
-    alias gemir="gemi --resume"
-
     opencode-sb() { safe opencode "$@"; }
     alias oc="opencode-sb"
     alias occ="oc --continue"
