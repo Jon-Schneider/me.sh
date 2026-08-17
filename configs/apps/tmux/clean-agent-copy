@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
-"""Dispatch tmux copied text through an agent-specific cleaner."""
+"""Dispatch tmux copied text through an agent-specific cleaner.
+
+Machine-specific agents go in ~/.config/me.sh/agent-cleaners.json (or $AGENT_CLEANERS_MANIFEST),
+a JSON object of process name → cleaner name or path, which overlays the built-in map.
+"""
 
 from __future__ import annotations
 
+import json
 import os
 import re
 import shutil
@@ -11,12 +16,41 @@ import sys
 from pathlib import Path
 
 
-AGENT_CLEANERS = {
+BUILTIN_AGENT_CLEANERS = {
     "claude": "clean-claude-copy",
     "codex": "clean-codex-copy",
     "gemini": "clean-gemini-copy",
 }
+LOCAL_MANIFEST_ENV = "AGENT_CLEANERS_MANIFEST"
+DEFAULT_LOCAL_MANIFEST = Path.home() / ".config/me.sh/agent-cleaners.json"
 PROCESS_RE = re.compile(r"^[^TXZ ]+\s+(.+?)\s*$")
+
+
+def local_manifest_path() -> Path:
+    override = os.environ.get(LOCAL_MANIFEST_ENV)
+    return Path(override).expanduser() if override else DEFAULT_LOCAL_MANIFEST
+
+
+def agent_cleaners() -> dict[str, str]:
+    """Built-in process-name → cleaner map, overlaid with an uncommitted local manifest."""
+    cleaners = dict(BUILTIN_AGENT_CLEANERS)
+    manifest = local_manifest_path()
+    try:
+        entries = json.loads(manifest.read_text())
+    except FileNotFoundError:
+        return cleaners
+    except (OSError, json.JSONDecodeError) as error:
+        sys.stderr.write(f"clean-agent-copy: ignoring {manifest}: {error}\n")
+        return cleaners
+
+    if not isinstance(entries, dict):
+        sys.stderr.write(f"clean-agent-copy: ignoring {manifest}: expected a JSON object\n")
+        return cleaners
+
+    for process_name, cleaner in entries.items():
+        if isinstance(cleaner, str) and cleaner:
+            cleaners[str(process_name).lower()] = cleaner
+    return cleaners
 
 
 def run(argv: list[str]) -> subprocess.CompletedProcess[str]:
@@ -64,7 +98,7 @@ def process_names_for_tty(tty: str) -> list[str]:
     return names
 
 
-def detect_agent(target: str | None) -> str | None:
+def detect_agent(target: str | None, cleaners: dict[str, str]) -> str | None:
     if not target:
         return None
 
@@ -73,15 +107,20 @@ def detect_agent(target: str | None) -> str | None:
         return None
 
     for name in process_names_for_tty(tty):
-        if name in AGENT_CLEANERS:
+        if name in cleaners:
             return name
     return None
 
 
-def clean_with(agent: str, text: str) -> int:
-    cleaner_name = AGENT_CLEANERS[agent]
+def resolve_cleaner(cleaner_name: str) -> str:
+    if "/" in cleaner_name:
+        return str(Path(cleaner_name).expanduser())
     sibling_cleaner = Path(__file__).with_name(cleaner_name)
-    cleaner = str(sibling_cleaner) if sibling_cleaner.exists() else cleaner_name
+    return str(sibling_cleaner) if sibling_cleaner.exists() else cleaner_name
+
+
+def clean_with(cleaner_name: str, text: str) -> int:
+    cleaner = resolve_cleaner(cleaner_name)
     try:
         proc = subprocess.run([cleaner], input=text, capture_output=True, text=True, check=False)
     except FileNotFoundError:
@@ -94,10 +133,11 @@ def clean_with(agent: str, text: str) -> int:
 
 def main() -> int:
     text = sys.stdin.read()
-    agent = detect_agent(current_pane())
+    cleaners = agent_cleaners()
+    agent = detect_agent(current_pane(), cleaners)
 
     if agent:
-        return clean_with(agent, text)
+        return clean_with(cleaners[agent], text)
 
     sys.stdout.write(text)
     return 0
