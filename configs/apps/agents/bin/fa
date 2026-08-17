@@ -1,12 +1,33 @@
 #!/bin/zsh
 
 # fa - Fork Agent
-# Forks a running Codex CLI or Claude CLI session into a new tmux split pane
+# Forks a running Codex CLI, Claude CLI, or pi-agent session into a new tmux split pane
 
 if [[ -z "$TMUX" ]]; then
     echo "fa: not running inside tmux"
     exit 1
 fi
+
+# Try to get pi-agent session ID from the most recent session file for current directory
+get_pi_session_id() {
+    # pi encodes paths by replacing / with - and wrapping with --...--
+    # e.g., /Users/jsc/Developer/jsc -> --Users-jsc-Developer-jsc--
+    # We need to strip the leading / from PWD before replacing / with -
+    local pwd_encoded=$(echo "$PWD" | sed 's|^/||; s|/|-|g')
+    local session_dir="$HOME/.pi/agent/sessions/--${pwd_encoded}--"
+    if [[ -d "$session_dir" ]]; then
+        local latest_session=$(ls -t "$session_dir"/*.jsonl 2>/dev/null | head -1)
+        if [[ -n "$latest_session" ]]; then
+            # Extract session ID from first line of session file
+            local session_id=$(head -1 "$latest_session" | sed -n 's/.*"id":"\([^"]*\)".*/\1/p')
+            if [[ -n "$session_id" ]]; then
+                echo "$session_id"
+                return 0
+            fi
+        fi
+    fi
+    return 1
+}
 
 if [[ -n "$CODEX_THREAD_ID" ]]; then
     # Codex
@@ -16,11 +37,27 @@ elif [[ -n "$CLAUDE_CODE_SESSION_ID" ]]; then
     # Claude Code
     command=(claude --resume "$CLAUDE_CODE_SESSION_ID" --fork-session)
 
+elif [[ -n "$PI_SESSION_ID" ]]; then
+    # pi-agent (from environment)
+    command=(pi --fork "$PI_SESSION_ID")
+
 else
-    echo "fa: couldn't detect Codex or Claude Code"
-    exit 1
+    # Try to find pi-agent session from session files
+    pi_session_id=$(get_pi_session_id)
+    if [[ -n "$pi_session_id" ]]; then
+        command=(pi --fork "$pi_session_id")
+    else
+        echo "fa: couldn't detect Codex, Claude Code, or pi-agent"
+        exit 1
+    fi
 fi
 
-tmux split-window -h \
-    -c "$PWD" \
-    "$(printf '%q ' "${command[@]}")"
+# Pass environment variables to the new tmux pane (tmux inherits from server, not current process)
+env_args=()
+for var in CODEX_THREAD_ID CLAUDE_CODE_SESSION_ID PI_SESSION_ID PI_SESSION_FILE PI_PROVIDER PI_MODEL PI_REASONING_LEVEL; do
+    if [[ -n "${(P)var}" ]]; then
+        env_args+=(-e "$var=${(P)var}")
+    fi
+done
+
+tmux split-window -h -c "$PWD" "${env_args[@]}" "$(printf '%q ' "${command[@]}")" ";" select-layout even-horizontal
