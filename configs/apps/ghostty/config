@@ -81,6 +81,12 @@ keybind = super+q=text:\x00Q
 keybind = ctrl+tab=text:\x00n
 keybind = ctrl+shift+tab=text:\x00p
 
+# xlent bold/italic: Cmd+B sends Ctrl+B (tmux prefix is Ctrl+Space, so it passes
+# straight through to the pane). Cmd+I sends Ctrl+I, which in terminal byte
+# encoding is identical to Tab.
+keybind = cmd+b=text:\x02
+keybind = cmd+i=text:\x09
+
 # Disable toggling fullscreen
 keybind = super+ctrl+f=unbind
 
