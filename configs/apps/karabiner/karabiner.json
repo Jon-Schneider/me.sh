@@ -4,6 +4,40 @@
             "complex_modifications": {
                 "rules": [
                     {
+                        "description": "Chrome: tap left command alone to open a new tab after the current one",
+                        "manipulators": [
+                            {
+                                "type": "basic",
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_if",
+                                        "bundle_identifiers": [
+                                            "^com\\.google\\.Chrome$"
+                                        ]
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_command",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_command"
+                                    }
+                                ],
+                                "to_if_alone": [
+                                    {
+                                        "shell_command": "/usr/bin/osascript -e 'tell application \"Google Chrome\"' -e 'if (count of windows) is 0 then' -e 'make new window' -e 'else' -e 'tell front window' -e 'set i to active tab index' -e 'make new tab at after tab i with properties {URL:\"chrome://newtab/\"}' -e 'set active tab index to i + 1' -e 'end tell' -e 'end if' -e 'activate' -e 'end tell'"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
                         "description": "Ghostty Herdr navigation without macOS NSBeep",
                         "manipulators": [
                             {
@@ -223,7 +257,7 @@
                                 ],
                                 "type": "basic"
                             },
-							{
+                            {
                                 "from": {
                                     "key_code": "h",
                                     "modifiers": {
@@ -1171,12 +1205,19 @@
                                 ],
                                 "from": {
                                     "key_code": "k",
-                                    "modifiers": { "mandatory": ["command"] }
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "command"
+                                        ]
+                                    }
                                 },
                                 "to": [
                                     {
                                         "key_code": "u",
-                                        "modifiers": ["shift", "command"]
+                                        "modifiers": [
+                                            "shift",
+                                            "command"
+                                        ]
                                     }
                                 ],
                                 "type": "basic"
