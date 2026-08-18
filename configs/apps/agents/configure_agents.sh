@@ -10,19 +10,19 @@ mkdir -p "$HOME/.codex/skills"
 mkdir -p "$HOME/.claude/skills"
 
 echo "Configiring ~/.agents..."
-ln -f "$current_dir/AGENTS.md" "$HOME/.agents/AGENTS.md"
+ln -sfn "$current_dir/AGENTS.md" "$HOME/.agents/AGENTS.md"
 
 echo "Configuring Claude..."
-ln -f "$current_dir/AGENTS.md" "$HOME/.claude/CLAUDE.md"
-ln -f "$current_dir/Claude/settings.json" "$HOME/.claude"
-ln -f "$current_dir/Claude/statusline-command.sh" "$HOME/.claude"
+ln -sfn "$current_dir/AGENTS.md" "$HOME/.claude/CLAUDE.md"
+ln -sfn "$current_dir/Claude/settings.json" "$HOME/.claude/settings.json"
+ln -sfn "$current_dir/Claude/statusline-command.sh" "$HOME/.claude/statusline-command.sh"
 
 echo "Configuring Codex..."
 ln -sfn "$current_dir/Codex/config.toml" "$HOME/.codex/config.toml"
 ln -sfn "$current_dir/Codex/hooks.json" "$HOME/.codex/hooks.json"
 
 echo "Configuring Opencode..."
-ln -f "$current_dir/Opencode/opencode.json" "$HOME/.config/opencode"
+ln -sfn "$current_dir/Opencode/opencode.json" "$HOME/.config/opencode/opencode.json"
 ln -f "$current_dir/Opencode/opencode-tmux-agent-status.js" "$HOME/.config/opencode/plugins"
 
 echo "Configuring Pi..."
@@ -50,9 +50,9 @@ ln -Fsn "$current_dir/Skills/use-jira" "$HOME/.agents/skills/"
 ln -Fsn "$current_dir/Skills/use-jira" "$HOME/.claude/skills/"
 
 echo "Configuring Agent bin..."
-ln -f $current_dir/bin/fa ~/bin/ 
-ln -f $current_dir/bin/xcsift-for-apple-build-tools ~/bin/ 
-ln -f "$current_dir/bin/sync-opencode-omlx-models" "$HOME/bin/"
+ln -sfn "$current_dir/bin/fa" "$HOME/bin/fa"
+ln -sfn "$current_dir/bin/xcsift-for-apple-build-tools" "$HOME/bin/xcsift-for-apple-build-tools"
+ln -sfn "$current_dir/bin/sync-opencode-omlx-models" "$HOME/bin/sync-opencode-omlx-models"
 
 # Herdr owns its integration files and rewrites them on update, so install them
 # through herdr rather than tracking copies here. This has to run after the
