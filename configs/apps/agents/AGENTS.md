@@ -1,4 +1,4 @@
-- IMPORTANT When creating branches, name them using the format 'jsc/yyyy-mm-dd--[description]'
+- IMPORTANT Never create or switch branches unless I explicitly ask — commit on the current branch even when it is `main`. When I do ask, name branches 'jsc/yyyy-mm-dd--[description]'.
 - Ask me clarifying questions before you start writing code if anything is evenly slightly ambiguous
 - Always explain the rationale behind non-obvious fixes, not just what changed
 - Be concise in all written comments, commit messages, pull request descriptions, and other writing.
