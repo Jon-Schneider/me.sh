@@ -3,7 +3,6 @@ current_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 mkdir -p "$HOME/.claude"
 mkdir -p "$HOME/.codex"
-mkdir -p "$HOME/.kimi"
 mkdir -p "$HOME/.config/opencode/plugins"
 mkdir -p "$HOME/.agents/skills"
 mkdir -p "$HOME/.codex/skills"
@@ -20,11 +19,6 @@ ln -f "$current_dir/Claude/statusline-command.sh" "$HOME/.claude"
 echo "Configuring Codex..."
 ln -f "$current_dir/AGENTS.md" "$HOME/.codex/AGENTS.md"
 ln -f "$current_dir/Codex/config.toml" "$HOME/.codex"
-
-
-
-echo "Configuring Kimi..."
-ln -f "$current_dir/AGENTS.md" "$HOME/.kimi/AGENTS.md"
 
 echo "Configuring Opencode..."
 ln -f "$current_dir/Opencode/opencode.json" "$HOME/.config/opencode"
