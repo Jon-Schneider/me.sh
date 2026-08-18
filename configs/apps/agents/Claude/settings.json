@@ -139,6 +139,10 @@
     "command": "bash /Users/$(whoami)/.claude/statusline-command.sh"
   },
   "effortLevel": "high",
+  "enabledPlugins": {
+    "clangd-lsp@claude-plugins-official": true,
+    "swift-lsp@claude-plugins-official": true
+  },
   "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,
   "agentPushNotifEnabled": true
