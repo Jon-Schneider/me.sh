@@ -17,6 +17,7 @@
       "Read(~/.ssh/*)"
     ]
   },
+  "model": "opus",
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -133,16 +134,15 @@
       }
     ]
   },
-  "model": "opus",
   "statusLine": {
     "type": "command",
     "command": "bash /Users/$(whoami)/.claude/statusline-command.sh"
   },
-  "effortLevel": "high",
   "enabledPlugins": {
     "clangd-lsp@claude-plugins-official": true,
     "swift-lsp@claude-plugins-official": true
   },
+  "effortLevel": "medium",
   "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,
   "agentPushNotifEnabled": true
