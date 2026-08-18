@@ -128,6 +128,14 @@ load_git_aliases() {
     alias gdt="git difftool"
     alias gfx="git fixup"
     alias gfix="gfx"
+    alias ghs="gh stack"
+    alias ghsa="ghs add"
+    alias ghsi="ghs init"
+    alias ghss="ghs sync"
+    alias ghsu="ghs submit"
+    alias ghsr="ghs rebase"
+    alias ghsm="ghs modify"
+    alias ghsv="ghs view"
     alias glfp="git lfs pull"
     alias glm='git pull --rebase=false' # git pull docs say merge strategy (default) used if --rebase=false
     alias glr='git pull --rebase'
