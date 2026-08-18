@@ -53,3 +53,17 @@ echo "Configuring Agent bin..."
 ln -f $current_dir/bin/fa ~/bin/ 
 ln -f $current_dir/bin/xcsift-for-apple-build-tools ~/bin/ 
 ln -f "$current_dir/bin/sync-opencode-omlx-models" "$HOME/bin/"
+
+# Herdr owns its integration files and rewrites them on update, so install them
+# through herdr rather than tracking copies here. This has to run after the
+# symlinks above, because installing edits the agent configs in place — those
+# edits land in the repo and are stripped back out by the herdr-hooks clean
+# filter (see clean_herdr-hooks).
+if command -v herdr > /dev/null; then
+  echo "Configuring Herdr integrations..."
+  for agent in pi claude codex opencode; do
+    herdr integration install "$agent"
+  done
+else
+  echo "Skipping Herdr integrations (herdr not installed)"
+fi
