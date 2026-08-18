@@ -2,5 +2,18 @@ model = "gpt-5.6-sol"
 model_reasoning_effort = "high"
 
 [features]
-hooks = true
 computer_use = false
+hooks = true
+plugins = false
+
+[tui]
+status_line = [
+    "model-with-reasoning",
+    "context-used",
+    "five-hour-limit",
+    "weekly-limit",
+]
+status_line_use_colors = true
+
+[notice]
+hide_rate_limit_model_nudge = true
