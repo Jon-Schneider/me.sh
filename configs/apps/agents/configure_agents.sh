@@ -22,7 +22,7 @@ ln -sfn "$current_dir/Codex/config.toml" "$HOME/.codex/config.toml"
 ln -sfn "$current_dir/Codex/hooks.json" "$HOME/.codex/hooks.json"
 
 echo "Configuring Opencode..."
-ln -sfn "$current_dir/Opencode/opencode.json" "$HOME/.config/opencode/opencode.json"
+ln -sfn "$current_dir/Opencode/opencode.json" "$HOME/.config/opencode/opencode-shared.json"
 ln -sfn "$current_dir/Opencode/opencode-tmux-agent-status.js" "$HOME/.config/opencode/plugins/opencode-tmux-agent-status.js"
 
 echo "Configuring Pi..."

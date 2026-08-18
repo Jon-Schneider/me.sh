@@ -402,6 +402,9 @@ eval "$(starship init zsh)"
 # Customize config file location for apps that support it (including ghostty)
 export XDG_CONFIG_HOME="$HOME/.config"
 
+# Opencode merges shared global config file into ~/.config/opencode/opencode.json, which is left untracked so mtplx and sync-opencode-omlx-models can rewrite it freely.
+export OPENCODE_CONFIG="$XDG_CONFIG_HOME/opencode/opencode-shared.json"
+
 # Skip tmux autostart when the terminal was opened for a specific directory.
 shell_has_preassigned_directory() {
   [[ "${PWD:A}" != "${HOME:A}" ]]

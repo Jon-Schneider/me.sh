@@ -3,7 +3,7 @@
 set -eu
 
 program_name="${0##*/}"
-config_file="${OPENCODE_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/opencode/opencode.json}"
+config_file="${XDG_CONFIG_HOME:-$HOME/.config}/opencode/opencode.json"
 omlx_settings_file="${OMLX_SETTINGS_FILE:-$HOME/.omlx/settings.json}"
 dry_run=false
 
