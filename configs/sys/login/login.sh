@@ -1,3 +1,3 @@
 #! bash
 
-trash ~/Tmp/*
+# Currently empty
