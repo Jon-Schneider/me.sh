@@ -17,7 +17,6 @@ ln -f "$current_dir/Claude/settings.json" "$HOME/.claude"
 ln -f "$current_dir/Claude/statusline-command.sh" "$HOME/.claude"
 
 echo "Configuring Codex..."
-ln -f "$current_dir/AGENTS.md" "$HOME/.codex/AGENTS.md"
 ln -f "$current_dir/Codex/config.toml" "$HOME/.codex"
 
 echo "Configuring Opencode..."
