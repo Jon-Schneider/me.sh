@@ -1,4 +1,5 @@
 const STATUS_SCRIPT = "/Users/jsc/bin/set_tmux_agent_status";
+const CLEAR_PANE_TITLE_SCRIPT = "/Users/jsc/bin/clear_tmux_pane_title";
 const SUBMARINE_SOUND = "/System/Library/Sounds/Submarine.aiff";
 const FUNK_SOUND = "/System/Library/Sounds/Funk.aiff";
 
@@ -20,6 +21,11 @@ export const TmuxAgentStatusPlugin = async ({ $ }) => {
     }
   };
 
+  const clearPaneTitle = async () => {
+    await $`${CLEAR_PANE_TITLE_SCRIPT}`.quiet().nothrow();
+  };
+
+  await clearPaneTitle();
   await setStatus("ready");
 
   return {
@@ -34,6 +40,7 @@ export const TmuxAgentStatusPlugin = async ({ $ }) => {
           break;
 
         case "session.created":
+          await clearPaneTitle();
           await setStatus("ready");
           break;
 
