@@ -84,6 +84,10 @@
           {
             "type": "command",
             "command": "/Users/$(whoami)/bin/xcsift-for-apple-build-tools --then-rtk-claude"
+          },
+          {
+            "type": "command",
+            "command": "rtk hook claude"
           }
         ]
       }
