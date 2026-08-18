@@ -22,7 +22,7 @@
 				<key>Navigation</key>
 				<string>NO</string>
 				<key>Parent Title</key>
-				<string>Xcode Assistant</string>
+				<string>XcodeAssistant - Extension</string>
 				<key>Title</key>
 				<string>Format Swift code</string>
 			</dict>
@@ -42,7 +42,7 @@
 				<key>Navigation</key>
 				<string>NO</string>
 				<key>Parent Title</key>
-				<string>Xcode Assistant</string>
+				<string>XcodeAssistant - Extension</string>
 				<key>Title</key>
 				<string>Open in Github</string>
 			</dict>
@@ -62,7 +62,7 @@
 				<key>Navigation</key>
 				<string>NO</string>
 				<key>Parent Title</key>
-				<string>Xcode Assistant</string>
+				<string>XcodeAssistant - Extension</string>
 				<key>Title</key>
 				<string>Open in Sourcegraph</string>
 			</dict>
