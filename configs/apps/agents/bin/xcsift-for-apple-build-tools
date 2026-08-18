@@ -20,6 +20,18 @@ RTK_BEFORE_BUILD = re.compile(
     r"(?=(?:command\s+)?(?:xcodebuild|swift\s+(?:build|test|run|package))\b)"
 )
 
+# Opt-out marker: a leading `NO_XCSIFT=1 xcodebuild ...` (or after `env`) runs the
+# build unwrapped. Falsy values leave wrapping enabled so `NO_XCSIFT=0` is a no-op.
+NO_XCSIFT_ASSIGNMENT = re.compile(r"^NO_XCSIFT=(.*)$")
+FALSY_MARKER_VALUES = {"", "0", "false", "False", "no", "No", "off", "Off"}
+
+
+def is_xcsift_bypass(token):
+    match = NO_XCSIFT_ASSIGNMENT.match(token)
+    if not match:
+        return False
+    return match.group(1) not in FALSY_MARKER_VALUES
+
 
 def parse_tool_args(raw):
     if isinstance(raw, dict):
@@ -135,6 +147,7 @@ def rewrite_simple_tokens(tokens, original, xcsift):
 
     prefix = []
     index = 0
+    bypass = False
 
     while index < len(tokens):
         first = os.path.basename(tokens[index])
@@ -143,8 +156,20 @@ def rewrite_simple_tokens(tokens, original, xcsift):
             prefix.append(tokens[index])
             index += 1
             while index < len(tokens) and "=" in tokens[index] and not tokens[index].startswith("-"):
-                prefix.append(tokens[index])
+                if is_xcsift_bypass(tokens[index]):
+                    bypass = True
+                else:
+                    prefix.append(tokens[index])
                 index += 1
+            continue
+
+        marker = NO_XCSIFT_ASSIGNMENT.match(tokens[index])
+        if marker:
+            if marker.group(1) not in FALSY_MARKER_VALUES:
+                bypass = True
+            else:
+                prefix.append(tokens[index])
+            index += 1
             continue
 
         if first == "command":
@@ -172,6 +197,9 @@ def rewrite_simple_tokens(tokens, original, xcsift):
         return None
 
     build_command = shlex.join(prefix + target)
+    if bypass:
+        return build_command
+
     if "2>&1" not in original:
         build_command = f"{build_command} 2>&1"
 
