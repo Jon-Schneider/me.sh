@@ -83,6 +83,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "/Users/$(whoami)/.local/bin/dcg"
+          },
+          {
+            "type": "command",
             "command": "/Users/$(whoami)/bin/xcsift-for-apple-build-tools --then-rtk-claude"
           },
           {

@@ -36,6 +36,15 @@
         "hooks": [
           {
             "type": "command",
+            "command": "$HOME/.local/bin/dcg"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
             "command": "$HOME/bin/set_tmux_agent_status running-tool"
           }
         ]
