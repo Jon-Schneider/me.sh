@@ -13,7 +13,8 @@
       "Write(~/**/*)"
     ],
     "deny": [
-      "Bash(swiftformat:*)"
+      "Bash(swiftformat:*)",
+      "Read(~/.ssh/*)"
     ]
   },
   "hooks": {
