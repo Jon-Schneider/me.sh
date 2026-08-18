@@ -1,7 +1,7 @@
 echo "Configuring tmux..."
 current_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-ln -f $current_dir/.tmux.conf ~/
+ln -sfn $current_dir/.tmux.conf ~/.tmux.conf
 
 mkdir -p ~/bin
 cp -v $current_dir/set_tmux_agent_status ~/bin/
