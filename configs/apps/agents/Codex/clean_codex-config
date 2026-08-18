@@ -1,0 +1,69 @@
+#!/usr/bin/env python3
+"""git clean filter: drop machine-local state Codex writes into config.toml.
+
+Codex rewrites its own config at runtime, appending per-machine sections that
+should never reach the repo. This strips them on the way into git so a symlinked
+config.toml stays clean on every machine. Reads stdin, writes stdout.
+
+Line-based rather than a TOML round-trip so comments, key order, and formatting
+of the sections we keep survive untouched.
+"""
+import re
+import sys
+
+# Dotted-path prefixes whose sections are machine-local. A section is dropped
+# when its header equals one of these or nests under it.
+STRIP_PREFIXES = (
+    "projects",       # one entry per directory ever opened
+    "hooks.state",    # per-hook trust hashes, keyed by absolute source path
+    "marketplaces",   # install timestamps and ~/.codex/.tmp paths
+    "tui.model_availability_nux",  # per-model "seen it" counters
+)
+
+HEADER = re.compile(r"^\s*\[\[?([^\]]+)\]\]?\s*$")
+
+
+def section_path(header_body):
+    """Dotted path of a header, with quoted segments collapsed to a placeholder."""
+    parts, buf, in_quotes = [], "", False
+    for ch in header_body:
+        if ch == '"':
+            in_quotes = not in_quotes
+            continue
+        if ch == "." and not in_quotes:
+            parts.append(buf)
+            buf = ""
+            continue
+        buf += ch
+    parts.append(buf)
+    return parts
+
+
+def is_stripped(path_parts):
+    for prefix in STRIP_PREFIXES:
+        wanted = prefix.split(".")
+        if path_parts[: len(wanted)] == wanted:
+            return True
+    return False
+
+
+def clean(text):
+    out, dropping = [], False
+    for line in text.split("\n"):
+        match = HEADER.match(line)
+        if match:
+            dropping = is_stripped(section_path(match.group(1)))
+            if dropping:
+                while out and out[-1].strip() == "":
+                    out.pop()
+                continue
+            if out and out[-1].strip() != "":
+                out.append("")
+        if not dropping:
+            out.append(line)
+    while out and out[-1].strip() == "":
+        out.pop()
+    return "\n".join(out) + "\n"
+
+
+sys.stdout.write(clean(sys.stdin.read()))
