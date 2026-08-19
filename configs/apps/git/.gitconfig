@@ -1,10 +1,9 @@
 [user]
 	name = Jon Schneider
-	email = jon@jonschneider.me
+[include]
+    path = .gitconfig_local
 [includeIf "gitdir:jsc/"]
     path = .gitconfig_jsc
-[includeIf "gitdir:ms/"]
-    path = .gitconfig_ms
 [difftool]
     prompt = false
 [fetch]
@@ -13,7 +12,7 @@
 	excludesfile = ~/.gitignore
     pager = hunk pager
     preloadIndex = true
-    attributesfile = /Users/jsc/.gitattributes
+    attributesfile = ~/.gitattributes
 [pager]
     log = less --mouse -FR
     show = less --mouse -FR
