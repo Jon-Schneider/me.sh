@@ -488,21 +488,28 @@ tmux_repo_key_for_pwd() {
   git -C "$PWD" rev-parse --show-toplevel 2>/dev/null || printf "%s" "$PWD"
 }
 
+# Window id owning this shell, but only when this shell is the pane's root shell.
+# TMUX_PANE is inherited by nested agent shells, and only the root shell owns its
+# window name; otherwise a child shell can rename the window for its temporary
+# working directory (for example, document-translation-<UUID>).
+tmux_window_id_for_pane_root_shell() {
+  [[ -n "$TMUX" && -n "$TMUX_PANE" ]] || return 1
+
+  local pane_pid window_id
+  pane_pid="$(tmux display-message -p -t "$TMUX_PANE" '#{pane_pid}')" || return 1
+  [[ "$pane_pid" == "$$" ]] || return 1
+
+  window_id="$(tmux display-message -p -t "$TMUX_PANE" '#{window_id}')" || return 1
+  [[ -n "$window_id" ]] || return 1
+  printf "%s" "$window_id"
+}
+
 rename_tmux_window_for_pwd() {
-  [[ -n "$TMUX" && -n "$TMUX_PANE" ]] || return
-
-  local target_window pane_pid name key
-  # TMUX_PANE is inherited by nested agent shells. Only the pane's root shell
-  # owns its window name; otherwise a child shell can rename the window for its
-  # temporary working directory (for example, document-translation-<UUID>).
-  pane_pid="$(tmux display-message -p -t "$TMUX_PANE" '#{pane_pid}')" || return
-  [[ "$pane_pid" == "$$" ]] || return
-
+  local target_window name key
   # Resolve the window that owns this shell before doing any slower path/Git
   # work. Without an explicit target, tmux operates on whichever window the
   # client has selected when each command runs.
-  target_window="$(tmux display-message -p -t "$TMUX_PANE" '#{window_id}')" || return
-  [[ -n "$target_window" ]] || return
+  target_window="$(tmux_window_id_for_pane_root_shell)" || return
 
   name="$(tmux_window_name_for_pwd)"
   # Never set an empty name (e.g. a transient git failure / vanished path):
@@ -522,6 +529,37 @@ rename_tmux_window_for_pwd() {
   tmux set-option -w -t "$target_window" @window_repo_root "$key"
 }
 
+# Herdr is a full-window app: its splits happen inside Herdr rather than in tmux,
+# so a pane running it owns the whole window tab for as long as it runs.
+TMUX_HERDR_WINDOW_NAME="Herdr"
+
+rename_tmux_window_for_herdr() {
+  local target_window
+  target_window="$(tmux_window_id_for_pane_root_shell)" || return
+
+  # A manually pinned name (prefix ,) outranks Herdr.
+  [[ "$(tmux show-option -wqv -t "$target_window" @manual_window_name)" == "1" ]] && return
+
+  tmux rename-window -t "$target_window" "$TMUX_HERDR_WINDOW_NAME"
+  TMUX_WINDOW_RENAMED_FOR_HERDR=1
+}
+
+start_tmux_herdr_window_name() {
+  # $3 is the command line with aliases and history expanded; (z) splits it the
+  # way the shell does, so the first word is the command actually being run.
+  local -a command_words
+  command_words=(${(z)3})
+  [[ "${command_words[1]:t}" == "herdr" ]] && rename_tmux_window_for_herdr
+}
+
+end_tmux_herdr_window_name() {
+  [[ -n "$TMUX_WINDOW_RENAMED_FOR_HERDR" ]] || return
+  unset TMUX_WINDOW_RENAMED_FOR_HERDR
+  rename_tmux_window_for_pwd
+}
+
+add-zsh-hook preexec start_tmux_herdr_window_name
+add-zsh-hook precmd end_tmux_herdr_window_name
 add-zsh-hook precmd refresh_starship_github_pr_cache
 add-zsh-hook chpwd reset_starship_github_pr_cache
 add-zsh-hook zshexit cleanup_starship_github_pr_cache
