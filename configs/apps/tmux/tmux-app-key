@@ -39,6 +39,16 @@ HERDR_ACTIONS = {
     "HerdrPreviousTab": ("tab", "previous"),
     "HerdrNextTab": ("tab", "next"),
 }
+HERDR_PANE_DIRECTIONS = {
+    "HerdrFocusPaneLeft": ("focus", "left"),
+    "HerdrFocusPaneRight": ("focus", "right"),
+    "HerdrFocusPaneUp": ("focus", "up"),
+    "HerdrFocusPaneDown": ("focus", "down"),
+    "HerdrSwapPaneLeft": ("swap", "left"),
+    "HerdrSwapPaneRight": ("swap", "right"),
+    "HerdrSwapPaneUp": ("swap", "up"),
+    "HerdrSwapPaneDown": ("swap", "down"),
+}
 HERDR_SPLITS = {
     "HerdrSplitRight": ("right", True),
     "HerdrSplitRightNoFocus": ("right", False),
@@ -159,6 +169,21 @@ def run_herdr_split(app_key: str) -> int:
             "--focus" if focus else "--no-focus",
         ]
     )
+    if result.returncode != 0:
+        print(result.stderr.strip() or result.stdout.strip(), file=sys.stderr)
+    return result.returncode
+
+
+def run_herdr_pane_direction(app_key: str) -> int:
+    operation, direction = HERDR_PANE_DIRECTIONS[app_key]
+
+    herdr = herdr_binary()
+    if not herdr:
+        return 127
+
+    # No target pane: Herdr acts on its own focused pane, which is the one the
+    # tmux pane is showing. At a layout edge this is a no-op, not an error.
+    result = run([herdr, "pane", operation, "--direction", direction])
     if result.returncode != 0:
         print(result.stderr.strip() or result.stdout.strip(), file=sys.stderr)
     return result.returncode
@@ -305,6 +330,8 @@ def main() -> int:
             if app_name == "herdr":
                 if app_key in HERDR_SPLITS:
                     return run_herdr_split(app_key)
+                if app_key in HERDR_PANE_DIRECTIONS:
+                    return run_herdr_pane_direction(app_key)
                 if app_key in HERDR_ACTIONS:
                     return run_herdr_action(app_key)
             return subprocess.run(
