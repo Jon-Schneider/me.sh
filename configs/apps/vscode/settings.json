@@ -8,8 +8,7 @@
     "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
     "security.workspace.trust.untrustedFiles": "open",
     "git.openRepositoryInParentFolders": "never",
-    "workbench.colorTheme": "Xcode Classic Light",
-    "workbench.preferredLightColorTheme": "Xcode Classic Light",
     "editor.fontSize": 13,
-    "workbench.tree.indent": 20
+    "workbench.tree.indent": 20,
+    "workbench.colorTheme": "Visual Studio Light"
 }
