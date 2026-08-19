@@ -39,6 +39,12 @@ HERDR_ACTIONS = {
     "HerdrPreviousTab": ("tab", "previous"),
     "HerdrNextTab": ("tab", "next"),
 }
+HERDR_SPLITS = {
+    "HerdrSplitRight": ("right", True),
+    "HerdrSplitRightNoFocus": ("right", False),
+    "HerdrSplitDown": ("down", True),
+    "HerdrSplitDownNoFocus": ("down", False),
+}
 
 
 def run(argv: list[str]) -> subprocess.CompletedProcess[str]:
@@ -127,14 +133,70 @@ def focused_herdr_resource(
     return focused, resources
 
 
+def herdr_binary() -> str | None:
+    herdr = shutil.which("herdr")
+    if not herdr:
+        print("tmux-app-key: herdr not found", file=sys.stderr)
+    return herdr
+
+
+def run_herdr_split(app_key: str) -> int:
+    direction, focus = HERDR_SPLITS[app_key]
+
+    herdr = herdr_binary()
+    if not herdr:
+        return 127
+
+    # No target pane: Herdr splits its own focused pane, which is the one the
+    # tmux pane is showing.
+    result = run(
+        [
+            herdr,
+            "pane",
+            "split",
+            "--direction",
+            direction,
+            "--focus" if focus else "--no-focus",
+        ]
+    )
+    if result.returncode != 0:
+        print(result.stderr.strip() or result.stdout.strip(), file=sys.stderr)
+    return result.returncode
+
+
+def focused_split_pane_id(herdr: str, tab_id: str) -> str | None:
+    """Focused pane id when its tab holds more than one pane, otherwise None."""
+    result = run([herdr, "pane", "list"])
+    if result.returncode != 0:
+        print(result.stderr.strip() or result.stdout.strip(), file=sys.stderr)
+        return None
+
+    try:
+        payload = json.loads(result.stdout)
+    except json.JSONDecodeError as error:
+        print(f"tmux-app-key: invalid Herdr response: {error}", file=sys.stderr)
+        return None
+
+    panes = [
+        pane
+        for pane in payload.get("result", {}).get("panes", [])
+        if pane.get("tab_id") == tab_id
+    ]
+    if len(panes) < 2:
+        return None
+
+    focused = next((pane for pane in panes if pane.get("focused")), None)
+    pane_id = focused.get("pane_id") if focused else None
+    return pane_id if isinstance(pane_id, str) else None
+
+
 def run_herdr_action(app_key: str) -> int:
     action = HERDR_ACTIONS.get(app_key)
     if not action:
         return 64
 
-    herdr = shutil.which("herdr")
+    herdr = herdr_binary()
     if not herdr:
-        print("tmux-app-key: herdr not found", file=sys.stderr)
         return 127
 
     resource, operation = action
@@ -173,14 +235,19 @@ def run_herdr_action(app_key: str) -> int:
                 print(f"tmux-app-key: Herdr returned no {resource} id", file=sys.stderr)
                 return 1
             command = [herdr, resource, "focus", target_id]
-        # Herdr refuses to close a workspace's final tab. Match macOS Cmd+W
-        # behavior by closing that workspace instead.
         elif resource == "tab":
+            split_pane_id = focused_split_pane_id(herdr, resource_id)
             workspace_id = focused_resource.get("workspace_id")
             workspace_tab_count = sum(
                 item.get("workspace_id") == workspace_id for item in resources
             )
-            if isinstance(workspace_id, str) and workspace_tab_count == 1:
+            if split_pane_id:
+                # Close the focused split first; the tab only closes once it is
+                # down to a single pane.
+                command = [herdr, "pane", "close", split_pane_id]
+            # Herdr refuses to close a workspace's final tab. Match macOS Cmd+W
+            # behavior by closing that workspace instead.
+            elif isinstance(workspace_id, str) and workspace_tab_count == 1:
                 command = [herdr, "workspace", "close", workspace_id]
             else:
                 command.append(resource_id)
@@ -235,8 +302,11 @@ def main() -> int:
 
     for app_name, app_key in app_keys:
         if app_name in names:
-            if app_name == "herdr" and app_key in HERDR_ACTIONS:
-                return run_herdr_action(app_key)
+            if app_name == "herdr":
+                if app_key in HERDR_SPLITS:
+                    return run_herdr_split(app_key)
+                if app_key in HERDR_ACTIONS:
+                    return run_herdr_action(app_key)
             return subprocess.run(
                 [tmux, "send-keys", "-t", target, app_key], check=False
             ).returncode
