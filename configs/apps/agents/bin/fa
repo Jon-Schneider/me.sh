@@ -1,12 +1,8 @@
 #!/bin/zsh
 
 # fa - Fork Agent
-# Forks a running Codex CLI, Claude CLI, or pi-agent session into a new tmux split pane
-
-if [[ -z "$TMUX" ]]; then
-    echo "fa: not running inside tmux"
-    exit 1
-fi
+# Forks a running Codex CLI, Claude CLI, or pi-agent session into a new split pane.
+# Splits inside Herdr when run from a Herdr pane, otherwise falls back to tmux.
 
 # Try to get pi-agent session ID from the most recent session file for current directory
 get_pi_session_id() {
@@ -30,21 +26,22 @@ get_pi_session_id() {
 }
 
 if [[ -n "$CODEX_THREAD_ID" ]]; then
-    # Codex
+    agent=codex
     command=(codex fork "$CODEX_THREAD_ID")
 
 elif [[ -n "$CLAUDE_CODE_SESSION_ID" ]]; then
-    # Claude Code
+    agent=claude
     command=(claude --resume "$CLAUDE_CODE_SESSION_ID" --fork-session)
 
 elif [[ -n "$PI_SESSION_ID" ]]; then
-    # pi-agent (from environment)
+    agent=pi
     command=(pi --fork "$PI_SESSION_ID")
 
 else
     # Try to find pi-agent session from session files
     pi_session_id=$(get_pi_session_id)
     if [[ -n "$pi_session_id" ]]; then
+        agent=pi
         command=(pi --fork "$pi_session_id")
     else
         echo "fa: couldn't detect Codex, Claude Code, or pi-agent"
@@ -52,12 +49,42 @@ else
     fi
 fi
 
-# Pass environment variables to the new tmux pane (tmux inherits from server, not current process)
-env_args=()
-for var in CODEX_THREAD_ID CLAUDE_CODE_SESSION_ID PI_SESSION_ID PI_SESSION_FILE PI_PROVIDER PI_MODEL PI_REASONING_LEVEL; do
-    if [[ -n "${(P)var}" ]]; then
-        env_args+=(-e "$var=${(P)var}")
-    fi
-done
+# The new pane inherits the multiplexer server's environment, not this process's,
+# so forward the session variables explicitly.
+forwarded_vars=(CODEX_THREAD_ID CLAUDE_CODE_SESSION_ID PI_SESSION_ID PI_SESSION_FILE PI_PROVIDER PI_MODEL PI_REASONING_LEVEL)
 
-tmux split-window -h -c "$PWD" "${env_args[@]}" "$(printf '%q ' "${command[@]}")" ";" select-layout even-horizontal
+if [[ -n "$HERDR_PANE_ID" ]]; then
+    env_args=()
+    for var in $forwarded_vars; do
+        if [[ -n "${(P)var}" ]]; then
+            env_args+=(--env "$var=${(P)var}")
+        fi
+    done
+
+    tab_args=()
+    if [[ -n "$HERDR_TAB_ID" ]]; then
+        tab_args=(--tab "$HERDR_TAB_ID")
+    fi
+
+    exec herdr agent start "$agent" \
+        --cwd "$PWD" \
+        "${tab_args[@]}" \
+        --split right \
+        --focus \
+        "${env_args[@]}" \
+        -- "${command[@]}"
+
+elif [[ -n "$TMUX" ]]; then
+    env_args=()
+    for var in $forwarded_vars; do
+        if [[ -n "${(P)var}" ]]; then
+            env_args+=(-e "$var=${(P)var}")
+        fi
+    done
+
+    exec tmux split-window -h -c "$PWD" "${env_args[@]}" "$(printf '%q ' "${command[@]}")" ";" select-layout even-horizontal
+
+else
+    echo "fa: not running inside Herdr or tmux"
+    exit 1
+fi
