@@ -26,6 +26,9 @@
               "key_code": "left_command"
             }
           ],
+          "parameters": {
+            "basic.to_if_alone_timeout_milliseconds": 250
+          },
           "to_if_alone": [
             {
               "shell_command": "/usr/bin/osascript -e 'tell application \"Google Chrome\"' -e 'if (count of windows) is 0 then' -e 'make new window' -e 'else' -e 'tell front window' -e 'set i to active tab index' -e 'make new tab at after tab i with properties {URL:\"chrome://newtab/\"}' -e 'set active tab index to i + 1' -e 'end tell' -e 'end if' -e 'activate' -e 'end tell'"
