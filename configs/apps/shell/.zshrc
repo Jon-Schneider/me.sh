@@ -295,7 +295,7 @@ load_non_git_aliases() {
 
     codex-sb() { safe codex --dangerously-bypass-approvals-and-sandbox "$@"; }
     alias cdxsb="codex-sb"
-    alias cdxus="codex -- --dangerously-bypass-approvals-and-sandbox" # Codex unsafe
+    alias cdxus="codex --dangerously-bypass-approvals-and-sandbox" # Codex unsafe
 
     alias cdx="codex"
     alias cdxr="cdx resume"
