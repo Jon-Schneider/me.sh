@@ -260,6 +260,7 @@ load_non_git_aliases() {
     alias xcrmdd="rm -rf ~/Library/Developer/Xcode/DerivedData" # Nuke derived data
     alias xcs="xcode-select"
     alias xcss="sudo xcode-select --switch"
+    alias xl="xlent"
     alias zpu="zplugin update" # zsh plugin update
     alias zpua="zplugin update --all" # zsh plugin update all
     alias zshrc="bb ~/.zshrc"
