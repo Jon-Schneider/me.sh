@@ -195,7 +195,6 @@ load_non_git_aliases() {
     alias fdr="open ."
     alias fl="bundle exec fastlane"
     alias fm="nnn" # Open 'nnn' file manager in current dir
-    alias gcg="open ~/.gitconfig_js; open ~/.gitconfig_ms; open ~/.gitconfig"
     alias hm="cd ~/"
     alias hst="history"
     alias hstg="hst | grep"
