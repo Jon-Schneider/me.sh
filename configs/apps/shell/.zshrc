@@ -205,7 +205,7 @@ load_non_git_aliases() {
     alias js="cd ~/Developer/jsc"
     alias kr="sudo killall Karabiner-Core-Service" # Karabiner Restart
     alias lib="open ~/Library"
-    alias ls='ls -aG $@'
+    alias ls='ls -aG1 $@'
     alias me="mer && vsc"
     alias mer="cd ~/Developer/jsc/me.sh"
     alias od="cd ~/OneDrive"
