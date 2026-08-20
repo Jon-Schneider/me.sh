@@ -1,9 +1,9 @@
 [user]
 	name = Jon Schneider
 [include]
-    path = .gitconfig_local
+    path = ~/.gitconfig_local
 [includeIf "gitdir:jsc/"]
-    path = .gitconfig_jsc
+    path = ~/.gitconfig_jsc
 [difftool]
     prompt = false
 [fetch]
