@@ -19,7 +19,6 @@ from pathlib import Path
 BUILTIN_AGENT_CLEANERS = {
     "claude": "clean-claude-copy",
     "codex": "clean-codex-copy",
-    "gemini": "clean-gemini-copy",
 }
 LOCAL_MANIFEST_ENV = "AGENT_CLEANERS_MANIFEST"
 DEFAULT_LOCAL_MANIFEST = Path.home() / ".config/me.sh/agent-cleaners.json"
