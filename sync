@@ -1,0 +1,301 @@
+#!/bin/bash
+# Convenience runner for syncing all or part of the me.sh configuration.
+#
+# Usage:
+#   sync                        List available config names
+#   sync --help                 Show detailed help
+#   sync all                    Sync everything (app + system configs + git filters)
+#   sync app | apps             Full app sync (all app configs + git filters)
+#   sync sys | system           Full system sync (all system configs)
+#   sync [app|sys] <name>...    Sync only the named configs
+set -euo pipefail
+
+repo_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$repo_root" || exit 1
+
+source "lib/common.sh"
+
+readonly APPS_SCOPE="apps"
+readonly SYS_SCOPE="sys"
+
+# --- Discovery -------------------------------------------------------------
+
+# Print every configure script for a scope ('apps' or 'sys'), sorted.
+function list_scripts {
+	find -E "configs/$1" -name 'configure_*.sh' | sort
+}
+
+# Print the config name of a script path (configure_<name>.sh -> <name>).
+function script_name {
+	local base="${1##*/}"
+	base="${base#configure_}"
+	printf '%s' "${base%.sh}"
+}
+
+# Print every accepted config name for a scope, one per line, sorted.
+# Both directory names and script names are accepted by 'sync'.
+function list_names {
+	local script
+	{
+		while IFS= read -r script; do
+			basename "$(dirname "$script")"
+			script_name "$script"
+			printf '\n'
+		done < <(list_scripts "$1")
+	} | sort -fu
+}
+
+# Emit 'scope<TAB>name' lines for zsh completion (internal use only).
+function show_completion_names {
+	local scope script
+	{
+		for scope in "$APPS_SCOPE" "$SYS_SCOPE"; do
+			while IFS= read -r script; do
+				printf '%s\t%s\n' "$scope" "$(basename "$(dirname "$script")")"
+				printf '%s\t%s\n' "$scope" "$(script_name "$script")"
+			done < <(list_scripts "$scope")
+		done
+	} | sort -fu
+}
+
+# --- Resolution ------------------------------------------------------------
+
+declare -a selected=()
+
+# Add a script to 'selected', skipping duplicates.
+function add_selected {
+	local candidate="$1" existing
+	if (( ${#selected[@]} > 0 )); then
+		for existing in "${selected[@]}"; do
+			if [[ "$existing" == "$candidate" ]]; then
+				return 0
+			fi
+		done
+	fi
+	selected+=("$candidate")
+}
+
+# Raw matches from the most recent collect_matches call.
+declare -a matches=()
+
+# Fill 'matches' with every script in a scope whose directory name or script
+# name equals NAME.
+function collect_matches {
+	local scope="$1" name="$2" script
+	matches=()
+	while IFS= read -r script; do
+		if [[ "$(basename "$(dirname "$script")")" == "$name" || "$(script_name "$script")" == "$name" ]]; then
+			matches+=("$script")
+		fi
+	done < <(list_scripts "$scope")
+}
+
+# Resolve one requested name against a scope ('apps', 'sys', or '' for both),
+# appending matches to 'selected'. Exits on unknown or ambiguous names.
+function resolve_name {
+	local scope="$1" name="$2"
+	local -a app_matches=()
+	local m
+
+	if [[ -n "$scope" ]]; then
+		collect_matches "$scope" "$name"
+		if (( ${#matches[@]} == 0 )); then
+			error "No config named '${name}' found in configs/$scope. Available names:"
+			list_names "$scope" | sed 's/^/  /' >&2
+			exit 1
+		fi
+		for m in "${matches[@]}"; do
+			add_selected "$m"
+		done
+		return
+	fi
+
+	# No scope given: search both trees.
+	collect_matches "$APPS_SCOPE" "$name"
+	if (( ${#matches[@]} > 0 )); then
+		app_matches=("${matches[@]}")
+	fi
+	collect_matches "$SYS_SCOPE" "$name"
+
+	if (( ${#app_matches[@]} > 0 && ${#matches[@]} > 0 )); then
+		error "'${name}' matches configs in both app and system:"
+		for m in "${app_matches[@]}" "${matches[@]}"; do
+			error "  ${m}"
+		done
+		error "Re-run with an explicit scope: 'sync app ${name}' or 'sync sys ${name}'"
+		exit 1
+	fi
+
+	if (( ${#app_matches[@]} == 0 && ${#matches[@]} == 0 )); then
+		error "No config named '${name}'. Available names:"
+		show_list >&2
+		exit 1
+	fi
+
+	for m in ${app_matches[@]+"${app_matches[@]}"} ${matches[@]+"${matches[@]}"}; do
+		add_selected "$m"
+	done
+}
+
+# Resolve all requested names against a scope ('apps', 'sys', or '' for both),
+# filling 'selected'. Exits on the first unknown or ambiguous name.
+function resolve_args {
+	local scope="$1" name
+	shift
+	selected=()
+	for name in "$@"; do
+		resolve_name "$scope" "$name"
+	done
+}
+
+# --- Execution -------------------------------------------------------------
+
+declare -a failed_scripts=()
+
+# Run every script in 'selected', collecting failures.
+function run_selected {
+	local script
+	if (( ${#selected[@]} == 0 )); then
+		return
+	fi
+	for script in "${selected[@]}"; do
+		message "Running ${script}..."
+		if ! bash "$script"; then
+			error "${script} failed"
+			failed_scripts+=("$script")
+		fi
+	done
+}
+
+# Run every configure script in a scope, collecting failures.
+function run_scope {
+	local scope="$1" script
+	selected=()
+	while IFS= read -r script; do
+		selected+=("$script")
+	done < <(list_scripts "$scope")
+	run_selected
+}
+
+function run_git_filters {
+	"${repo_root}/sync_git_filters.sh"
+}
+
+# Summarize failures and exit with an appropriate status.
+function finish {
+	if (( ${#failed_scripts[@]} > 0 )); then
+		error "${#failed_scripts[@]} script(s) failed:"
+		local failed_script
+		for failed_script in "${failed_scripts[@]}"; do
+			error "  ${failed_script}"
+		done
+		exit 1
+	fi
+	exit 0
+}
+
+# --- Help & listing --------------------------------------------------------
+
+function show_list {
+	echo "Available config names:"
+	echo
+	echo "app:"
+	list_names "$APPS_SCOPE" | sed 's/^/  /'
+	echo
+	echo "system:"
+	list_names "$SYS_SCOPE" | sed 's/^/  /'
+}
+
+function show_help {
+	cat <<EOF
+sync — run all or part of the me.sh configuration sync
+
+Usage:
+  sync                        List available config names
+  sync --help                 Show this help
+  sync all                    Sync everything: app configs, system configs, git filters
+  sync app | apps             Full app sync (all app configs + git filters)
+  sync sys | system           Full system sync (all system configs)
+  sync [app|sys] <name>...    Sync only the named configs
+
+A name matches either a config directory (e.g. 'karabiner', 'bin') or a
+configure script (e.g. 'karabiner-elements', 'user_bin'). A directory match
+runs every configure script inside it. With no scope, a name is looked up in
+both app and system configs; if it exists in both, re-run with an explicit
+scope.
+
+Examples:
+  sync app karabiner-elements   Sync one app config
+  sync karabiner-elements       Same: unambiguous, found in app configs
+  sync bin                      Same: 'sync system bin'
+  sync app git ghostty          Several configs in one run
+
+Failing scripts never stop the run; failures are summarized at the end and
+reported with a non-zero exit code.
+
+Shell completion (zsh) lives in lib/completion/_sync and is installed into
+~/.zsh/completions by the shell config.
+EOF
+}
+
+# --- Main ------------------------------------------------------------------
+
+if (( $# == 0 )); then
+	show_list
+	exit 0
+fi
+
+case "$1" in
+	-h|--help)
+		show_help
+		exit 0
+		;;
+	-l|--list)
+		show_list
+		exit 0
+		;;
+	--completion-names)
+		# Internal: consumed by lib/completion/_sync.
+		show_completion_names
+		exit 0
+		;;
+	all)
+		if (( $# > 1 )); then
+			error "'all' takes no additional arguments"
+			exit 1
+		fi
+		message "Syncing everything..."
+		run_scope "$APPS_SCOPE"
+		run_git_filters
+		run_scope "$SYS_SCOPE"
+		finish
+		;;
+	app|apps)
+		shift
+		if (( $# == 0 )); then
+			message "Syncing all app configs..."
+			run_scope "$APPS_SCOPE"
+			run_git_filters
+			finish
+		fi
+		resolve_args "$APPS_SCOPE" "$@"
+		run_selected
+		finish
+		;;
+	sys|system)
+		shift
+		if (( $# == 0 )); then
+			message "Syncing all system configs..."
+			run_scope "$SYS_SCOPE"
+			finish
+		fi
+		resolve_args "$SYS_SCOPE" "$@"
+		run_selected
+		finish
+		;;
+	*)
+		resolve_args "" "$@"
+		run_selected
+		finish
+		;;
+esac

@@ -1,0 +1,65 @@
+#compdef sync
+
+# Zsh completion for the me.sh 'sync' runner.
+# Installed into ~/.zsh/completions by configs/apps/shell/configure_shell.sh.
+
+_sync() {
+	local -a app_names sys_names scopes
+	local scope name sync_script line
+
+	# Locate the sync script to ask for valid names. Falls back to the
+	# canonical checkout location when the repo root is not on PATH.
+	sync_script="$(whence -p sync 2>/dev/null)"
+	if [[ -z "$sync_script" ]]; then
+		sync_script="$HOME/Developer/jsc/me.sh/sync"
+	fi
+
+	while IFS=$'\t' read -r scope name; do
+		case "$scope" in
+			app) app_names+=("$name") ;;
+			sys) sys_names+=("$name") ;;
+		esac
+	done < <("$sync_script" --completion-names 2>/dev/null)
+
+	scopes=(
+		'all:everything (app configs, system configs, git filters)'
+		'app:full app sync (includes git filters)'
+		'apps:full app sync (includes git filters)'
+		'sys:full system sync'
+		'system:full system sync'
+	)
+
+	_arguments -C \
+		'(-h --help)'{-h,--help}'[show help]' \
+		'(-l --list)'{-l,--list}'[list available config names]' \
+		'1:scope:->scopes' \
+		'*::name:->names'
+
+	case "$state" in
+		scopes)
+			_describe -t scopes 'scope' scopes
+			(( ${#app_names[@]} )) && _describe -t app-names 'app config' app_names
+			(( ${#sys_names[@]} )) && _describe -t sys-names 'system config' sys_names
+			;;
+		names)
+			case "$words[1]" in
+				app|apps)
+					(( ${#app_names[@]} )) && _describe -t app-names 'app config' app_names
+					;;
+				sys|system)
+					(( ${#sys_names[@]} )) && _describe -t sys-names 'system config' sys_names
+					;;
+				all)
+					;; # no further arguments
+				*)
+					(( ${#app_names[@]} )) && _describe -t app-names 'app config' app_names
+					(( ${#sys_names[@]} )) && _describe -t sys-names 'system config' sys_names
+					;;
+			esac
+			;;
+	esac
+
+	return 0
+}
+
+_sync "$@"
