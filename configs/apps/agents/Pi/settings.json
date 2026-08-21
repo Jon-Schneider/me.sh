@@ -8,7 +8,8 @@
     "npm:pi-omlx-picker",
     "npm:opencode-pi",
     "npm:pi-nvidia-nim",
-    "npm:pi-btw"
+    "npm:pi-btw",
+    "npm:pi-goal"
   ],
   "hideThinkingBlock": true
 }
