@@ -215,6 +215,50 @@ def focused_split_pane_id(herdr: str, tab_id: str) -> str | None:
     return pane_id if isinstance(pane_id, str) else None
 
 
+def ordered_herdr_tab_sequence(herdr: str) -> list[str]:
+    """Every Herdr tab id in stable order: workspaces by number, tabs by number."""
+    workspaces_result = run([herdr, "workspace", "list"])
+    if workspaces_result.returncode != 0:
+        print(
+            workspaces_result.stderr.strip() or workspaces_result.stdout.strip(),
+            file=sys.stderr,
+        )
+        return []
+    tabs_result = run([herdr, "tab", "list"])
+    if tabs_result.returncode != 0:
+        print(tabs_result.stderr.strip() or tabs_result.stdout.strip(), file=sys.stderr)
+        return []
+
+    try:
+        workspaces = json.loads(workspaces_result.stdout)["result"]["workspaces"]
+        tabs = json.loads(tabs_result.stdout)["result"]["tabs"]
+    except (json.JSONDecodeError, KeyError) as error:
+        print(f"tmux-app-key: invalid Herdr response: {error}", file=sys.stderr)
+        return []
+
+    tabs_by_workspace: dict[str, list[dict[str, object]]] = {}
+    for tab in tabs:
+        workspace_id = tab.get("workspace_id")
+        if isinstance(workspace_id, str):
+            tabs_by_workspace.setdefault(workspace_id, []).append(tab)
+
+    sequence: list[str] = []
+    for workspace in sorted(workspaces, key=lambda item: item.get("number") or 0):
+        workspace_id = workspace.get("workspace_id")
+        if not isinstance(workspace_id, str):
+            continue
+        workspace_tabs = sorted(
+            tabs_by_workspace.get(workspace_id, []),
+            key=lambda item: item.get("number") or 0,
+        )
+        sequence.extend(
+            tab_id
+            for tab in workspace_tabs
+            if isinstance((tab_id := tab.get("tab_id")), str)
+        )
+    return sequence
+
+
 def run_herdr_action(app_key: str) -> int:
     action = HERDR_ACTIONS.get(app_key)
     if not action:
@@ -239,27 +283,45 @@ def run_herdr_action(app_key: str) -> int:
             return 1
 
         if operation in {"previous", "next"}:
-            navigation_resources = resources
             if resource == "tab":
-                workspace_id = focused_resource.get("workspace_id")
-                navigation_resources = [
-                    item
-                    for item in resources
-                    if item.get("workspace_id") == workspace_id
+                # Tab navigation walks all Herdr tabs in workspace order rather
+                # than wrapping inside one workspace: moving past a workspace's
+                # last tab lands on the next workspace's first tab (and
+                # symmetrically backwards), wrapping around at the extremes.
+                sequence = ordered_herdr_tab_sequence(herdr)
+                if not sequence:
+                    return 1
+                if len(sequence) == 1:
+                    return 0
+                current_tab_id = focused_resource.get("tab_id")
+                if not isinstance(current_tab_id, str) or current_tab_id not in sequence:
+                    print(
+                        "tmux-app-key: focused Herdr tab missing from tab sequence",
+                        file=sys.stderr,
+                    )
+                    return 1
+                offset = -1 if operation == "previous" else 1
+                target_id = sequence[
+                    (sequence.index(current_tab_id) + offset) % len(sequence)
                 ]
-
-            if len(navigation_resources) == 1:
-                return 0
-            focused_index = navigation_resources.index(focused_resource)
-            offset = -1 if operation == "previous" else 1
-            target_resource = navigation_resources[
-                (focused_index + offset) % len(navigation_resources)
-            ]
-            target_id = target_resource.get(f"{resource}_id")
-            if not isinstance(target_id, str):
-                print(f"tmux-app-key: Herdr returned no {resource} id", file=sys.stderr)
-                return 1
-            command = [herdr, resource, "focus", target_id]
+                command = [herdr, "tab", "focus", target_id]
+            else:
+                navigation_resources = resources
+                if len(navigation_resources) == 1:
+                    return 0
+                focused_index = navigation_resources.index(focused_resource)
+                offset = -1 if operation == "previous" else 1
+                target_resource = navigation_resources[
+                    (focused_index + offset) % len(navigation_resources)
+                ]
+                target_id = target_resource.get(f"{resource}_id")
+                if not isinstance(target_id, str):
+                    print(
+                        f"tmux-app-key: Herdr returned no {resource} id",
+                        file=sys.stderr,
+                    )
+                    return 1
+                command = [herdr, resource, "focus", target_id]
         elif resource == "tab":
             split_pane_id = focused_split_pane_id(herdr, resource_id)
             workspace_id = focused_resource.get("workspace_id")
