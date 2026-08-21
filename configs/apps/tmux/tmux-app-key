@@ -287,12 +287,13 @@ def run_herdr_action(app_key: str) -> int:
                 # Tab navigation walks all Herdr tabs in workspace order rather
                 # than wrapping inside one workspace: moving past a workspace's
                 # last tab lands on the next workspace's first tab (and
-                # symmetrically backwards), wrapping around at the extremes.
+                # symmetrically backwards). Past the very first/last Herdr tab
+                # it hands off to the previous/next tmux window instead of
+                # wrapping. Standalone Herdr (running outside tmux) never
+                # reaches this script and keeps its own wrap-around behavior.
                 sequence = ordered_herdr_tab_sequence(herdr)
                 if not sequence:
                     return 1
-                if len(sequence) == 1:
-                    return 0
                 current_tab_id = focused_resource.get("tab_id")
                 if not isinstance(current_tab_id, str) or current_tab_id not in sequence:
                     print(
@@ -301,10 +302,27 @@ def run_herdr_action(app_key: str) -> int:
                     )
                     return 1
                 offset = -1 if operation == "previous" else 1
-                target_id = sequence[
-                    (sequence.index(current_tab_id) + offset) % len(sequence)
-                ]
-                command = [herdr, "tab", "focus", target_id]
+                target_index = sequence.index(current_tab_id) + offset
+                if not 0 <= target_index < len(sequence):
+                    tmux = shutil.which("tmux")
+                    if tmux:
+                        result = run(
+                            [
+                                tmux,
+                                "previous-window"
+                                if operation == "previous"
+                                else "next-window",
+                            ]
+                        )
+                        if result.returncode != 0:
+                            print(
+                                result.stderr.strip() or result.stdout.strip(),
+                                file=sys.stderr,
+                            )
+                        return result.returncode
+                    # No tmux binary: degrade to the old wrap-around.
+                    target_index %= len(sequence)
+                command = [herdr, "tab", "focus", sequence[target_index]]
             else:
                 navigation_resources = resources
                 if len(navigation_resources) == 1:
