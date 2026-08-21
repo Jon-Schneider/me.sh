@@ -1,0 +1,178 @@
+// ── pi statusline configuration ─────────────────────────────────────
+// This file is JSONC: // comments, /* block comments */ and trailing
+// commas are all fine.
+//
+// Merge order:  built-in defaults → this file → <project>/.pi/statusline.json
+// Edit anytime with /statusline (this file) or /statusline project.
+// /statusline reset deletes both and returns to built-in defaults.
+//
+// Colors may be:
+//   - a theme token name (accent, muted, dim, success, warning, error, text,
+//     toolDiffAdded, toolDiffRemoved, thinkingHigh, syntaxString, ...)
+//   - "auto" → colored by the first matching entry in "thresholds"
+//   - "#rrggbb" → raw truecolor (bypasses the theme)
+//   - "none"
+{
+  // Segment pipeline. Order = render order. Remove, reorder or duplicate
+  // freely. An entry may be a plain name or an object overriding options
+  // for that one instance:
+  //   "context"
+  //   { "segment": "context", "barWidth": 20, "colors": { "contextPct": "#ff8800" } }
+  //   { "segment": "text", "text": "🚀", "color": "accent" }
+  //   { "segment": "session", "enabled": false }
+  //   { "segment": "project", "align": "right" }   // push to the right edge
+  //
+  // Built-in segments:
+  //   model     current model (+ provider + thinking level + sandbox icon)
+  //   thinking  thinking level on its own
+  //   sandbox   sandbox indicator on its own (🔒 sandboxed / ⚠ unsandboxed)
+  //   context   context-window usage: bar / tokens / percent
+  //   session   session totals: in, out, cacheRead, cacheWrite, cost, turns
+  //   project   dir + branch + diff (+ aheadBehind)
+  //   dir       working directory alone
+  //   branch    git branch alone
+  //   diff      git diff stat alone
+  //   time      current time (strftime-style)
+  //   text      literal text
+  "segments": [
+    "model",
+    "session",
+    { "segment": "project", "align": "right" }
+    // "align": "right" pads the line so the segment sits at the right edge
+    // (re-pads automatically on terminal resize).
+    //
+    // "context" is omitted by default — pi's built-in footer already shows
+    // context usage. Add it back (or set "footer": "own") if you want it here.
+  ],
+
+  // Text between segments, and its color.
+  "separator": " | ",
+  "separatorColor": "dim",
+
+  // Hard-truncate the whole line to N terminal columns (0 = never).
+  "maxWidth": 0,
+
+  // ── footer takeover ──────────────────────────────────────────────
+  // pi draws a built-in footer line (context %, provider/model) and this
+  // statusline renders below it as a status item. "footer" controls that:
+  //   "keep" — built-in footer stays (default)
+  //   "own"  — this statusline REPLACES the built-in footer: "segments"
+  //            become the left zone and "footerRight" (same syntax as
+  //            "segments") an optional right-aligned zone, padded to the
+  //            terminal width. Other extensions' status items still render
+  //            below. Outside the TUI it falls back to normal behavior.
+  "footer": "keep",
+
+  // Right-aligned zone for "footer": "own" — same segment syntax.
+  "footerRight": [],
+
+  // Thresholds for every color set to "auto". First matching "at" wins.
+  "thresholds": [
+    { "at": 0,  "color": "success" },
+    { "at": 50, "color": "warning" },
+    { "at": 75, "color": "error" }
+  ],
+
+  // Default colors for every segment part. Override per instance with
+  // "colors": { ... } on a segment object.
+  "colors": {
+    "model": "accent",
+    "thinking": "muted",
+    "sandboxYes": "success",
+    "sandboxNo": "error",
+    "contextBarFilled": "auto",
+    "contextBarEmpty": "dim",
+    "contextTokens": "auto",
+    "contextPct": "auto",
+    "sessionIn": "dim",
+    "sessionOut": "dim",
+    "sessionCacheRead": "dim",
+    "sessionCacheWrite": "dim",
+    "sessionCost": "muted",
+    "sessionTurns": "dim",
+    "dir": "accent",
+    "branch": "success",
+    "diffAdded": "toolDiffAdded",
+    "diffRemoved": "toolDiffRemoved",
+    "ahead": "success",
+    "behind": "error",
+    "time": "dim",
+    "text": "text"
+  },
+
+  // ── model ────────────────────────────────────────────────────────
+  "model": {
+    "icon": "",               // prefix, e.g. "🤖" or "◆"
+    "showProvider": false,    // "openrouter/id" instead of "id"
+    "showThinking": true,     // append effective thinking level
+    "showSandbox": true,      // prefix the sandbox icon (see "sandbox" below)
+    "aliases": {
+      // "provider/model-id": "short name",
+      // "other-model-id": "also works bare"
+    }
+  },
+
+  // ── thinking ─────────────────────────────────────────────────────
+  // Labels per level; "" hides the level entirely.
+  "thinking": {
+    "labels": {
+      "off": "",
+      "minimal": "min",
+      "low": "low",
+      "medium": "med",
+      "high": "high",
+      "xhigh": "xhigh",
+      "max": "max"
+    }
+  },
+
+  // ── sandbox ──────────────────────────────────────────────────────
+  // Detects an externally-imposed sandbox (safehouse-style): sandboxes
+  // that restrict process access make /bin/ps fail. Probed once and
+  // cached for the whole session. The model segment reuses these icons
+  // when "showSandbox" is on; override per instance with e.g.
+  // { "segment": "model", "showSandbox": false } or
+  // { "segment": "model", "sandbox": { "icons": { "yes": "🛡" } } }.
+  "sandbox": {
+    "icons": { "yes": "🔒", "no": "⚠" },
+    "labels": { "yes": "", "no": "" }   // optional text after the icon
+  },
+
+  // ── context ──────────────────────────────────────────────────────
+  // "style": any combination of bar, tokens, pct (always that order).
+  "context": {
+    "style": "bar+tokens+pct",
+    "barWidth": 10,
+    "barFilled": "█",
+    "barEmpty": "░",
+    "tokenFormat": "compact"  // compact | commas | raw
+  },
+
+  // ── session ──────────────────────────────────────────────────────
+  // "parts": any subset of in | out | cacheRead | cacheWrite | cost | turns
+  "session": {
+    "parts": ["in", "out", "cost"],
+    "tokenFormat": "compact",
+    "costSymbol": "$",
+    "costPrecision": 2,
+    "icons": { "in": "↑", "out": "↓", "cacheRead": "⟲", "cacheWrite": "✎", "cost": "", "turns": "⟳" }
+  },
+
+  // ── project ──────────────────────────────────────────────────────
+  // "parts": any subset of dir | branch | diff | aheadBehind
+  "project": {
+    "parts": ["dir", "branch", "diff"],
+    "dirStyle": "basename",   // basename | full | tilde
+    "branchPrefix": "@"
+  },
+
+  // ── time ─────────────────────────────────────────────────────────
+  // strftime subset: %Y %m %d %e %H %I %M %S %p %b %B %a %A %% (- = no pad)
+  "time": { "format": "%H:%M" },
+
+  // ── git (shared by project / branch / diff segments) ─────────────
+  "git": {
+    "includeStaged": false,   // count staged changes too (git diff HEAD)
+    "cacheMs": 1500           // how long git lookups are cached
+  }
+}

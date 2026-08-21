@@ -28,6 +28,8 @@ ln -sfn "$current_dir/Opencode/opencode-tmux-agent-status.js" "$HOME/.config/ope
 echo "Configuring Pi..."
 ln -sfn "$current_dir/Pi/extensions/dcg-guard.ts" "$HOME/.pi/agent/extensions/dcg-guard.ts"
 ln -sfn "$current_dir/Pi/extensions/tmux-agent-status.ts" "$HOME/.pi/agent/extensions/tmux-agent-status.ts"
+ln -sfn "$current_dir/Pi/extensions/statusline.ts" "$HOME/.pi/agent/extensions/statusline.ts"
+ln -sfn "$current_dir/Pi/statusline.json" "$HOME/.pi/agent/statusline.json"
 
 echo "Configuring Skills..."
 ln -Fsn "$current_dir/Skills/claude-review" "$HOME/.agents/skills/"
