@@ -92,15 +92,16 @@ defaults write com.apple.dock showLaunchpadGestureEnabled -int 0
 # Check for software updates daily
 defaults write com.apple.SoftwareUpdate ScheduleFrequency -int 1
 
-# Enable TouchId for Command Line Sudo. https://nicholasmangold.com/blog/how-use-sudo-touch-id-mac
-if grep -i "pam_tid.so" /etc/pam.d/sudo
+# Enable TouchID for command line sudo via /etc/pam.d/sudo_local, which macOS
+# leaves alone during updates (unlike /etc/pam.d/sudo).
+# https://nicholasmangold.com/blog/how-use-sudo-touch-id-mac
+if sudo grep -qs '^auth.*pam_tid.so' /etc/pam.d/sudo_local
 then
   echo "Sudo already configured to use TouchID"
 else
-  echo "Configuring sudo to accep TouchId"
-sudo sed -i '' '2i\
-auth       sufficient     pam_tid.so\
-' /etc/pam.d/sudo
+  echo "Configuring sudo to accept TouchID"
+  sudo cp /etc/pam.d/sudo_local.template /etc/pam.d/sudo_local
+  sudo sed -i '' 's/^#[[:space:]]*auth[[:space:]]*sufficient[[:space:]]*pam_tid\.so/auth       sufficient     pam_tid.so/' /etc/pam.d/sudo_local
 fi
 
 # Reduce obnoxious spacing between menu bar icons
