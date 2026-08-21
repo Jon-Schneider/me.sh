@@ -1,0 +1,14 @@
+{
+  "lastChangelogVersion": "0.84.2",
+  "theme": "dark",
+  "defaultProvider": "openrouter",
+  "defaultModel": "stealth/ox-alpha",
+  "defaultThinkingLevel": "medium",
+  "packages": [
+    "npm:pi-omlx-picker",
+    "npm:opencode-pi",
+    "npm:pi-nvidia-nim",
+    "npm:pi-btw"
+  ],
+  "hideThinkingBlock": true
+}

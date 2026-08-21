@@ -29,6 +29,7 @@ ln -sfn "$current_dir/Opencode/opencode.json" "$HOME/.config/opencode/opencode-s
 ln -sfn "$current_dir/Opencode/opencode-tmux-agent-status.js" "$HOME/.config/opencode/plugins/opencode-tmux-agent-status.js"
 
 echo "Configuring Pi..."
+ln -sfn "$current_dir/Pi/settings.json" "$HOME/.pi/agent/settings.json"
 ln -sfn "$current_dir/Pi/extensions/dcg-guard.ts" "$HOME/.pi/agent/extensions/dcg-guard.ts"
 ln -sfn "$current_dir/Pi/extensions/tmux-agent-status.ts" "$HOME/.pi/agent/extensions/tmux-agent-status.ts"
 ln -sfn "$current_dir/Pi/extensions/statusline.ts" "$HOME/.pi/agent/extensions/statusline.ts"
