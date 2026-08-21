@@ -9,7 +9,9 @@
     "npm:opencode-pi",
     "npm:pi-nvidia-nim",
     "npm:pi-btw",
-    "npm:pi-goal"
+    "npm:pi-goal",
+    "npm:remote-pi",
+    "npm:@eko24ive/pi-ask"
   ],
   "hideThinkingBlock": true
 }
