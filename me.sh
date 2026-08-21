@@ -28,10 +28,6 @@ if [ ! -f ~/.ssh/id_ed25519 ]; then
 	ssh-keygen -t ed25519 -C "jon@jonschneider.me"
 fi
 ssh-add -K ~/.ssh/id_ed25519
-if [ ! -f ~/.ssh/id_rsa ]; then
-	ssh-keygen -t rsa -C "jon@jonschneider.me"
-fi
-ssh-add -K ~/.ssh/id_rsa
 
 message "Configuring Mac..."
 
@@ -79,5 +75,7 @@ mkdir -p ~/Developer/jsc
 ln -sfn ~/Developer/jsc ~/repo
 ln -sfn ~/Developer/jsc ~/repos
 
-"${SCRIPT_DIR}/sync_app_config.sh"
-"${SCRIPT_DIR}/sync_sys_config.sh"
+# Sync scripts exit non-zero if any configure script failed; don't abort setup over it,
+# the errors have already been printed.
+"${SCRIPT_DIR}/sync_app_config.sh" || error "sync_app_config.sh reported failures"
+"${SCRIPT_DIR}/sync_sys_config.sh" || error "sync_sys_config.sh reported failures"

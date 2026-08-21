@@ -1,5 +1,8 @@
+#!/bin/bash
+set -euo pipefail
+
 # Create Developer Dir
-mkdir "~/Developer" # I used to use '~/src' but then I found out '~/Developer' has a system icon
+mkdir -p "$HOME/Developer" # I used to use '~/src' but then I found out '~/Developer' has a system icon
 
 # Disable Screenshot Previews
 echo "Disabling screenshot previews..."
@@ -29,7 +32,7 @@ duti -s com.barebones.bbedit ts all # VLC recognizes .ts as a media file, but th
 duti -s com.barebones.bbedit txt all
 duti -s com.barebones.bbedit yml all
 duti -s abnerworks.Typora md all
-duti -s com.googe.Chrome http # Set Edge as default browser
+duti -s com.google.Chrome http # Set Chrome as default browser
 duti -s com.macpaw.site.theunarchiver zip # Use The Unarchiver for zips
 
 # Override system theme to set certain apps to always display in dark or light mode
@@ -61,7 +64,7 @@ echo "Setting Misc. Config..."
 #Disable Boot Sound
 sudo nvram StartupMute=%01
 
-# Dxpand Save Panel by default
+# Expand Save Panel by default
 defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -bool true
 defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode2 -bool true
 

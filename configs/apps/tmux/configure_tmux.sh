@@ -1,3 +1,6 @@
+#!/bin/bash
+set -euo pipefail
+
 echo "Configuring tmux..."
 current_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 

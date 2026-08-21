@@ -1,3 +1,6 @@
+#!/bin/bash
+set -euo pipefail
+
 echo "Configuring Finder..."
 defaults write com.apple.Finder FXPreferredViewStyle clmv # Default to column view
 # Unfortunately there is no way to enable grouping by default in finder windows; the best I can do is set my preferred finder grouping and sorting

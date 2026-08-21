@@ -1,3 +1,6 @@
+#!/bin/bash
+set -euo pipefail
+
 echo "Configuring sudoers"
 
 # https://www.smileykeith.com/2021/08/12/xcode-select-sudoers/

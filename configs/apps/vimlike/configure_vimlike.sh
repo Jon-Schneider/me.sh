@@ -1,3 +1,6 @@
+#!/bin/bash
+set -euo pipefail
+
 echo "Configuring Vimlike Safari Extension..."
 
 mkdir -p ~/Library/Group\ Containers/group.net.jasminestudios.Vimlike/Library/Preferences/ 2> /dev/null # Redirect stderr to suppress dir already exists log

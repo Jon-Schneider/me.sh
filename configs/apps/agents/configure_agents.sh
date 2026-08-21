@@ -1,3 +1,6 @@
+#!/bin/bash
+set -euo pipefail
+
 echo "Configuring Agents..."
 current_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -9,7 +12,7 @@ mkdir -p "$HOME/.agents/skills"
 mkdir -p "$HOME/.codex/skills"
 mkdir -p "$HOME/.claude/skills"
 
-echo "Configiring ~/.agents..."
+echo "Configuring ~/.agents..."
 ln -sfn "$current_dir/AGENTS.md" "$HOME/.agents/AGENTS.md"
 
 echo "Configuring Claude..."

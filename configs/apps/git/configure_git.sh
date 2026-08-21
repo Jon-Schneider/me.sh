@@ -1,3 +1,6 @@
+#!/bin/bash
+set -euo pipefail
+
 echo "Configuring git..."
 current_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ln -sfn $current_dir/.gitignore ~/.gitignore

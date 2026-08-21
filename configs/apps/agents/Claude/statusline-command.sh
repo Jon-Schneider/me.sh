@@ -8,7 +8,6 @@
 
 set -f
 
-VERSION="1.2.0"
 input=$(cat)
 
 if [ -z "$input" ]; then
