@@ -29,5 +29,3 @@ code --install-extension rangav.vscode-thunder-client
 code --install-extension rebornix.ruby
 code --install-extension redhat.vscode-yaml
 code --install-extension yzhang.markdown-all-in-one
-
-configs/sys/Icons/configure_app_icons.sh

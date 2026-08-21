@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 function message {
 	GREEN='\033[0;32m'
@@ -19,11 +20,9 @@ read -n 1 -s
 message "Prerequisite 3/4: Sudo"
 sudo -v
 
-xcode-select -p 1>/dev/null;echo $?
-if [ $? != 0 ]
-then
-message "Xcode Command Line Tools are not installed"
-exit 1
+if ! xcode-select -p &>/dev/null; then
+	message "Xcode Command Line Tools are not installed"
+	exit 1
 fi
 
 # Setup SSH
@@ -42,15 +41,15 @@ message "Rosetta 2 Installed"
 
 # Brew
 message "Installing Homebrew"
-- [ ] /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
-eval "$(/opt/homeberw/bin/brews shellenv)"
+eval "$(/opt/homebrew/bin/brew shellenv)"
 brew update
 brew doctor
 brew bundle
 
-# Cladue
-messge "Installing Claude CLI"
+# Codex
+message "Installing Codex CLI"
 curl -fsSL https://chatgpt.com/codex/install.sh | sh
 
 # Install trash command-line util, not available via brew
@@ -67,15 +66,15 @@ bundle install
 
 # Configure Tmp Dir
 message "Creating ~/Tmp dir..."
-mkdir ~/Tmp
-sudo rm -rf ~/Downloads && ln -s ~/Tmp ~/Downloads # Redirect Downloads to Tmp dir
+mkdir -p ~/Tmp
+if [ ! -L ~/Downloads ]; then
+	sudo rm -rf ~/Downloads && ln -s ~/Tmp ~/Downloads # Redirect Downloads to Tmp dir
+fi
 
 # Configure repo link for cd
-mkdir -p ~/Develper/jsc
-ln -s ~/Developer/jsc repo
-ln -s ~/Developer/jsc repos
-ln -s ~/Developer/jsc ~/repo
-ln -s ~/Developer/jsc ~/repos
+mkdir -p ~/Developer/jsc
+ln -sfn ~/Developer/jsc ~/repo
+ln -sfn ~/Developer/jsc ~/repos
 
 ./sync_app_config.sh
 ./sync_sys_config.sh
