@@ -1,0 +1,20 @@
+# Managed in ~/Developer/jsc/me.sh (configs/apps/herdr). Symlinked into
+# ~/.config/herdr/config.toml by configs/apps/herdr/configure_herdr.sh.
+#
+# Split/close even-layout behavior is provided by the me.even-panes herdr
+# plugin (plugin/ in this directory): it evens out panes tmux-style whenever
+# a tab's pane count changes (split, close, or pane move), regardless of how
+# the change was made. Manual resizes and zoom are left untouched.
+
+onboarding = false
+
+[theme]
+name = "catppuccin"
+auto_switch = false
+
+[ui]
+agent_panel_sort = "priority"
+show_agent_labels_on_pane_borders = true
+
+[ui.toast]
+delivery = "system"

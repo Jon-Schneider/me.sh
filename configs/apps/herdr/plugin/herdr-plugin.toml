@@ -1,0 +1,21 @@
+id = "me.even-panes"
+name = "Even Panes"
+version = "1.0.0"
+min_herdr_version = "0.7.0"
+description = "Rebalance panes evenly tmux-style after splits, closes, and moves"
+platforms = ["macos"]
+
+[[startup]]
+command = ["/usr/bin/python3", "even_on_event.py"]
+
+[[events]]
+on = "pane.created"
+command = ["/usr/bin/python3", "even_on_event.py"]
+
+[[events]]
+on = "pane.closed"
+command = ["/usr/bin/python3", "even_on_event.py"]
+
+[[events]]
+on = "pane.moved"
+command = ["/usr/bin/python3", "even_on_event.py"]

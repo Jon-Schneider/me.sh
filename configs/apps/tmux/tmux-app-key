@@ -158,7 +158,8 @@ def run_herdr_split(app_key: str) -> int:
         return 127
 
     # No target pane: Herdr splits its own focused pane, which is the one the
-    # tmux pane is showing.
+    # tmux pane is showing. The me.even-panes plugin evens the tab out right
+    # after the split.
     result = run(
         [
             herdr,
