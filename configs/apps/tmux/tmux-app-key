@@ -39,6 +39,13 @@ HERDR_ACTIONS = {
     "HerdrPreviousTab": ("tab", "previous"),
     "HerdrNextTab": ("tab", "next"),
 }
+# Shift+Left/Right rearrange spaces when Herdr owns the pane. tmux eats the
+# raw keys before Herdr sees them, so these invoke the me.space-mover plugin
+# actions (the same ones [keys.command] binds to Shift+Left/Right standalone).
+HERDR_SPACE_MOVES = {
+    "HerdrMoveSpaceLeft": "move-left",
+    "HerdrMoveSpaceRight": "move-right",
+}
 HERDR_PANE_DIRECTIONS = {
     "HerdrFocusPaneLeft": ("focus", "left"),
     "HerdrFocusPaneRight": ("focus", "right"),
@@ -260,6 +267,27 @@ def ordered_herdr_tab_sequence(herdr: str) -> list[str]:
     return sequence
 
 
+def run_herdr_space_move(app_key: str) -> int:
+    herdr = herdr_binary()
+    if not herdr:
+        return 127
+
+    result = run(
+        [
+            herdr,
+            "plugin",
+            "action",
+            "invoke",
+            HERDR_SPACE_MOVES[app_key],
+            "--plugin",
+            "me.space-mover",
+        ]
+    )
+    if result.returncode != 0:
+        print(result.stderr.strip() or result.stdout.strip(), file=sys.stderr)
+    return result.returncode
+
+
 def run_herdr_action(app_key: str) -> int:
     action = HERDR_ACTIONS.get(app_key)
     if not action:
@@ -413,6 +441,8 @@ def main() -> int:
                     return run_herdr_split(app_key)
                 if app_key in HERDR_PANE_DIRECTIONS:
                     return run_herdr_pane_direction(app_key)
+                if app_key in HERDR_SPACE_MOVES:
+                    return run_herdr_space_move(app_key)
                 if app_key in HERDR_ACTIONS:
                     return run_herdr_action(app_key)
             return subprocess.run(
