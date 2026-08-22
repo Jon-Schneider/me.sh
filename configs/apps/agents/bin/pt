@@ -1,12 +1,23 @@
 #!/usr/bin/env bash
 # pt — set the pane title ("pane title"): the herdr pane when running under
 # herdr, otherwise the tmux pane. Lets agents label their split while working.
+#
+# Under herdr the title also feeds the sidebar agents list: the first word is
+# reported as $title_key (rendered next to the workspace name) and the rest is
+# word-wrapped onto up to two $title_sum rows (~30 columns each; herdr has no
+# native text wrapping, and rows whose tokens are missing disappear).
+# update_shipyard_pane_title delegates here, so this is the single writer of
+# those tokens (source me.pt).
+#
+# usage: pt <title>       set pane title (+ herdr agents-list entry)
+#        pt -c|--clear    clear pane title and agents-list entry
+#        echo <title> | pt
 
 set -u
 
 usage() {
-  echo "usage: pt <title>       set pane title" >&2
-  echo "       pt -c|--clear    clear pane title" >&2
+  echo "usage: pt <title>       set pane title (+ herdr agents-list entry)" >&2
+  echo "       pt -c|--clear    clear pane title and agents-list entry" >&2
   echo "       echo <title> | pt" >&2
 }
 
@@ -35,11 +46,70 @@ elif [[ -z "$title" ]]; then
   exit 2
 fi
 
+SIDEBAR_SOURCE="me.pt"
+SIDEBAR_KEY="title_key"
+SIDEBAR_SUM1="title_sum1"
+SIDEBAR_SUM2="title_sum2"
+
+clear_sidebar_tokens() {
+  herdr pane report-metadata "${HERDR_PANE_ID}" --source "$SIDEBAR_SOURCE" \
+    --clear-token "$SIDEBAR_KEY" \
+    --clear-token "$SIDEBAR_SUM1" \
+    --clear-token "$SIDEBAR_SUM2" >/dev/null 2>&1 || true
+}
+
+report_sidebar_tokens() {
+  # Split "<key> <summary...>" at word boundaries across up to two ~30-col
+  # lines. Empty chunk -> explicit clear, so shrinking titles shrink rows.
+  local wrapped skey s1 s2
+  wrapped="$(printf '%s' "$1" | python3 -c '
+import sys
+
+text = " ".join(sys.stdin.read().split())
+key, _, summary = text.partition(" ")
+width = 30
+lines, current = [], ""
+for word in summary.split():
+    candidate = f"{current} {word}".strip()
+    if current and len(candidate) > width:
+        lines.append(current)
+        current = word
+    else:
+        current = candidate
+if current:
+    lines.append(current)
+lines = lines[:2]
+print("\n".join([key, *lines, ""][:3]))
+')" || return 0
+  skey="$(printf '%s\n' "$wrapped" | sed -n '1p')"
+  s1="$(printf '%s\n' "$wrapped" | sed -n '2p')"
+  s2="$(printf '%s\n' "$wrapped" | sed -n '3p')"
+  [[ -n "$skey" ]] || return 0
+
+  local args=(pane report-metadata "${HERDR_PANE_ID}" --source "$SIDEBAR_SOURCE")
+  args+=(--token "${SIDEBAR_KEY}=${skey}")
+  if [[ -n "$s1" ]]; then
+    args+=(--token "${SIDEBAR_SUM1}=${s1}")
+  else
+    args+=(--clear-token "$SIDEBAR_SUM1")
+  fi
+  if [[ -n "$s2" ]]; then
+    args+=(--token "${SIDEBAR_SUM2}=${s2}")
+  else
+    args+=(--clear-token "$SIDEBAR_SUM2")
+  fi
+  herdr "${args[@]}" >/dev/null 2>&1 || true
+}
+
 if [[ "${HERDR_ENV:-}" == "1" && -n "${HERDR_SOCKET_PATH:-}" && -n "${HERDR_PANE_ID:-}" ]]; then
   if ((clear)); then
-    exec herdr pane rename "$HERDR_PANE_ID" --clear >/dev/null
+    herdr pane rename "${HERDR_PANE_ID}" --clear >/dev/null 2>&1 || true
+    clear_sidebar_tokens
+    exit 0
   fi
-  exec herdr pane rename "$HERDR_PANE_ID" "$title" >/dev/null
+  herdr pane rename "${HERDR_PANE_ID}" "$title" >/dev/null 2>&1 || true
+  report_sidebar_tokens "$title"
+  exit 0
 fi
 
 if [[ -n "${TMUX:-}" ]]; then
