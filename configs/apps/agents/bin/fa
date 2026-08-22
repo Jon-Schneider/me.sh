@@ -3,29 +3,111 @@
 # fa - Fork Agent
 # Forks a running Codex CLI, Claude CLI, or pi-agent session into a new split pane.
 # Splits inside Herdr when run from a Herdr pane, otherwise falls back to tmux.
+#
+# Usage: fa [pi-session-id]
+#
+# pi session resolution order:
+#   1. explicit argument              fa <session-id>
+#   2. $PI_SESSION_ID                 (exported by pi's bash tool when it receives
+#                                      its tool context; pi 0.84.2 has a bug where
+#                                      the agent loop never passes ctx, so this is
+#                                      usually EMPTY in interactive sessions)
+#   3. the sole *.jsonl session file for $PWD, but ONLY if there is exactly one
+#   4. a numbered picker when stdin is a TTY; otherwise refuse (exit 1) and list
+#      the newest candidates so you can re-run `fa <session-id>`
+#
+# We deliberately NEVER guess by mtime: with parallel pi sessions sharing a cwd,
+# the most recently written file usually belongs to a *different* pane/session
+# than the one you ran this from.
 
-# Try to get pi-agent session ID from the most recent session file for current directory
-get_pi_session_id() {
+# --- pi session helpers -----------------------------------------------------
+
+pi_session_dir() {
     # pi encodes paths by replacing / with - and wrapping with --...--
     # e.g., /Users/jsc/Developer/jsc -> --Users-jsc-Developer-jsc--
-    # We need to strip the leading / from PWD before replacing / with -
-    local pwd_encoded=$(echo "$PWD" | sed 's|^/||; s|/|-|g')
-    local session_dir="$HOME/.pi/agent/sessions/--${pwd_encoded}--"
-    if [[ -d "$session_dir" ]]; then
-        local latest_session=$(ls -t "$session_dir"/*.jsonl 2>/dev/null | head -1)
-        if [[ -n "$latest_session" ]]; then
-            # Extract session ID from first line of session file
-            local session_id=$(head -1 "$latest_session" | sed -n 's/.*"id":"\([^"]*\)".*/\1/p')
-            if [[ -n "$session_id" ]]; then
-                echo "$session_id"
-                return 0
-            fi
-        fi
-    fi
-    return 1
+    local pwd_encoded=$(print -r -- "$PWD" | sed 's|^/||; s|/|-|g')
+    print -r -- "$HOME/.pi/agent/sessions/--${pwd_encoded}--"
 }
 
-if [[ -n "$CODEX_THREAD_ID" ]]; then
+# Prints "<session-id>\t<mtime>" lines, newest first, for the current directory.
+list_pi_sessions() {
+    local dir
+    dir=$(pi_session_dir)
+    [[ -d "$dir" ]] || return 1
+
+    local f base id mt
+    ls -t "$dir"/*.jsonl 2>/dev/null | while IFS= read -r f; do
+        base=${f:t}
+        id=${base#*_}       # newer files: <timestamp>_<uuid>.jsonl
+        id=${id%.jsonl}
+        if [[ ! "$id" =~ ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$ ]]; then
+            # fall back to the session header's id field
+            id=$(head -1 "$f" 2>/dev/null | sed -n 's/.*"id":"\([^"]*\)".*/\1/p')
+        fi
+        [[ -n "$id" ]] || continue
+        mt=$(stat -f '%Sm' -t '%m-%d %H:%M' "$f" 2>/dev/null)
+        printf '%s\t%s\n' "$id" "$mt"
+    done
+}
+
+# Resolves the pi session id to fork, or fails loudly. See header for policy.
+resolve_pi_session() {
+    local -a cands
+    cands=("${(f)$(list_pi_sessions)}")
+    cands=("${(@)cands:#}")          # drop empty element from empty cmd-subst
+    (( ${#cands} )) || return 1
+
+    # Unambiguous: exactly one session file for this cwd.
+    if (( ${#cands} == 1 )); then
+        print -r -- "${cands[1]%%$'\t'*}"
+        return 0
+    fi
+
+    # Ambiguous + no terminal (e.g. run by an agent's bash tool): refuse loudly.
+    if [[ ! -t 0 ]]; then
+        {
+            print -u2 "fa: can't tell which pi session is yours."
+            print -u2 "    \$PI_SESSION_ID is not set and ${#cands} session files exist for $PWD."
+            print -u2 "    Re-run as: fa <session-id>   Newest candidates:"
+            local i id rest
+            for (( i = 1; i <= 3 && i <= ${#cands}; i++ )); do
+                id=${cands[i]%%$'\t'*}
+                rest=${cands[i]#*$'\t'}
+                print -u2 "      fa $id   (last write $rest)"
+            done
+        }
+        return 1
+    fi
+
+    # Ambiguous + interactive: numbered picker, newest first.
+    local n=$(( ${#cands} > 9 ? 9 : ${#cands} ))
+    local i id rest choice
+    print -u2 "fa: ${#cands} pi sessions found for $PWD:"
+    for (( i = 1; i <= n; i++ )); do
+        id=${cands[i]%%$'\t'*}
+        rest=${cands[i]#*$'\t'}
+        printf -v row '  %d) %s  %s\n' "$i" "$rest" "$id"
+        print -u2 -r -- "$row"
+    done
+    while true; do
+        read -r "choice?fork which session? [1-$n, or q to abort] " || return 1
+        [[ "$choice" == q ]] && return 1
+        if [[ "$choice" == <-> && "$choice" -ge 1 && "$choice" -le $n ]]; then
+            print -r -- "${cands[$choice]%%$'\t'*}"
+            return 0
+        fi
+        print -u2 "invalid choice: $choice"
+    done
+}
+
+# --- agent detection ---------------------------------------------------------
+
+if [[ -n "${1:-}" ]]; then
+    # Explicit session id wins over everything (documented as pi-only).
+    agent=pi
+    command=(pi --fork "$1")
+
+elif [[ -n "$CODEX_THREAD_ID" ]]; then
     agent=codex
     command=(codex fork "$CODEX_THREAD_ID")
 
@@ -38,15 +120,19 @@ elif [[ -n "$PI_SESSION_ID" ]]; then
     command=(pi --fork "$PI_SESSION_ID")
 
 else
-    # Try to find pi-agent session from session files
-    pi_session_id=$(get_pi_session_id)
-    if [[ -n "$pi_session_id" ]]; then
-        agent=pi
-        command=(pi --fork "$pi_session_id")
-    else
-        echo "fa: couldn't detect Codex, Claude Code, or pi-agent"
+    pi_session_id=$(resolve_pi_session) || {
+        echo "fa: couldn't detect Codex, Claude Code, or a unique pi-agent session"
         exit 1
-    fi
+    }
+    agent=pi
+    command=(pi --fork "$pi_session_id")
+fi
+
+# Debug escape hatch: resolve only, don't fork.  FA_DEBUG=1 fa
+if [[ -n "${FA_DEBUG:-}" ]]; then
+    print "fa(debug): agent=$agent cwd=$PWD"
+    print -r -- "fa(debug): command: ${(qq)command}"
+    exit 0
 fi
 
 # The new pane inherits the multiplexer server's environment, not this process's,
