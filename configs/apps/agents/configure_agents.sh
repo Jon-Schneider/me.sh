@@ -57,6 +57,7 @@ ln -Fsn "$current_dir/Skills/use-jira" "$HOME/.claude/skills/"
 
 echo "Configuring Agent bin..."
 ln -sfn "$current_dir/bin/fa" "$HOME/bin/fa"
+ln -sfn "$current_dir/bin/pt" "$HOME/bin/pt"
 ln -sfn "$current_dir/bin/xcsift-for-apple-build-tools" "$HOME/bin/xcsift-for-apple-build-tools"
 ln -sfn "$current_dir/bin/sync-opencode-omlx-models" "$HOME/bin/sync-opencode-omlx-models"
 

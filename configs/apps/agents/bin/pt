@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# pt — set the pane title ("pane title"): the herdr pane when running under
+# herdr, otherwise the tmux pane. Lets agents label their split while working.
+
+set -u
+
+usage() {
+  echo "usage: pt <title>       set pane title" >&2
+  echo "       pt -c|--clear    clear pane title" >&2
+  echo "       echo <title> | pt" >&2
+}
+
+clear=0
+while (($#)); do
+  case "$1" in
+    -h|--help) usage; exit 0 ;;
+    -c|--clear) clear=1; shift ;;
+    --) shift; break ;;
+    *) break ;;
+  esac
+done
+
+title=""
+if (($#)); then
+  title="$*"
+elif [[ ! -t 0 ]]; then
+  title="$(cat)"
+fi
+title="$(printf '%s' "$title" | tr '\r\n\t' '   ' | tr -s ' ' | sed 's/^ //; s/ $//')"
+
+if ((clear)); then
+  title=""
+elif [[ -z "$title" ]]; then
+  usage
+  exit 2
+fi
+
+if [[ "${HERDR_ENV:-}" == "1" && -n "${HERDR_SOCKET_PATH:-}" && -n "${HERDR_PANE_ID:-}" ]]; then
+  if ((clear)); then
+    exec herdr pane rename "$HERDR_PANE_ID" --clear >/dev/null
+  fi
+  exec herdr pane rename "$HERDR_PANE_ID" "$title" >/dev/null
+fi
+
+if [[ -n "${TMUX:-}" ]]; then
+  pane_id="${TMUX_PANE:-}"
+  helper="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/tmux-pane-for-process"
+  if [[ -x "$helper" ]]; then
+    pane_id="$("$helper")"
+  fi
+  [[ -n "$pane_id" ]] || { echo "pt: couldn't identify tmux pane" >&2; exit 1; }
+  exec tmux select-pane -t "$pane_id" -T "$title"
+fi
+
+echo "pt: not inside herdr or tmux" >&2
+exit 1
