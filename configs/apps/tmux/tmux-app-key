@@ -335,7 +335,7 @@ def run_herdr_action(app_key: str) -> int:
                 if not 0 <= target_index < len(sequence):
                     tmux = shutil.which("tmux")
                     if tmux:
-                        result = run(
+                        run(
                             [
                                 tmux,
                                 "previous-window"
@@ -343,12 +343,12 @@ def run_herdr_action(app_key: str) -> int:
                                 else "next-window",
                             ]
                         )
-                        if result.returncode != 0:
-                            print(
-                                result.stderr.strip() or result.stdout.strip(),
-                                file=sys.stderr,
-                            )
-                        return result.returncode
+                        # Already past the first/last tmux window too (e.g. a
+                        # single window): previous/next-window exits non-zero.
+                        # That is a boundary no-op here, not an error -- a
+                        # non-zero exit makes tmux's run-shell raise its
+                        # "'...' returned N" error overlay over the terminal.
+                        return 0
                     # No tmux binary: degrade to the old wrap-around.
                     target_index %= len(sequence)
                 command = [herdr, "tab", "focus", sequence[target_index]]
