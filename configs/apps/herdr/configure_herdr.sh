@@ -3,18 +3,26 @@ set -euo pipefail
 
 echo "Configuring herdr..."
 current_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-plugin_id="me.even-panes"
 
 mkdir -p ~/.config/herdr
 
 ln -sfn "$current_dir/config.toml" ~/.config/herdr/config.toml
 ln -sfn "$current_dir/even_panes.py" ~/.config/herdr/even_panes.py
 
-# Even-panes plugin: herdr runs it on pane created/closed/moved events and at
-# startup, evening out split panes tmux-style. Re-link to pick up changes.
+# Plugins are linked in place from this repo; re-link to pick up changes.
+#
+# - me.even-panes: runs on pane created/closed/moved events and at startup,
+#   evening out split panes tmux-style.
+# - me.space-mover: move-left / move-right actions that shift the focused
+#   space sideways in the sidebar. Bound to Shift+Left/Right via [keys.command]
+#   in config.toml; inside tmux, tmux-app-key invokes the same actions.
 if command -v herdr > /dev/null; then
-  herdr plugin unlink "$plugin_id" 2> /dev/null || true
-  herdr plugin link "$current_dir/plugin"
+  # Plugin ids live in each manifest; grep them out so the loop stays dumb.
+  for plugin_dir in plugin plugin-move-space; do
+    plugin_id="$(sed -n 's/^id *= *"\(.*\)"/\1/p' "$current_dir/$plugin_dir/herdr-plugin.toml")"
+    herdr plugin unlink "$plugin_id" 2> /dev/null || true
+    herdr plugin link "$current_dir/$plugin_dir"
+  done
   herdr config check && herdr server reload-config || true
 fi
 

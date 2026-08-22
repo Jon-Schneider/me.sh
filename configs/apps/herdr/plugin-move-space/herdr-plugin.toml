@@ -1,0 +1,23 @@
+id = "me.space-mover"
+name = "Space Mover"
+version = "1.0.0"
+min_herdr_version = "0.7.0"
+description = "Move the focused space left/right in the sidebar (Shift+Left / Shift+Right)"
+platforms = ["macos"]
+
+# Bound to Shift+Left / Shift+Right via [keys.command] in config.toml
+# ("herdr plugin action invoke ..."). Inside tmux, tmux-app-key invokes these
+# same actions because tmux consumes the raw keys before Herdr sees them.
+[[actions]]
+id = "move-left"
+title = "Move Space Left"
+description = "Swap the focused space with its left-hand sidebar neighbor"
+command = ["/usr/bin/python3", "move_space.py", "left"]
+contexts = ["global"]
+
+[[actions]]
+id = "move-right"
+title = "Move Space Right"
+description = "Swap the focused space with its right-hand sidebar neighbor"
+command = ["/usr/bin/python3", "move_space.py", "right"]
+contexts = ["global"]

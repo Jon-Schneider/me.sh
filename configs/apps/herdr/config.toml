@@ -5,6 +5,14 @@
 # plugin (plugin/ in this directory): it evens out panes tmux-style whenever
 # a tab's pane count changes (split, close, or pane move), regardless of how
 # the change was made. Manual resizes and zoom are left untouched.
+#
+# Space rearranging is provided by the me.space-mover plugin
+# (plugin-move-space/ in this directory). Its move-left/move-right actions
+# shift the focused space one slot sideways in the sidebar, keeping worktree
+# groups together. The [keys.command] entries below bind Shift+Left/Right to
+# those actions when Herdr runs standalone. Inside tmux, tmux consumes those
+# keys before Herdr sees them, so tmux-app-key detects Herdr-owned panes and
+# invokes the same actions instead.
 
 onboarding = false
 
@@ -18,3 +26,14 @@ show_agent_labels_on_pane_borders = true
 
 [ui.toast]
 delivery = "system"
+
+# Move the focused space left/right in the sidebar (me.space-mover plugin).
+[[keys.command]]
+key = "shift+left"
+type = "shell"
+command = "herdr plugin action invoke move-left --plugin me.space-mover"
+
+[[keys.command]]
+key = "shift+right"
+type = "shell"
+command = "herdr plugin action invoke move-right --plugin me.space-mover"
