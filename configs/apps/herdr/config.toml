@@ -6,6 +6,22 @@
 # a tab's pane count changes (split, close, or pane move), regardless of how
 # the change was made. Manual resizes and zoom are left untouched.
 #
+# Active-pane cwd is provided by the me.active-cwd plugin
+# (plugin-active-cwd/ in this directory): an event-driven handler — no
+# daemon — that watches pane/focus events (pane.updated carries the pane's
+# foreground_cwd via shell OSC 7) and reports workspace metadata.
+# $active_cwd is the ~-substituted path, like the right side of the tmux
+# status bar; $active_repo adds "Repo (worktree)" for worktree-backed
+# spaces. Rows whose tokens are all missing disappear, so plain spaces show
+# only the path, and only the focused space carries the row at all.
+
+[ui.sidebar.spaces]
+rows = [
+  ["state_icon", "workspace"],
+  ["branch", "git_status"],
+  ["$active_repo", "$active_cwd"],
+]
+
 # Space rearranging is provided by the me.space-mover plugin
 # (plugin-move-space/ in this directory). Its move-left/move-right actions
 # shift the focused space one slot sideways in the sidebar, keeping worktree

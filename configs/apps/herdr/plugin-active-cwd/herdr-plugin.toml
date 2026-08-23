@@ -1,0 +1,42 @@
+id = "me.active-cwd"
+name = "Active CWD"
+version = "1.1.0"
+min_herdr_version = "0.7.0"
+description = "Report the focused pane's working directory as workspace metadata ($active_repo / $active_cwd) for the sidebar space rows"
+platforms = ["macos"]
+
+# Event-driven, even-panes style: Herdr spawns this script on pane/focus
+# events and once at server startup. pane.updated carries the pane's
+# foreground_cwd (shell OSC 7), so cd inside a focused pane re-renders the
+# sidebar row with no polling and no daemon. The handler diffs against its
+# last report and stays silent when nothing changed.
+[[startup]]
+command = ["/usr/bin/python3", "active_cwd_on_event.py"]
+
+[[events]]
+on = "pane.updated"
+command = ["/usr/bin/python3", "active_cwd_on_event.py"]
+
+[[events]]
+on = "pane.focused"
+command = ["/usr/bin/python3", "active_cwd_on_event.py"]
+
+[[events]]
+on = "pane.created"
+command = ["/usr/bin/python3", "active_cwd_on_event.py"]
+
+[[events]]
+on = "pane.moved"
+command = ["/usr/bin/python3", "active_cwd_on_event.py"]
+
+[[events]]
+on = "pane.exited"
+command = ["/usr/bin/python3", "active_cwd_on_event.py"]
+
+[[events]]
+on = "tab.focused"
+command = ["/usr/bin/python3", "active_cwd_on_event.py"]
+
+[[events]]
+on = "workspace.focused"
+command = ["/usr/bin/python3", "active_cwd_on_event.py"]
