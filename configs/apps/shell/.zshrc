@@ -436,7 +436,35 @@ fi
 
 # Starship GitHub PR cache hooks
 
+# Instant sidebar cwd updates under herdr: herdr 0.7.x tracks each pane's cwd
+# (surfaced by the me.active-cwd plugin's $active_cwd/$active_repo sidebar
+# rows) but fires no plugin event when it changes — only focus/create/exit
+# events exist — so a bare `cd` otherwise refreshes only on the next
+# refocus. Fire the handler ourselves on chpwd; it diffs against its last
+# report, so redundant runs are cheap no-ops. Stdio is fully detached:
+# herdr captures the handler's log lines when IT spawns the plugin, but
+# here the shell would otherwise print them into the pane.
 autoload -Uz add-zsh-hook
+
+herdr_active_cwd_refresh() {
+  [[ -n "$HERDR_ENV" && -f "$HOME/.config/herdr/active_cwd_on_event.py" ]] || return 0
+  HERDR_PLUGIN_STATE_DIR="$HOME/.config/herdr/plugins/config/me.active-cwd" \
+    /usr/bin/python3 "$HOME/.config/herdr/active_cwd_on_event.py" \
+    </dev/null >/dev/null 2>&1 &!
+}
+add-zsh-hook chpwd herdr_active_cwd_refresh
+
+# Fresh shells never fire chpwd (initial PWD isn't a change), so a new
+# split/pane otherwise stays stale until its first cd or refocus. Nudge the
+# handler exactly once, at the first prompt, when the shell's real cwd is
+# settled.
+typeset -g _HERDR_CWD_REPORTED=0
+_herdr_active_cwd_first_prompt() {
+  (( _HERDR_CWD_REPORTED )) && return 0
+  _HERDR_CWD_REPORTED=1
+  herdr_active_cwd_refresh
+}
+add-zsh-hook precmd _herdr_active_cwd_first_prompt
 
 export STARSHIP_GITHUB_PR_SESSION_CACHE="${TMPDIR:-/tmp}/starship-github-pr-${USER:-user}-$$"
 : >| "$STARSHIP_GITHUB_PR_SESSION_CACHE"

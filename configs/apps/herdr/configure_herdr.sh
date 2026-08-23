@@ -8,15 +8,18 @@ mkdir -p ~/.config/herdr
 
 ln -sfn "$current_dir/config.toml" ~/.config/herdr/config.toml
 ln -sfn "$current_dir/even_panes.py" ~/.config/herdr/even_panes.py
+ln -sfn "$current_dir/plugin-active-cwd/active_cwd_on_event.py" ~/.config/herdr/active_cwd_on_event.py
 
 # Plugins are linked in place from this repo; re-link to pick up changes.
 #
 # - me.even-panes: runs on pane created/closed/moved events and at startup,
 #   evening out split panes tmux-style.
-# - me.active-cwd: event-driven handler that reports the focused pane's
-#   working directory as workspace metadata ($active_repo / $active_cwd),
-#   rendered by the [ui.sidebar.spaces] rows in config.toml like the tmux
-#   status bar.
+# - me.active-cwd: event-driven handler that reports each space's
+#   focused-pane working directory as workspace metadata ($active_repo /
+#   $active_cwd), rendered by the [ui.sidebar.spaces] rows in config.toml
+#   like the tmux status bar. Herdr 0.7.x fires no plugin event when a
+#   pane's cwd changes, so .zshrc also spawns this same handler from a
+#   chpwd hook to cover bare `cd`.
 # - me.space-mover: move-left / move-right actions that shift the focused
 #   space sideways in the sidebar. Bound to Shift+Left/Right via [keys.command]
 #   in config.toml; inside tmux, tmux-app-key invokes the same actions.
