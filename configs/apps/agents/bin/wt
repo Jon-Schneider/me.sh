@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# wt — set the workspace title ("workspace title"): the herdr space when
+# running under herdr, otherwise the tmux window. The space-level sibling of
+# `pt` (pane title): panes label their split, workspaces label their whole
+# sidebar row.
+#
+# The spaces sidebar's first row ("state_icon", "workspace") renders this
+# label directly — unlike pt there are no extra token rows to feed, so wt is
+# one label in, one rename out. Bare words (or stdin) are the label:
+#
+#   wt SHP-399 login flow      -> label "SHP-399 login flow"
+#   echo "release prep" | wt   -> read label from stdin
+#   wt -c|--clear              -> restore the default label (basename of the
+#                                 space's startup cwd under herdr; re-enables
+#                                 tmux automatic-rename under tmux)
+#
+# usage: wt [-c|--clear] <label>   set workspace/space title
+#        wt <label>                bare words are the label
+#        wt -c|--clear             restore default label
+#        echo <label> | wt         read label from stdin
+
+set -u
+
+usage() {
+  echo "usage: wt [-c|--clear] <label>   set workspace/space title" >&2
+  echo "       wt <label>                bare words are the label" >&2
+  echo "       wt -c|--clear             restore default label" >&2
+  echo "       echo <label> | wt         read label from stdin" >&2
+}
+
+# Collapse whitespace: herdr/tmux titles are single-line.
+norm() {
+  printf '%s' "$1" | tr '\r\n\t' '   ' | tr -s ' ' | sed 's/^ //; s/ $//'
+}
+
+clear=0
+label=""
+while (($#)); do
+  case "$1" in
+    -h|--help) usage; exit 0 ;;
+    -c|--clear) clear=1; shift ;;
+    --) shift; label="$label${label:+ }$*"; break ;;
+    -*) echo "wt: unknown option $1" >&2; usage; exit 2 ;;
+    *) [[ -n "$label" ]] && label="$label $1" || label="$1"; shift ;;
+  esac
+done
+
+if ((clear)); then
+  label=""
+elif [[ -z "$label" ]]; then
+  if [[ ! -t 0 ]]; then
+    label="$(cat)"
+  else
+    usage
+    exit 2
+  fi
+fi
+label="$(norm "$label")"
+
+if ((clear)); then
+  # herdr auto-labels new spaces from the startup cwd's basename, so that is
+  # the closest thing to a default label to restore.
+  label="$(basename "${HERDR_STARTUP_CWD:-$PWD}")"
+elif [[ -z "$label" ]]; then
+  usage
+  exit 2
+fi
+
+if [[ "${HERDR_ENV:-}" == "1" && -n "${HERDR_SOCKET_PATH:-}" && -n "${HERDR_WORKSPACE_ID:-}" ]]; then
+  herdr workspace rename "${HERDR_WORKSPACE_ID}" "$label" >/dev/null 2>&1 || true
+  exit 0
+fi
+
+if [[ -n "${TMUX:-}" ]]; then
+  pane_id="${TMUX_PANE:-}"
+  helper="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/tmux-pane-for-process"
+  if [[ -x "$helper" ]]; then
+    pane_id="$("$helper")"
+  fi
+  [[ -n "$pane_id" ]] || { echo "wt: couldn't identify tmux pane" >&2; exit 1; }
+  if ((clear)); then
+    exec tmux set-option -w -t "$pane_id" automatic-rename on
+  fi
+  tmux set-option -w -t "$pane_id" automatic-rename off >/dev/null 2>&1 || true
+  exec tmux rename-window -t "$pane_id" "$label"
+fi
+
+echo "wt: not inside herdr or tmux" >&2
+exit 1
