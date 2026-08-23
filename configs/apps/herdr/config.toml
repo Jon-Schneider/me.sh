@@ -32,6 +32,15 @@ rows = [
 # keys before Herdr sees them, so tmux-app-key detects Herdr-owned panes and
 # invokes the same actions instead.
 
+# Prefix key: ctrl+space (replaces tmux's C-b muscle memory). All the
+# default prefix+... bindings below keep working; only the leader changes.
+
+[keys]
+prefix = "ctrl+space"
+# tmux muscle memory: prefix+, renames the focused space (default is
+# prefix+shift+w).
+rename_workspace = "prefix+comma"
+
 onboarding = false
 
 [theme]
