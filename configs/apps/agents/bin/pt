@@ -2,48 +2,93 @@
 # pt — set the pane title ("pane title"): the herdr pane when running under
 # herdr, otherwise the tmux pane. Lets agents label their split while working.
 #
-# Under herdr the title also feeds the sidebar agents list: the first word is
-# reported as $title_key (rendered next to the workspace name) and the rest is
-# word-wrapped onto up to two $title_sum rows (~30 columns each; herdr has no
-# native text wrapping, and rows whose tokens are missing disappear).
-# update_shipyard_pane_title delegates here, so this is the single writer of
-# those tokens (source me.pt).
+# Input splits into an optional short title and an optional body:
 #
-# usage: pt <title>       set pane title (+ herdr agents-list entry)
-#        pt -c|--clear    clear pane title and agents-list entry
-#        echo <title> | pt
+# - -t/--title: short label for the sidebar's first row (next to the
+#   workspace name), typically a ticket key like SHP-123.
+# - -b/--body: longer text, word-wrapped onto up to two extra agents-list
+#   rows (~30 columns each; herdr has no native text wrapping, and rows
+#   whose tokens are missing disappear).
+#
+# Both flags swallow words until the next flag, so quoting is optional:
+# `pt -t SHP-123 -b fix the login flow` -> title "SHP-123", body "fix the
+# login flow". Bare words (or stdin) are the body: `pt fixed the flaky
+# test` just fills the body rows. Use `--` to feed words starting with "-".
+#
+# The split-pane title itself is "<title> <body>" concatenated.
+# Tokens are reported as title_key / title_sum1 / title_sum2 (source me.pt);
+# update_shipyard_pane_title delegates here, so this is the single writer of
+# those tokens.
+#
+# usage: pt [-t <title>] [-b <body>]  set pane title (+ herdr agents-list entry)
+#        pt <body>                    bare words are the body
+#        pt -c|--clear                clear pane title and agents-list entry
+#        echo <body> | pt             read body from stdin
 
 set -u
 
 usage() {
-  echo "usage: pt <title>       set pane title (+ herdr agents-list entry)" >&2
-  echo "       pt -c|--clear    clear pane title and agents-list entry" >&2
-  echo "       echo <title> | pt" >&2
+  echo "usage: pt [-t <title>] [-b <body>]  set pane title (+ herdr agents-list entry)" >&2
+  echo "       pt <body>                    bare words are the body" >&2
+  echo "       pt -c|--clear                clear pane title and agents-list entry" >&2
+  echo "       echo <body> | pt             read body from stdin" >&2
+}
+
+# Collapse whitespace: herdr/tmux titles are single-line.
+norm() {
+  printf '%s' "$1" | tr '\r\n\t' '   ' | tr -s ' ' | sed 's/^ //; s/ $//'
 }
 
 clear=0
+title=""
+body=""
+dest=""   # flag currently collecting words: "" | title | body
 while (($#)); do
   case "$1" in
     -h|--help) usage; exit 0 ;;
     -c|--clear) clear=1; shift ;;
+    -t|--title) dest=title; shift ;;
+    -b|--body) dest=body; shift ;;
     --) shift; break ;;
-    *) break ;;
+    -*) echo "pt: unknown option $1" >&2; usage; exit 2 ;;
+    *)
+      # Words collect into the active flag's value (-t/-b); bare words
+      # with no flag seen yet are body shorthand.
+      if [[ "$dest" == title ]]; then
+        [[ -n "$title" ]] && title="$title $1" || title="$1"
+      else
+        [[ -n "$body" ]] && body="$body $1" || body="$1"
+      fi
+      shift ;;
   esac
 done
 
-title=""
+# Anything after -- is body.
 if (($#)); then
-  title="$*"
-elif [[ ! -t 0 ]]; then
-  title="$(cat)"
+  if [[ -n "$body" ]]; then
+    body="$body $*"
+  else
+    body="$*"
+  fi
+elif [[ ! -t 0 && -z "$body" ]]; then
+  body="$(cat)"
 fi
-title="$(printf '%s' "$title" | tr '\r\n\t' '   ' | tr -s ' ' | sed 's/^ //; s/ $//')"
+title="$(norm "$title")"
+body="$(norm "$body")"
 
 if ((clear)); then
   title=""
-elif [[ -z "$title" ]]; then
+  body=""
+elif [[ -z "$title" && -z "$body" ]]; then
   usage
   exit 2
+fi
+
+# The split-pane title shows both parts concatenated.
+if [[ -n "$title" && -n "$body" ]]; then
+  full="$title $body"
+else
+  full="$title$body"
 fi
 
 SIDEBAR_SOURCE="me.pt"
@@ -59,17 +104,18 @@ clear_sidebar_tokens() {
 }
 
 report_sidebar_tokens() {
-  # Split "<key> <summary...>" at word boundaries across up to two ~30-col
-  # lines. Empty chunk -> explicit clear, so shrinking titles shrink rows.
-  local wrapped skey s1 s2
-  wrapped="$(printf '%s' "$1" | python3 -c '
+  # Title -> title_key (sidebar row 1); body word-wrapped at word boundaries
+  # across up to two ~30-col lines -> title_sum1/title_sum2. Missing pieces
+  # get explicit clears, so shrinking titles shrink rows.
+  local title="$1" body="$2"
+  local wrapped s1 s2
+  wrapped="$(printf '%s' "$body" | python3 -c '
 import sys
 
 text = " ".join(sys.stdin.read().split())
-key, _, summary = text.partition(" ")
 width = 30
 lines, current = [], ""
-for word in summary.split():
+for word in text.split():
     candidate = f"{current} {word}".strip()
     if current and len(candidate) > width:
         lines.append(current)
@@ -78,16 +124,17 @@ for word in summary.split():
         current = candidate
 if current:
     lines.append(current)
-lines = lines[:2]
-print("\n".join([key, *lines, ""][:3]))
+print("\n".join(lines[:2]))
 ')" || return 0
-  skey="$(printf '%s\n' "$wrapped" | sed -n '1p')"
-  s1="$(printf '%s\n' "$wrapped" | sed -n '2p')"
-  s2="$(printf '%s\n' "$wrapped" | sed -n '3p')"
-  [[ -n "$skey" ]] || return 0
+  s1="$(printf '%s\n' "$wrapped" | sed -n '1p')"
+  s2="$(printf '%s\n' "$wrapped" | sed -n '2p')"
 
   local args=(pane report-metadata "${HERDR_PANE_ID}" --source "$SIDEBAR_SOURCE")
-  args+=(--token "${SIDEBAR_KEY}=${skey}")
+  if [[ -n "$title" ]]; then
+    args+=(--token "${SIDEBAR_KEY}=${title}")
+  else
+    args+=(--clear-token "$SIDEBAR_KEY")
+  fi
   if [[ -n "$s1" ]]; then
     args+=(--token "${SIDEBAR_SUM1}=${s1}")
   else
@@ -107,8 +154,8 @@ if [[ "${HERDR_ENV:-}" == "1" && -n "${HERDR_SOCKET_PATH:-}" && -n "${HERDR_PANE
     clear_sidebar_tokens
     exit 0
   fi
-  herdr pane rename "${HERDR_PANE_ID}" "$title" >/dev/null 2>&1 || true
-  report_sidebar_tokens "$title"
+  herdr pane rename "${HERDR_PANE_ID}" "$full" >/dev/null 2>&1 || true
+  report_sidebar_tokens "$title" "$body"
   exit 0
 fi
 
@@ -119,7 +166,7 @@ if [[ -n "${TMUX:-}" ]]; then
     pane_id="$("$helper")"
   fi
   [[ -n "$pane_id" ]] || { echo "pt: couldn't identify tmux pane" >&2; exit 1; }
-  exec tmux select-pane -t "$pane_id" -T "$title"
+  exec tmux select-pane -t "$pane_id" -T "$full"
 fi
 
 echo "pt: not inside herdr or tmux" >&2
