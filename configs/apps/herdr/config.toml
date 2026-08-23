@@ -8,12 +8,14 @@
 #
 # Active-pane cwd is provided by the me.active-cwd plugin
 # (plugin-active-cwd/ in this directory): an event-driven handler — no
-# daemon — that watches pane/focus events (pane.updated carries the pane's
-# foreground_cwd via shell OSC 7) and reports workspace metadata.
+# daemon — that watches pane focus/create/exit events and reports workspace
+# metadata. Herdr 0.7.x fires no plugin event when a pane's cwd changes, so
+# a zsh chpwd hook (.zshrc) also spawns the handler on bare `cd`.
 # $active_cwd is the ~-substituted path, like the right side of the tmux
 # status bar; $active_repo adds "Repo (worktree)" for worktree-backed
-# spaces. Rows whose tokens are all missing disappear, so plain spaces show
-# only the path, and only the focused space carries the row at all.
+# spaces. Every space carries its own row once its panes have reported a
+# cwd; rows whose tokens are all missing disappear, so plain spaces show
+# only the path.
 
 [ui.sidebar.spaces]
 rows = [

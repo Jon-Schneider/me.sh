@@ -1,29 +1,38 @@
 #!/usr/bin/env python3
-"""Active-cwd plugin handler: mirror the focused pane's cwd into the sidebar.
+"""Active-cwd plugin handler: mirror each space's focused-pane cwd into the sidebar.
 
-Herdr spawns this script on pane/focus events and once at startup — same
-shape as even_on_event.py, no daemon. Herdr tracks each pane's working
-directory via shell OSC 7 and includes foreground_cwd in every pane.updated
-event, so cd inside a focused pane reaches us like any other change:
+Event-driven, no daemon: herdr spawns this script on pane events and once
+at startup — same shape as even_on_event.py. Herdr tracks each pane's
+working directory (foreground_cwd in pane.list) but 0.7.x fires no plugin
+event when it changes, so cd coverage comes from a zsh chpwd hook that
+spawns this script directly; focus/create/exit/move events do the rest:
 
-  workspace.list  → focused space (+ its worktree info)
-  pane.list       → that space's focused pane; fallback any pane
+  workspace.list  → per-space worktree info
+  pane.list       → every pane, grouped here by workspace_id
 
 The value is reported via workspace.report_metadata as tokens consumed by
 [ui.sidebar.spaces] rows in config.toml:
 
-  $active_cwd   ~-substituted path, e.g. ~/Developer/jsc/me.sh
-  $active_repo  "Repo (worktree)" for worktree-backed spaces; null for
-                plain checkouts, which drops it from the row
+  $active_cwd   ~-substituted path of the space's focused pane, e.g.
+                ~/Developer/jsc/me.sh
+  $active_repo  "Repo (worktree)" label for worktree-backed spaces; null
+                for plain checkouts, which drops it from the row
 
-Only the focused space ever carries tokens: when focus moves, previously
-marked spaces are cleared so their extra row disappears.
+Every space carries its own row persistently; a space with no known cwd yet
+reports nothing, and rows whose tokens are all null simply don't render.
 
-pane.updated fires per revision bump (scroll, title, output), so bursts are
-coalesced two ways: a short settle sleep up front, then an exclusive lock on
-the state file — queued invocations recompute after the winner finishes and
-exit silently when nothing changed. Reports are diffed against state, so a
-no-op run costs two local socket reads.
+Handlers must be short-lived: herdr caps concurrent plugin commands (32)
+and hard-drops spawns beyond the cap. v1 blocked on an exclusive lock while
+sleeping out a defer window, so bursts serialized into minutes-long queues
+that pinned all 32 slots — herdr then dropped new spawns outright and the
+sidebar stopped updating. v2 takes a non-blocking lock instead: if another
+instance is already reconciling, this one exits immediately (~30ms). The
+winner sleeps one short settle to absorb same-instant bursts, then
+reconciles ALL workspaces, retrying briefly while a fresh pane's shell is
+still booting (no cwd yet). Desired state is always recomputed from live
+server state and diffs are idempotent, so dropped or duplicate spawns are
+harmless — the next successful run converges everything, and losers cost
+one python startup each.
 """
 
 from __future__ import annotations
@@ -35,10 +44,12 @@ import socket
 import sys
 import time
 
-SETTLE_S = 0.03
-DEFER_S = 0.15  # min gap between handled runs; latecomers wait out the gap
+SETTLE_S = 0.04  # absorb same-instant event bursts once the lock is ours
+MAX_PASSES = 4  # reconcile passes; stop early when nothing is still booting
+PASS_GAP_S = 0.15  # grace between passes while a fresh pane's shell starts up
 SOURCE = "me.active-cwd"
-STATE_VERSION = 1
+STATE_VERSION = 2
+TOKEN_NAMES = ("active_cwd", "active_repo")
 WORKTREES_ROOT = os.path.expanduser(
     os.environ.get("HERDR_WORKTREES_ROOT") or "~/.herdr/worktrees"
 )
@@ -66,7 +77,7 @@ def load_state(path: str) -> dict:
             return state
     except (OSError, ValueError):
         pass
-    return {"version": STATE_VERSION, "reported": {}, "handled_at": 0.0}
+    return {"version": STATE_VERSION, "reported": {}}
 
 
 def save_state(path: str, state: dict) -> None:
@@ -131,47 +142,76 @@ def repo_token(workspace: dict, cwd: str | None) -> str | None:
     return None
 
 
-def desired_tokens(sock: str) -> tuple[str, dict | None]:
-    """Tokens for the focused workspace, plus its id."""
+def desired_tokens(sock: str, workspaces: list | None = None) -> tuple[dict[str, dict], list[str]]:
+    """Per-workspace tokens, plus ids of workspaces whose panes exist but
+    have no usable cwd yet (fresh panes whose shells haven't started)."""
+    workspaces = workspaces if workspaces is not None else api(sock, "workspace.list")["workspaces"]
+    panes = api(sock, "pane.list")["panes"]
+
+    by_ws: dict[str, list] = {}
+    for p in panes:
+        by_ws.setdefault(p.get("workspace_id"), []).append(p)
+
+    out: dict[str, dict] = {}
+    booting: list[str] = []
+    for ws in workspaces:
+        wid = ws["workspace_id"]
+        cands = by_ws.get(wid, [])
+        if not cands:
+            continue
+        ordered = [p for p in cands if p.get("focused")] + [
+            p for p in cands if not p.get("focused")
+        ]
+        cwd = next(
+            (
+                p.get("foreground_cwd") or p.get("cwd")
+                for p in ordered
+                if p.get("foreground_cwd") or p.get("cwd")
+            ),
+            None,
+        )
+        if not cwd:
+            booting.append(wid)  # shell not up yet; leave previous tokens untouched
+            continue
+        out[wid] = {"active_cwd": tilde(cwd), "active_repo": repo_token(ws, cwd)}
+    return out, booting
+
+
+def reconcile_once(sock: str, state_path: str) -> tuple[int, int]:
+    """Report token diffs for all workspaces; returns (changes, booting)."""
+    state = load_state(state_path)
     workspaces = api(sock, "workspace.list")["workspaces"]
-    focused_ws = next((ws for ws in workspaces if ws.get("focused")), None)
-    if focused_ws is None:
-        return "", None
-    wid = focused_ws["workspace_id"]
+    live_ids = {ws["workspace_id"] for ws in workspaces}
 
-    panes = api(sock, "pane.list", workspace_id=wid)["panes"]
-    ordered = [p for p in panes if p.get("focused")] + [
-        p for p in panes if not p.get("focused")
-    ]
-    cwd = next(
-        (
-            p.get("foreground_cwd") or p.get("cwd")
-            for p in ordered
-            if p.get("foreground_cwd") or p.get("cwd")
-        ),
-        None,
-    )
-    if not cwd:
-        return wid, None
-    return wid, {"active_cwd": tilde(cwd), "active_repo": repo_token(focused_ws, cwd)}
+    changed = 0
+    reported = state.setdefault("reported", {})
+    # Spaces that vanished: drop our bookkeeping (their metadata died with them).
+    for stale_id in [wid for wid in reported if wid not in live_ids]:
+        del reported[stale_id]
+        changed += 1
 
+    tokens, booting = desired_tokens(sock, workspaces)
+    for wid, ws_tokens in tokens.items():
+        if reported.get(wid) != ws_tokens:
+            payload = {name: None for name in TOKEN_NAMES}
+            payload.update(ws_tokens)
+            api(
+                sock,
+                "workspace.report_metadata",
+                workspace_id=wid,
+                source=SOURCE,
+                tokens=payload,
+            )
+            reported[wid] = ws_tokens
+            changed += 1
 
-def report(sock: str, workspace_id: str, tokens: dict | None) -> None:
-    payload = {name: None for name in ("active_cwd", "active_repo")}
-    if tokens:
-        payload.update(tokens)
-    api(
-        sock,
-        "workspace.report_metadata",
-        workspace_id=workspace_id,
-        source=SOURCE,
-        tokens=payload,
-    )
+    if changed:
+        save_state(state_path, state)
+        log(f"reconciled {changed} workspace(s): {json.dumps(reported)}")
+    return changed, len(booting)
 
 
 def main() -> int:
-    time.sleep(SETTLE_S)
-
     sock = socket_path()
     state_dir_path = state_dir()
     state_path = os.path.join(state_dir_path, "state.json")
@@ -179,36 +219,21 @@ def main() -> int:
     os.makedirs(state_dir_path, exist_ok=True)
 
     with open(lock_path, "w") as lock_file:
-        fcntl.flock(lock_file, fcntl.LOCK_EX)
+        try:
+            fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            return 0  # another instance is reconciling right now; it sees this event too
 
-        # Coalesce bursts: wait out the remaining gap, then compute once.
-        state = load_state(state_path)
-        since_last = time.monotonic() - state.get("handled_at", 0.0)
-        if since_last < DEFER_S:
-            time.sleep(DEFER_S - since_last)
-
-        wid, tokens = desired_tokens(sock)
-
-        changed = []
-
-        # Focus moved / spaces closed: clear tokens we left behind.
-        live_ids = {ws["workspace_id"] for ws in api(sock, "workspace.list")["workspaces"]}
-        for stale_id in list(state.get("reported", {})):
-            if stale_id != wid or stale_id not in live_ids:
-                report(sock, stale_id, None)
-                del state["reported"][stale_id]
-                changed.append(f"cleared {stale_id}")
-
-        if wid and state.get("reported", {}).get(wid) != tokens:
-            report(sock, wid, tokens)
-            state.setdefault("reported", {})[wid] = tokens
-            changed.append(f"{wid}: {json.dumps(tokens)}")
-
-        state["handled_at"] = time.monotonic()
-        save_state(state_path, state)
-
-        if changed:
-            log("; ".join(changed))
+        time.sleep(SETTLE_S)
+        # A just-created split pane has no cwd until its shell comes up and
+        # herdr's tracking sees it; keep reconciling briefly so its row lands
+        # without waiting for the next event. Bounded, so the worst case
+        # occupies one process slot for ~MAX_PASSES * PASS_GAP_S.
+        for _ in range(MAX_PASSES):
+            _, booting = reconcile_once(sock, state_path)
+            if booting == 0:
+                break
+            time.sleep(PASS_GAP_S)
     return 0
 
 

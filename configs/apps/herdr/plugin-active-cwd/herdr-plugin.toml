@@ -1,15 +1,27 @@
 id = "me.active-cwd"
 name = "Active CWD"
-version = "1.1.0"
+version = "1.2.0"
 min_herdr_version = "0.7.0"
-description = "Report the focused pane's working directory as workspace metadata ($active_repo / $active_cwd) for the sidebar space rows"
+description = "Report each space's focused-pane working directory as workspace metadata ($active_repo / $active_cwd) for the sidebar space rows"
 platforms = ["macos"]
 
-# Event-driven, even-panes style: Herdr spawns this script on pane/focus
-# events and once at server startup. pane.updated carries the pane's
-# foreground_cwd (shell OSC 7), so cd inside a focused pane re-renders the
-# sidebar row with no polling and no daemon. The handler diffs against its
-# last report and stays silent when nothing changed.
+# Event-driven, even-panes style: Herdr spawns this script on pane events
+# and once at server startup. The handler recomputes every space from a
+# single pane.list, diffs against its last report, and stays silent when
+# nothing changed.
+#
+# Herdr 0.7.x tracks each pane's cwd but fires NO plugin event when it
+# changes — only focus/create/exit/move events exist. Bare `cd` is covered
+# by a zsh chpwd hook (.zshrc) that spawns this same script directly. The
+# pane.updated entry below is intentionally kept despite the link-time
+# "unknown event" warning: it's a no-op today and lights up automatically
+# if a future herdr adds the event.
+#
+# Trigger set is deliberately minimal: herdr caps concurrent plugin commands
+# (32) and hard-drops spawns past the cap, so every avoided spawn matters.
+# pane.focused alone covers focus switches (tab.focused/workspace.focused
+# always fired alongside it, tripling spawns for nothing), and each handler
+# exits in ~30ms via non-blocking lock instead of queueing behind its peers.
 [[startup]]
 command = ["/usr/bin/python3", "active_cwd_on_event.py"]
 
@@ -31,12 +43,4 @@ command = ["/usr/bin/python3", "active_cwd_on_event.py"]
 
 [[events]]
 on = "pane.exited"
-command = ["/usr/bin/python3", "active_cwd_on_event.py"]
-
-[[events]]
-on = "tab.focused"
-command = ["/usr/bin/python3", "active_cwd_on_event.py"]
-
-[[events]]
-on = "workspace.focused"
 command = ["/usr/bin/python3", "active_cwd_on_event.py"]
