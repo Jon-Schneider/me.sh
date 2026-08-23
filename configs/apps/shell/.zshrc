@@ -273,12 +273,15 @@ load_non_git_aliases() {
     safe() {
       local safehouse_xcode_override="$HOME/.config/agent-safehouse/profiles/55-integrations-optional/xcode-cli.sb"
 
+      # HERDR_* pass-through: under the always-inside-herdr workflow, sandboxed
+      # agents need these to register with herdr's agent sidebar (TMUX vars kept
+      # while tmux remains in use manually).
       safehouse \
         --enable=xcode \
         --enable=lldb \
         --enable=macos-gui \
         --enable=keychain \
-        --env-pass=TMUX,TMUX_PANE \
+        --env-pass=TMUX,TMUX_PANE,HERDR_ENV,HERDR_SOCKET_PATH,HERDR_PANE_ID,HERDR_TAB_ID,HERDR_WORKSPACE_ID \
         --append-profile="$safehouse_xcode_override" \
         --add-dirs="$HOME/.agents:$HOME/bin:$HOME/.claude:$HOME/.codex:$HOME/Developer/jsc/me.sh:$HOME/Library/Caches:$HOME/Library/Developer" \
         --add-dirs-ro="$HOME/.config/acli" \
@@ -405,33 +408,33 @@ export XDG_CONFIG_HOME="$HOME/.config"
 # Opencode merges shared global config file into ~/.config/opencode/opencode.json, which is left untracked so mtplx and sync-opencode-omlx-models can rewrite it freely.
 export OPENCODE_CONFIG="$XDG_CONFIG_HOME/opencode/opencode-shared.json"
 
-# Skip tmux autostart when the terminal was opened for a specific directory.
+# True when the terminal was opened for a specific directory rather than home.
 shell_has_preassigned_directory() {
   [[ "${PWD:A}" != "${HOME:A}" ]]
 }
 
-# Attach to main session if not already active, create a new tmux session if it is
-if command -v tmux >/dev/null 2>&1 && [[ -z "$TMUX" && -o interactive ]]; then
-  if shell_has_preassigned_directory; then
-    dir_name="${PWD:t}"  # <-- last path component
-
-    if tmux has-session -t main 2>/dev/null; then
-      new_window="$(tmux new-window -P -F '#{window_id}' -t main -c "$PWD" -n "$dir_name")"
-      tmux select-window -t "$new_window"
-      exec tmux attach -t main
-    else
-      exec tmux new-session -s main -c "$PWD" -n "$dir_name"
+# Always-inside-herdr: every top-level interactive shell opens inside the one
+# persistent herdr session, mirroring the previous always-inside-tmux setup.
+#
+# - Session already active: attach to it. When this terminal was opened for a
+#   specific directory, first create and focus a workspace there (herdr's
+#   equivalent of `tmux new-window -t main -c "$PWD"`). A bare reattach would
+#   NOT open anything at $PWD: herdr only honors the startup cwd when the
+#   session has no workspaces at all.
+# - No session yet: plain `herdr` spawns the background server and opens its
+#   startup workspace at $PWD.
+if command -v herdr >/dev/null 2>&1 && [[ -z "$HERDR_ENV" && -o interactive ]]; then
+  if herdr status server --json 2>/dev/null | grep -q '"running":true'; then
+    if shell_has_preassigned_directory; then
+      herdr workspace create --cwd "$PWD" --label "${PWD:t}" --focus >/dev/null 2>&1 || true
     fi
+    exec herdr
   else
-    if tmux has-session -t main 2>/dev/null; then
-      exec tmux attach -t main
-    else
-      exec tmux new-session -s main
-    fi
+    exec herdr
   fi
 fi
 
-# Custom tmux pane title logic
+# Starship GitHub PR cache hooks
 
 autoload -Uz add-zsh-hook
 
@@ -452,117 +455,7 @@ cleanup_starship_github_pr_cache() {
   rm -f "$STARSHIP_GITHUB_PR_SESSION_CACHE"
 }
 
-tmux_window_name_for_pwd() {
-  local toplevel git_dir common_dir repo_name
-
-  if toplevel="$(git -C "$PWD" rev-parse --show-toplevel 2>/dev/null)"; then
-    # Detect a linked worktree by comparing the per-worktree git dir against the
-    # shared common git dir. They match in the repo's main working tree and
-    # differ inside any linked worktree (e.g. ./Repo/.worktrees/<name>).
-    # Resolve both through `cd && pwd` so any symlinks are normalized
-    # identically and the comparison below is reliable.
-    git_dir="$(git -C "$PWD" rev-parse --git-dir 2>/dev/null)"
-    git_dir="$(cd "$git_dir" 2>/dev/null && pwd -P)"
-    common_dir="$(git -C "$PWD" rev-parse --git-common-dir 2>/dev/null)"
-    common_dir="$(cd "$common_dir" 2>/dev/null && pwd -P)"
-
-    if [[ -n "$common_dir" && "$git_dir" != "$common_dir" ]]; then
-      # In a worktree: name as "RepoName (worktree)". RepoName comes from the
-      # main repo (parent of the shared .git); the worktree label is the
-      # worktree's own directory name.
-      repo_name="$(basename "$(dirname "$common_dir")")"
-      printf "%s (%s)" "$repo_name" "$(basename "$toplevel")"
-    else
-      basename "$toplevel"
-    fi
-  elif [[ "$PWD" == "$HOME" ]]; then
-    printf "home"
-  else
-    basename "$PWD"
-  fi
-}
-
-# Stable identity for "the repo/dir this window is currently in". Used to decide
-# when a manual window name should be dropped (we've left the repo it was set in).
-tmux_repo_key_for_pwd() {
-  git -C "$PWD" rev-parse --show-toplevel 2>/dev/null || printf "%s" "$PWD"
-}
-
-# Window id owning this shell, but only when this shell is the pane's root shell.
-# TMUX_PANE is inherited by nested agent shells, and only the root shell owns its
-# window name; otherwise a child shell can rename the window for its temporary
-# working directory (for example, document-translation-<UUID>).
-tmux_window_id_for_pane_root_shell() {
-  [[ -n "$TMUX" && -n "$TMUX_PANE" ]] || return 1
-
-  local pane_pid window_id
-  pane_pid="$(tmux display-message -p -t "$TMUX_PANE" '#{pane_pid}')" || return 1
-  [[ "$pane_pid" == "$$" ]] || return 1
-
-  window_id="$(tmux display-message -p -t "$TMUX_PANE" '#{window_id}')" || return 1
-  [[ -n "$window_id" ]] || return 1
-  printf "%s" "$window_id"
-}
-
-rename_tmux_window_for_pwd() {
-  local target_window name key
-  # Resolve the window that owns this shell before doing any slower path/Git
-  # work. Without an explicit target, tmux operates on whichever window the
-  # client has selected when each command runs.
-  target_window="$(tmux_window_id_for_pane_root_shell)" || return
-
-  name="$(tmux_window_name_for_pwd)"
-  # Never set an empty name (e.g. a transient git failure / vanished path):
-  # an empty rename is exactly the "wrong name" drift we're trying to avoid.
-  [[ -n "$name" ]] || return
-  key="$(tmux_repo_key_for_pwd)"
-
-  # A window can be pinned to a manual name (prefix ,). Honor it only while we
-  # stay in the same repo/dir; once the repo key changes we've left the repo, so
-  # drop the override and resume automatic naming.
-  if [[ "$(tmux show-option -wqv -t "$target_window" @manual_window_name)" == "1" ]]; then
-    [[ "$key" == "$(tmux show-option -wqv -t "$target_window" @window_repo_root)" ]] && return
-    tmux set-option -uw -t "$target_window" @manual_window_name
-  fi
-
-  tmux rename-window -t "$target_window" "$name"
-  tmux set-option -w -t "$target_window" @window_repo_root "$key"
-}
-
-# Herdr is a full-window app: its splits happen inside Herdr rather than in tmux,
-# so a pane running it owns the whole window tab for as long as it runs.
-TMUX_HERDR_WINDOW_NAME="Herdr"
-
-rename_tmux_window_for_herdr() {
-  local target_window
-  target_window="$(tmux_window_id_for_pane_root_shell)" || return
-
-  # A manually pinned name (prefix ,) outranks Herdr.
-  [[ "$(tmux show-option -wqv -t "$target_window" @manual_window_name)" == "1" ]] && return
-
-  tmux rename-window -t "$target_window" "$TMUX_HERDR_WINDOW_NAME"
-  TMUX_WINDOW_RENAMED_FOR_HERDR=1
-}
-
-start_tmux_herdr_window_name() {
-  # $3 is the command line with aliases and history expanded; (z) splits it the
-  # way the shell does, so the first word is the command actually being run.
-  local -a command_words
-  command_words=(${(z)3})
-  [[ "${command_words[1]:t}" == "herdr" ]] && rename_tmux_window_for_herdr
-}
-
-end_tmux_herdr_window_name() {
-  [[ -n "$TMUX_WINDOW_RENAMED_FOR_HERDR" ]] || return
-  unset TMUX_WINDOW_RENAMED_FOR_HERDR
-  rename_tmux_window_for_pwd
-}
-
-add-zsh-hook preexec start_tmux_herdr_window_name
-add-zsh-hook precmd end_tmux_herdr_window_name
 add-zsh-hook precmd refresh_starship_github_pr_cache
 add-zsh-hook chpwd reset_starship_github_pr_cache
 add-zsh-hook zshexit cleanup_starship_github_pr_cache
-add-zsh-hook chpwd rename_tmux_window_for_pwd
 refresh_starship_github_pr_cache
-rename_tmux_window_for_pwd # Apply custom pane name on start
