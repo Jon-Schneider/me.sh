@@ -32,6 +32,7 @@ brew "watch"
 brew "xcinfo"
 brew "xcodegen"
 brew "yarn"
+brew "yq"
 brew "zsh-syntax-highlighting"
 
 cask "ankerwork"
