@@ -5,24 +5,20 @@ set -euo pipefail
 mkdir -p "$HOME/Developer" # I used to use '~/src' but then I found out '~/Developer' has a system icon
 
 # Disable Screenshot Previews
-echo "Disabling screenshot previews..."
 defaults write com.apple.screencapture show-thumbnail -bool FALSE
 
 # Set Screenshots Save Location
-echo "Setting screenshot save location..."
 defaults write com.apple.screencapture location ~/Tmp # System Screenshots
 defaults write com.apple.iphonesimulator ScreenShotSaveLocation -string ~/Tmp # iPhone Simulator Screenshots
 killall SystemUIServer
 
 # Crank up the key repeat rates and trackpad speed. We've got stuff to do.
 # You will have to log out for these preferences to be applied, or run 'killall Dock' or 'killall SystemUIServer'
-echo "Configuring Keyboard and Trackpad..."
 defaults write -g InitialKeyRepeat -int 15
 defaults write -g KeyRepeat -int 2
 defaults write -g com.apple.trackpad.scaling 3.0
 
 # Set default apps
-echo "Setting default apps..."
 duti -s com.barebones.bbedit public.text all
 duti -s com.barebones.bbedit public.plain-text all # All plaintext files. Includes Unix hidden files
 duti -s com.barebones.bbedit json all
@@ -37,11 +33,9 @@ duti -s com.macpaw.site.theunarchiver zip # Use The Unarchiver for zips
 
 # Override system theme to set certain apps to always display in dark or light mode
 # To reset run 'defaults delete [bundleid] NSRequiresAquaSystemAppearance'
-echo "Overriding system theme in specific apps..."
 defaults write com.apple.iCal NSRequiresAquaSystemAppearance -bool yes # Calendar should always be light mode
 defaults write com.microsoft.onenote.mac NSRequiresAquaSystemAppearance -bool no # OneNote should always be dark mode
 
-echo "Configuring Statusbar..."
 # Hide Siri in Statusbar
 defaults write com.apple.Siri StatusMenuVisible NO
 
@@ -58,8 +52,6 @@ defaults write com.apple.systemuiserver menuExtras -array \
     "/System/Library/CoreServices/Menu Extras/Battery.menu" \
     "/System/Library/CoreServices/Menu Extras/Clock.menu"
 killall SystemUIServer # Apply Statusbar Changes
-
-echo "Setting Misc. Config..."
 
 #Disable Boot Sound
 sudo nvram StartupMute=%01

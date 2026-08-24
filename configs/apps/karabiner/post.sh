@@ -1,8 +1,6 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "Configuring Karabiner Elements..."
-
 local_dir="$HOME/.config/me.sh/karabiner"
 local_module="$local_dir/local.libsonnet"
 output="$HOME/.config/karabiner/karabiner.json"

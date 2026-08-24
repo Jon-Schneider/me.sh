@@ -5,7 +5,6 @@ set -euo pipefail
 # after managed agent configs have been materialized. Those edits then land in
 # deployed copies and stay out of the repository.
 if command -v herdr > /dev/null; then
-  echo "Configuring Herdr integrations..."
   for agent in pi claude codex opencode; do
     herdr integration install "$agent"
   done
