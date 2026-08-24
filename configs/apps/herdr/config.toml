@@ -77,6 +77,27 @@ auto_switch = false
 agent_panel_sort = "priority"
 show_agent_labels_on_pane_borders = true
 
+# Agent rows: state icon + workspace + short title (pt -t, typically a
+# ticket key) + agent name on one line; the body (pt -b, or bare `pt words`)
+# is word-wrapped onto up to two extra lines. Tokens are reported by ~/bin/pt
+# (source me.pt) — the shared applier used both by manual pt calls and by
+# update_shipyard_pane_title when an agent fetches a Shipyard issue, e.g.
+# "● me.sh · SHP-399 · pi" + wrapped summary lines. Rows whose tokens are all
+# missing disappear, so untitled agents stay one line. herdr has no native
+# text wrapping — this is emulated script-side.
+[ui.sidebar.agents]
+# Inline { token = ..., dim = false } style tables: herdr renders agent-panel
+# tokens (agent name + custom $tokens) with the same overlay0 gray as the
+# space panel's branch/cwd rows PLUS a dim modifier, which made them near-
+# unreadable. dim=false drops just that modifier so these match the lighter
+# gray of the branch/cwd lines exactly, whatever the theme resolves
+# overlay0 to.
+rows = [
+  ["state_icon", "workspace", { token = "$title_key", dim = false }, { token = "agent", dim = false }],
+  [{ token = "$title_sum1", dim = false }],
+  [{ token = "$title_sum2", dim = false }],
+]
+
 [ui.toast]
 delivery = "system"
 
