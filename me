@@ -10,11 +10,15 @@
 #   me app | apps               Full app sync
 #   me macos | sys | system     Full macOS sync
 #   me [app|macos] <name>...    Sync only the named configs
-#   me diff [app|macos] [<name>...]
+#   me status [app|macos] [<name>|<path>...]
+#                               List files whose deployed copy differs from the
+#                               repo (compact; no diffs shown)
+#   me diff [app|macos] [<name>|<path>...]
 #                               Show one combined diff of drift between live
-#                               materialized copies and the repo (every config when
-#                               no names given)
-#   me up [app|macos] [<name>...] Pick local changes to pull back into the repo
+#                               materialized copies and the repo (every config
+#                               when nothing is named); path args scope by file
+#   me up [app|macos] [<name>|<path>...]
+#                               Pick local changes to pull back into the repo
 #                               (alias for the older name: absorb)
 #   me install                  Copy a 'me' shim into ~/bin so this runner is on PATH
 #   me doctor                   Validate every declarative config and claim
@@ -330,7 +334,7 @@ function select_all_config_units {
 	while IFS= read -r unit; do selected+=("$unit"); done < <(list_config_units "$APPS_SCOPE")
 }
 
-# --- Drift: diff / up (absorb) ----------------------------------------------
+# --- Drift: status / diff / up (absorb) ------------------------------------
 
 # Print kind<TAB>repo-source<TAB>deployed-destination rows for every
 # materialized file owned by UNIT. Managed files use marker discovery; plain
@@ -348,23 +352,113 @@ function drift_files_under_unit {
 	fi
 }
 
-# Diff every materialized file in 'selected' against its deployable repo state.
-# Managed files compare against a fresh composition; plain copies compare
-# directly against their manifest source. MODE 'show' renders one combined
-# colored git diff for the whole sweep; 'absorb' reviews each drifted file
-# separately and lets the user keep chosen hunks in the repo source.
-function run_drift {
-	local mode="$1" unit kind src dst tmp rc i applied=0 files=0 failed_apply=0
+declare -a drift_filters=()
 
-	if (( ${#selected[@]} == 0 )); then
-		error "needs at least one config name, e.g. 'me $mode agents'"
-		exit 1
+# Sweep results shared by status / diff / up.
+declare -a drift_src=() drift_dst=() drift_base=()
+declare -a drift_undeployed_src=() drift_undeployed_dst=()
+declare drift_tmp="" drift_clean_count=0
+
+# Normalize a path filter argument: expand a leading '~' to $HOME and drop a
+# trailing slash so prefix matching works cleanly.
+function normalize_drift_pattern {
+	local pattern="${1%/}"
+	if [[ "$pattern" == "~" ]]; then
+		pattern="$HOME"
+	elif [[ "$pattern" == "~/"* ]]; then
+		pattern="$HOME/${pattern:2}"
 	fi
+	printf '%s' "$pattern"
+}
 
-	tmp="$(mktemp -d "${TMPDIR:-/tmp}/me-drift.XXXXXX")"
+# True when PATTERN matches PATH on '/' boundaries: exact, directory prefix,
+# or any trailing or middle run of components ('ghostty/config',
+# '~/Library', 'apps/git' all match their targets).
+function drift_pattern_matches_path {
+	local pattern="$1" path="$2"
+	[[ -z "$pattern" ]] && return 1
+	[[ "$path" == "$pattern" || "$path" == "$pattern"/* || "$path" == */"$pattern" || "$path" == *"/$pattern"/* ]]
+}
 
-	# Phase 1: prepare each deployable repo state and collect drifted files.
-	local -a drift_src=() drift_dst=() drift_base=()
+# A row passes when no filters are set or either side matches any filter;
+# multiple filters union like positional paths in git diff.
+function drift_row_matches_filters {
+	local src="$1" dst="$2" pattern
+	if (( ${#drift_filters[@]} == 0 )); then
+		return 0
+	fi
+	for pattern in ${drift_filters[@]+"${drift_filters[@]}"}; do
+		if drift_pattern_matches_path "$pattern" "$src" || drift_pattern_matches_path "$pattern" "$dst"; then
+			return 0
+		fi
+	done
+	return 1
+}
+
+# Resolve one drift argument: arguments containing '/' are always path filters;
+# bare words resolve as config names first and fall back to path filters.
+function resolve_drift_arg {
+	local scope="$1" arg="$2" m app_total
+	if [[ "$arg" != */* ]]; then
+		if [[ "$scope" == "$APPS_SCOPE" || "$scope" == "$MACOS_SCOPE" ]]; then
+			collect_matches "$scope" "$arg"
+		else
+			collect_matches "$APPS_SCOPE" "$arg"
+			app_total=${#matches[@]}
+			collect_matches "$MACOS_SCOPE" "$arg"
+			if (( app_total > 0 && ${#matches[@]} > 0 )); then
+				error "'$arg' is ambiguous across app and macOS configs; re-run with an explicit scope: app or macos"
+				exit 1
+			fi
+		fi
+		if (( ${#matches[@]} > 0 )); then
+			for m in "${matches[@]}"; do
+				add_selected "$m"
+			done
+			return
+		fi
+	fi
+	drift_filters+=("$(normalize_drift_pattern "$arg")")
+}
+
+# Parse '<scope> <arg>...' for status/diff/up into 'selected' units plus
+# 'drift_filters'. Path-only invocations sweep the whole given scope so the
+# filters alone decide which rows survive.
+function parse_drift_args {
+	local scope="" arg
+	selected=()
+	drift_filters=()
+	if (( $# > 0 )); then
+		case "$1" in
+			all) select_drift_scripts ""; return ;;
+			app|apps) scope="$APPS_SCOPE"; shift ;;
+			mac|macos|sys|system) scope="$MACOS_SCOPE"; shift ;;
+		esac
+	fi
+	if (( $# == 0 )); then
+		select_drift_scripts "$scope"
+		return
+	fi
+	for arg in "$@"; do
+		resolve_drift_arg "$scope" "$arg"
+	done
+	if (( ${#selected[@]} == 0 )); then
+		select_drift_scripts "$scope"
+	fi
+}
+
+# Prepare each unit's deployable baselines and fill the sweep arrays, applying
+# path filters. MODE 'quiet' drops per-file chatter for 'me status'; 'verbose'
+# keeps it for 'me diff' / 'me up'.
+function collect_drift_files {
+	local mode="${1:-verbose}" unit kind src dst baseline rc considered=0
+	drift_src=()
+	drift_dst=()
+	drift_base=()
+	drift_undeployed_src=()
+	drift_undeployed_dst=()
+	drift_clean_count=0
+	drift_tmp="$(mktemp -d "${TMPDIR:-/tmp}/me-drift.XXXXXX")"
 	for unit in "${selected[@]}"; do
 		if is_manifest_unit "$unit" && ! validate_manifest_unit "$repo_root/$(dirname "$unit")" yes no; then
 			error "$unit failed validation; skipping drift review"
@@ -372,11 +466,17 @@ function run_drift {
 			continue
 		fi
 		while IFS=$'\t' read -r kind src dst; do
-			[[ -e "$dst" ]] || {
-				error "Not deployed yet, skipping: $src -> $dst"
+			drift_row_matches_filters "$src" "$dst" || continue
+			(( ++considered ))
+			if [[ ! -e "$dst" ]]; then
+				if [[ "$mode" == verbose ]]; then
+					error "Not deployed yet, skipping: $src -> $dst"
+				fi
+				drift_undeployed_src+=("$src")
+				drift_undeployed_dst+=("$dst")
 				continue
-			}
-			local baseline="$tmp/base-${#drift_src[@]}"
+			fi
+			baseline="$drift_tmp/base-${#drift_src[@]}"
 			if [[ "$kind" == managed ]]; then
 				# No fragments yet is fine for a managed file: compare against base.
 				rc=0
@@ -392,7 +492,10 @@ function run_drift {
 				continue
 			fi
 			if cmp -s "$baseline" "$dst"; then
-				message "Up to date: $src"
+				(( ++drift_clean_count ))
+				if [[ "$mode" == verbose ]]; then
+					message "Up to date: $src"
+				fi
 				continue
 			fi
 			drift_src+=("$src")
@@ -400,6 +503,50 @@ function run_drift {
 			drift_base+=("$baseline")
 		done < <(drift_files_under_unit "$unit")
 	done
+	if (( ${#drift_filters[@]} > 0 && considered == 0 )); then
+		error "No deployed files match: ${drift_filters[*]}"
+	fi
+}
+
+# Print a compact changed-files report instead of diffs. Read-only.
+function run_status {
+	collect_drift_files quiet
+	local i
+	if (( ${#drift_src[@]} > 0 )); then
+		echo "Changed files (${#drift_src[@]}):"
+		for (( i=0; i<${#drift_src[@]}; i++ )); do
+			printf 'M %s -> %s\n' "${drift_src[i]}" "${drift_dst[i]}"
+		done
+	else
+		echo "No changed files."
+	fi
+	if (( ${#drift_undeployed_src[@]} > 0 )); then
+		echo
+		echo "Not deployed (${#drift_undeployed_src[@]}):"
+		for (( i=0; i<${#drift_undeployed_src[@]}; i++ )); do
+			printf '? %s -> %s\n' "${drift_undeployed_src[i]}" "${drift_undeployed_dst[i]}"
+		done
+	fi
+	echo
+	echo "Clean copies: ${drift_clean_count}"
+	rm -rf "$drift_tmp"
+}
+
+# Diff every materialized file in 'selected' against its deployable repo state.
+# Managed files compare against a fresh composition; plain copies compare
+# directly against their manifest source. MODE 'show' renders one combined
+# colored git diff for the whole sweep; 'absorb' reviews each drifted file
+# separately and lets the user keep chosen hunks in the repo source.
+function run_drift {
+	local mode="$1" src dst tmp rc i applied=0 files=0 failed_apply=0
+
+	if (( ${#selected[@]} == 0 )); then
+		error "needs at least one config name, e.g. 'me $mode agents'"
+		exit 1
+	fi
+
+	collect_drift_files verbose
+	tmp="$drift_tmp"
 
 	if (( ${#drift_src[@]} == 0 )); then
 		rm -rf "$tmp"
@@ -656,6 +803,12 @@ Usage:
   me install                  Copy a 'me' shim into ~/bin (bakes this repo's path)
   me doctor                   Validate manifests and destination claims
   me plan [scope] [<name>...] Show config actions without deploying
+  me status [app|macos] [<name>|<path>...]
+                              List drifted files compactly, no diffs shown
+  me diff [app|macos] [<name>|<path>...]
+                              Show one combined drift diff
+  me up [app|macos] [<name>|<path>...]
+                              Review drift hunk by hunk, keep what you want
 
 A manifest unit is named by its directory (e.g. 'finicky' or 'karabiner'). A
 legacy name matches either its config directory or its configure script. With
@@ -674,6 +827,10 @@ Examples:
   me app git ghostty          Several configs in one run
   me diff                     Check every config for drift in one combined diff
   me diff agents              Preview machine-local drift in agent configs
+  me status                   List every drifted file without showing diffs
+  me status app               Same, restricted to app configs
+  me diff ~/.gitconfig        Scope a diff by deployed path
+  me diff ghostty/config      Path filters match either side on '/' boundaries
   me up                       Review drift everywhere, keep what you want
   me doctor                   Validate the complete config registry
   me plan finicky             Validate and preview one unit
@@ -686,10 +843,16 @@ at the first failure.
 Managed files declare themselves with a sibling '<file>.d/' overlay directory
 containing a 'dest' marker; they deploy as a base-plus-overlays composition.
 Manifest 'copies' rows are direct materialized copies without overlays. Local
-changes to either kind stay in the deployed copy. 'me diff' shows that drift;
-'me up' reviews it hunk by hunk and pulls what you approve back into the repo
-source. Both accept an optional scope and names and cover every config when
-none are given. Requires yq for manifests and YAML/TOML fragments.
+changes to either kind stay in the deployed copy. 'me status' lists that drift
+compactly; 'me diff' shows it; 'me up' reviews it hunk by hunk and pulls what
+you approve back into the repo source. All three accept an optional scope plus
+names and/or path filters, covering every config when none are given. A path
+filter matches on '/' boundaries against either side — the repo source or the
+deployed destination — so 'ghostty/config', '~/.gitconfig', and 'configs/apps/git'
+all work; arguments containing '/' are always paths, bare words resolve as
+config names first, and multiple filters union.
+
+Requires yq for manifests and YAML/TOML fragments.
 
 Config directories may replace their configure scripts with config.yml. Its
 'symlinks' and 'copies' rows are deployed safely, sibling managed files are
@@ -780,31 +943,21 @@ case "$1" in
 		run_scope "$APPS_SCOPE"
 		finish
 		;;
+	status)
+		shift
+		parse_drift_args "$@"
+		run_status
+		finish
+		;;
 	diff)
 		shift
-		scope=""
-		if (( $# > 0 )); then
-			case "$1" in app|apps) scope="$APPS_SCOPE"; shift ;; mac|macos|sys|system) scope="$MACOS_SCOPE"; shift ;; esac
-		fi
-		if (( $# == 0 )); then
-			select_drift_scripts "$scope"
-		else
-			resolve_args "${scope:-$CONFIG_SCOPE}" "$@"
-		fi
+		parse_drift_args "$@"
 		run_drift show
 		finish
 		;;
 	up|absorb)
 		shift
-		scope=""
-		if (( $# > 0 )); then
-			case "$1" in app|apps) scope="$APPS_SCOPE"; shift ;; mac|macos|sys|system) scope="$MACOS_SCOPE"; shift ;; esac
-		fi
-		if (( $# == 0 )); then
-			select_drift_scripts "$scope"
-		else
-			resolve_args "${scope:-$CONFIG_SCOPE}" "$@"
-		fi
+		parse_drift_args "$@"
 		run_drift absorb
 		finish
 		;;

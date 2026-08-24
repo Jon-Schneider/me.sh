@@ -214,11 +214,11 @@ sources must be regular files. Deployment prepares a sibling temporary file
 and replaces an absent destination, a symlink, or a regular file. It refuses to
 replace a directory or any other non-file object.
 
-`me diff` compares each deployed copy directly with its repo source. `me up`
-(or `me absorb`) offers the same hunk-by-hunk review used for managed files and
-applies accepted content changes to that source. Re-run the unit afterward to
-redeploy the accepted state. Copy drift is not composed: units that need local
-overlay fragments should continue to use `<base>.d/dest`.
+`me status` and `me diff` compare each deployed copy directly with its repo
+source. `me up` (or `me absorb`) offers the same hunk-by-hunk review used for
+managed files and applies accepted content changes to that source. Re-run the
+unit afterward to redeploy the accepted state. Copy drift is not composed:
+units that need local overlay fragments should continue to use `<base>.d/dest`.
 
 ## Validation and doctor
 

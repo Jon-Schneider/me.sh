@@ -85,14 +85,17 @@ Non-executable files with unknown extensions are silently skipped (so editor dro
 ## Daily usage
 
 ```sh
+me status               # compact list of drifted files, no diffs
 me diff agents          # preview drift for one config
 me diff                 # preview drift across every config
 me diff app agents git  # several configs, explicit scope
+me diff ~/.gitconfig    # scope any drift command by file or path
 me up agents            # interactive hunk-by-hunk review
 me absorb agents        # older name, same thing
 ```
 
 - **Drift** is everything the deployed copy contains beyond its deployable repo state: the manifest source for a static copy, or a fresh base-plus-overlays composition for a managed file. That includes app-written runtime state, formatting churn, and edits made directly to the live file.
+- `me status`, `me diff`, and `me up` accept unit names and/or path filters. A path filter matches on `/` boundaries against either side — repo source or deployed destination — so `ghostty/config`, `~/.gitconfig`, and `configs/apps/git` all work; arguments containing `/` are always paths, bare words resolve as config names first, and multiple filters union.
 - `me diff` renders one combined `git diff` covering every drifted static or managed copy (`a/` = repo side, `b/` = live side), so the whole sweep pages through your git config (delta, less, …) in a single session whenever stdout is a terminal; plain when piped. Read-only.
 - `me up` reviews hunks with native `git add -p`: `[y]` stage, `[n]` skip, `[a]` stage the rest of this file, `[d]` skip the rest, `[s]` split, `[e]` edit, `[?]` help. Staged hunks are applied to the **repo source** with `git apply`; declined hunks stay in the deployed copy only. Scripted or non-tty runs fall back to `lib/hunk_selector.py`: set `ABSORB_ANSWERS="y n q"` — answers are consumed in order but **restart for each deployed file**, since each file spawns a fresh picker.
 - After absorbing, re-run the normal sync (`me app agents`, for example) to redeploy clean copies.
@@ -139,7 +142,7 @@ Unlike symlinked files, static and managed copies have no live link back to the 
 | `lib/compose.sh` | Marker discovery (`managed_files_under`), `$HOME` expansion, overlay discovery, merge dispatch + transformer execution, `deploy_config` / `deploy_managed_under` |
 | `lib/deep_merge.py` | Format parsing/emission (JSON native; YAML/TOML via `yq`) and the shared deep-merge semantics |
 | `lib/hunk_selector.py` | Fallback hunk picker for scripted/no-tty `me up` runs; interactive runs use native `git add -p` |
-| `run_drift` in `me` | Shared engine behind `me diff` and `me up` / `absorb` for manifest copies and managed files |
+| `collect_drift_files` in `me` | Shared sweep engine behind `me status`, `me diff`, and `me up` / `absorb` for manifest copies and managed files |
 | `lib/manifests.sh` | Manifest validation/deployment, static-copy drift discovery, and automatic managed-marker handling |
 | `<file>.d/dest` markers | What is managed and where it deploys |
 

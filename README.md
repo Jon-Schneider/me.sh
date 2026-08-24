@@ -29,5 +29,6 @@ Most config files are symlinked into place, so editing either side edits both. M
 - Run ```me install``` to (re)copy a ```~/bin/me``` shim that execs this checkout, so ```me``` works from any directory.
 - Edit the Brewfile and run ```me homebrew``` for packages only, or let the next ```me all``` reconcile them automatically. Zsh tab-completion includes every scope and unit.
 - Run ```me doctor``` to validate every manifest, managed-file marker, and destination claim. Run ```me plan finicky``` (or ```me plan app```) to validate and preview actions without deploying them.
+- Run ```me status``` for a compact list of drifted files. ```me diff```, ```me up```, and ```me status``` all accept unit names and/or path filters — ```me diff ghostty/config``` matches on ```/``` boundaries against either the repo source or the deployed destination, so repo paths, home paths, and partial paths all work.
 
 I find ```me app``` to be the one that I need to run most frequently because I'm constantly optimizing my app configurations, especially Karabiner-Elements.

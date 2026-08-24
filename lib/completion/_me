@@ -35,6 +35,7 @@ _me() {
 		'diff:view machine-local drift in deployed copies'
 		'doctor:validate config manifests and destination claims'
 		'plan:preview config actions without deploying'
+		'status:list drifted files compactly, no diffs'
 		'up:pick local changes to absorb back into the repo'
 	)
 
@@ -64,9 +65,12 @@ _me() {
 					;;
 				all)
 					;; # no further arguments
-				diff|up|absorb|plan)
+				diff|up|absorb|plan|status)
 					(( ${#app_names[@]} )) && _describe -t app-names 'app config' app_names
 					(( ${#macos_names[@]} )) && _describe -t macos-names 'macOS config' macos_names
+					case "$words[1]" in
+						diff|status|up|absorb) _files ;;
+					esac
 					;;
 				*)
 					(( ${#app_names[@]} )) && _describe -t app-names 'app config' app_names
