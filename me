@@ -12,7 +12,7 @@
 #   me [app|macos] <name>...    Sync only the named configs
 #   me diff [app|macos] [<name>...]
 #                               Show one combined diff of drift between live
-#                               managed configs and the repo (every config when
+#                               materialized copies and the repo (every config when
 #                               no names given)
 #   me up [app|macos] [<name>...] Pick local changes to pull back into the repo
 #                               (alias for the older name: absorb)
@@ -331,12 +331,29 @@ function select_all_config_units {
 
 # --- Drift: diff / up (absorb) ----------------------------------------------
 
-# Diff every managed file in 'selected' against a fresh composition of its
-# repo base + overlays. MODE 'show' renders one combined colored git diff for
-# the whole sweep; 'absorb' reviews each drifted file separately and lets the
-# user keep chosen hunks in the repo base, leaving the rest local.
+# Print kind<TAB>repo-source<TAB>deployed-destination rows for every
+# materialized file owned by UNIT. Managed files use marker discovery; plain
+# copies come directly from a manifest's copies section.
+function drift_files_under_unit {
+	local unit="$1" dir src dst
+	dir="$(dirname "$unit")"
+	while IFS=$'\t' read -r src dst; do
+		printf 'managed\t%s\t%s\n' "$src" "$dst"
+	done < <(managed_files_under "$dir")
+	if is_manifest_unit "$unit"; then
+		while IFS=$'\t' read -r src dst; do
+			printf 'copy\t%s\t%s\n' "$src" "$dst"
+		done < <(manifest_copy_files_under "$repo_root/$dir")
+	fi
+}
+
+# Diff every materialized file in 'selected' against its deployable repo state.
+# Managed files compare against a fresh composition; plain copies compare
+# directly against their manifest source. MODE 'show' renders one combined
+# colored git diff for the whole sweep; 'absorb' reviews each drifted file
+# separately and lets the user keep chosen hunks in the repo source.
 function run_drift {
-	local mode="$1" unit src dst tmp rc i applied=0 files=0 failed_apply=0
+	local mode="$1" unit kind src dst tmp rc i applied=0 files=0 failed_apply=0
 
 	if (( ${#selected[@]} == 0 )); then
 		error "needs at least one config name, e.g. 'me $mode agents'"
@@ -345,32 +362,42 @@ function run_drift {
 
 	tmp="$(mktemp -d "${TMPDIR:-/tmp}/me-drift.XXXXXX")"
 
-	# Phase 1: compose every managed file and collect the drifted ones.
+	# Phase 1: prepare each deployable repo state and collect drifted files.
 	local -a drift_src=() drift_dst=() drift_base=()
 	for unit in "${selected[@]}"; do
-		while IFS=$'\t' read -r src dst; do
+		if is_manifest_unit "$unit" && ! validate_manifest_unit "$repo_root/$(dirname "$unit")" yes no; then
+			error "$unit failed validation; skipping drift review"
+			failed_units+=("$unit")
+			continue
+		fi
+		while IFS=$'\t' read -r kind src dst; do
 			[[ -e "$dst" ]] || {
 				error "Not deployed yet, skipping: $src -> $dst"
 				continue
 			}
-			local composed="$tmp/base-${#drift_src[@]}"
-			# No fragments yet is fine for a managed file: compare against base.
-			rc=0
-			compose_file "$repo_root/$src" "$composed" || rc=$?
-			if (( rc == 2 )); then
-				cp "$repo_root/$src" "$composed"
-			elif (( rc != 0 )); then
-				error "Compose failed for $src; skipping drift review"
+			local baseline="$tmp/base-${#drift_src[@]}"
+			if [[ "$kind" == managed ]]; then
+				# No fragments yet is fine for a managed file: compare against base.
+				rc=0
+				compose_file "$repo_root/$src" "$baseline" || rc=$?
+				if (( rc == 2 )); then
+					cp "$repo_root/$src" "$baseline"
+				elif (( rc != 0 )); then
+					error "Compose failed for $src; skipping drift review"
+					continue
+				fi
+			elif ! cp "$repo_root/$src" "$baseline"; then
+				error "Could not prepare copy source $src; skipping drift review"
 				continue
 			fi
-			if cmp -s "$composed" "$dst"; then
+			if cmp -s "$baseline" "$dst"; then
 				message "Up to date: $src"
 				continue
 			fi
 			drift_src+=("$src")
 			drift_dst+=("$dst")
-			drift_base+=("$composed")
-		done < <(managed_files_under "$(dirname "$unit")")
+			drift_base+=("$baseline")
+		done < <(drift_files_under_unit "$unit")
 	done
 
 	if (( ${#drift_src[@]} == 0 )); then
@@ -396,7 +423,7 @@ function run_drift {
 		for (( i=0; i<${#drift_src[@]}; i++ )); do
 			cp "${drift_dst[i]}" "$scratch/${drift_src[i]}"
 		done
-		message "Drift across ${#drift_src[@]} managed file(s) (a/ = repo, b/ = live):"
+		message "Drift across ${#drift_src[@]} deployed file(s) (a/ = repo, b/ = live):"
 		# Unpinned on purpose: honors your pager (delta, less) and color config.
 		git -C "$scratch" diff --color=auto || true
 		rm -rf "$tmp"
@@ -444,7 +471,7 @@ function run_drift {
 		rm -rf "$tmp"
 	fi
 	if (( files > 0 )); then
-		message "Absorbed $applied hunk(s) into $files managed file(s). Re-run your sync to redeploy clean copies."
+		message "Absorbed $applied hunk(s) into $files repo file(s). Re-run your sync to redeploy clean copies."
 	fi
 }
 
@@ -464,7 +491,7 @@ function finish {
 # --- Validation & dry run -------------------------------------------------
 
 function run_doctor {
-	local scope dir base canonical manifest src dest marker marker_dest duplicate duplicate_scope
+	local scope dir base canonical manifest operation src dest marker marker_dest duplicate duplicate_scope
 	local failed=0 claims names
 	claims="$(mktemp "${TMPDIR:-/tmp}/me-claims.XXXXXX")"
 	names="$(mktemp "${TMPDIR:-/tmp}/me-names.XXXXXX")"
@@ -501,11 +528,13 @@ function run_doctor {
 					failed=1
 				fi
 				if validate_manifest_schema "$manifest" &>/dev/null; then
-					while IFS=$'\t' read -r src dest; do
-						if validate_home_dest "$dest" "$manifest ($src)" &>/dev/null; then
-							printf '%s\t%s (%s)\n' "$(expand_dest "$dest")" "$manifest" "$src" >> "$claims"
-						fi
-					done < <(manifest_symlink_rows "$manifest")
+					for operation in symlinks copies; do
+						while IFS=$'\t' read -r src dest; do
+							if validate_home_dest "$dest" "$manifest ($src)" &>/dev/null; then
+								printf '%s\t%s (%s: %s)\n' "$(expand_dest "$dest")" "$manifest" "$operation" "$src" >> "$claims"
+							fi
+						done < <(manifest_rows "$manifest" "$operation")
+					done
 				fi
 			elif [[ -e "$dir/post.sh" ]]; then
 				error "$dir/post.sh: legacy units may not contain post.sh"
@@ -635,18 +664,18 @@ Config failures never stop the run; they are summarized at the end and reported
 with a non-zero exit code. Bootstrap is an ordered dependency chain and stops
 at the first failure.
 
-Managed files declare themselves: a config file with a sibling '<file>.d/'
-overlay directory containing a 'dest' marker (the deployed path) deploys as a
-composed copy -- base file plus machine-local fragments (.json/.yaml/.yml/.toml
-merge; executables transform) -- instead of a symlink. Machine-local state
-written by apps lands only in the deployed copy. 'me diff' shows that drift;
+Managed files declare themselves with a sibling '<file>.d/' overlay directory
+containing a 'dest' marker; they deploy as a base-plus-overlays composition.
+Manifest 'copies' rows are direct materialized copies without overlays. Local
+changes to either kind stay in the deployed copy. 'me diff' shows that drift;
 'me up' reviews it hunk by hunk and pulls what you approve back into the repo
-base. Both accept an optional scope and names and cover every config when
-none are given. Requires yq for YAML/TOML fragments: brew install yq.
+source. Both accept an optional scope and names and cover every config when
+none are given. Requires yq for manifests and YAML/TOML fragments.
 
 Config directories may replace their configure scripts with config.yml. Its
-'symlinks' rows are deployed safely, sibling managed files are auto-discovered,
-and an executable post.sh runs last. Use 'me plan' to preview these operations.
+'symlinks' and 'copies' rows are deployed safely, sibling managed files are
+auto-discovered, and an executable post.sh runs last. Static copies and managed
+files participate in 'me diff' and 'me up'. Use 'me plan' to preview deployment.
 
 Shell completion (zsh) lives in lib/completion/_me and is installed into
 ~/.zsh/completions by the shell config.

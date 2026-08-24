@@ -2,7 +2,7 @@
 
 Most files in this repo are **symlinked** into place by a unit's `config.yml` or legacy `configure_*.sh`: edit either side of the link and both sides change. That liveness is great for tweaking configs, but it cuts both ways — apps that rewrite their own config (herdr, Codex, work-machine system tools) spray machine-local state straight into your working tree, which is how the old git clean-filter hack was born.
 
-Files marked **managed** use a different model: they are deployed as **materialized copies**, composed from a canonical repo base plus machine-local overlay fragments. App-written state lands only in the deployed copy and never reaches the repo; changes you *do* want to keep flow back through an explicit review step (`me up`).
+Files marked **managed** use a different model: they are deployed as **materialized copies**, composed from a canonical repo base plus machine-local overlay fragments. App-written state lands only in the deployed copy and never reaches the repo; changes you *do* want to keep flow back through an explicit review step (`me up`). Plain `copies:` rows in `config.yml` participate in the same diff/up workflow, but compare directly against their repo source without overlays.
 
 ```
 repo base                    deployed copy (real file)
@@ -92,10 +92,10 @@ me up agents            # interactive hunk-by-hunk review
 me absorb agents        # older name, same thing
 ```
 
-- **Drift** is everything the deployed copy contains beyond a fresh composition: app-written runtime state (herdr registrations, Codex `[projects]` trust), formatting churn from tools that rewrite configs, *and* any edits you made to the live file directly.
-- `me diff` renders one combined `git diff` covering every drifted managed file (`a/` = repo side, `b/` = live side), so the whole sweep pages through your git config (delta, less, …) in a single session whenever stdout is a terminal; plain when piped. Read-only.
-- `me up` reviews hunks with native `git add -p`: `[y]` stage, `[n]` skip, `[a]` stage the rest of this file, `[d]` skip the rest, `[s]` split, `[e]` edit, `[?]` help. Staged hunks are applied to the **repo base** with `git apply`; declined hunks stay in the deployed copy only. Scripted or non-tty runs fall back to `lib/hunk_selector.py`: set `ABSORB_ANSWERS="y n q"` — answers are consumed in order but **restart for each managed file**, since each file spawns a fresh picker.
-- After absorbing, re-run your normal sync (`me app agents`) to recompose deployed copies cleanly.
+- **Drift** is everything the deployed copy contains beyond its deployable repo state: the manifest source for a static copy, or a fresh base-plus-overlays composition for a managed file. That includes app-written runtime state, formatting churn, and edits made directly to the live file.
+- `me diff` renders one combined `git diff` covering every drifted static or managed copy (`a/` = repo side, `b/` = live side), so the whole sweep pages through your git config (delta, less, …) in a single session whenever stdout is a terminal; plain when piped. Read-only.
+- `me up` reviews hunks with native `git add -p`: `[y]` stage, `[n]` skip, `[a]` stage the rest of this file, `[d]` skip the rest, `[s]` split, `[e]` edit, `[?]` help. Staged hunks are applied to the **repo source** with `git apply`; declined hunks stay in the deployed copy only. Scripted or non-tty runs fall back to `lib/hunk_selector.py`: set `ABSORB_ANSWERS="y n q"` — answers are consumed in order but **restart for each deployed file**, since each file spawns a fresh picker.
+- After absorbing, re-run the normal sync (`me app agents`, for example) to redeploy clean copies.
 - If a hunk won't apply (its context overlaps fragment-added regions), nothing is lost: the diff is kept in a `/tmp/me-drift.*` directory and its path is printed — resolve by editing the base or fragment by hand.
 
 ## Editing workflows
@@ -104,9 +104,9 @@ me absorb agents        # older name, same thing
 |---|---|---|
 | Repo base or a committed file elsewhere | `me app <name>` | Recomposed into the deployed copy |
 | An overlay fragment | `me app <name>` | Same — fragments compose on every deploy |
-| The deployed (live) file | `me diff` to see it, `me up <name>` to keep some/all of it | Keeper hunks land in the repo base |
+| A deployed static or managed copy | `me diff` to see it, `me up <name>` to keep some/all of it | Keeper hunks land in the manifest source or managed base |
 
-Unlike symlinked files, managed files have no live link back to the repo: deploying overwrites the copy with a fresh composition. That's the point — it's also what keeps junk out. Nothing is silently destroyed that `me diff` wouldn't have shown you first, though; make `diff` a habit before `up`.
+Unlike symlinked files, static and managed copies have no live link back to the repo: deploying overwrites them from their repo source or fresh composition. That's the point — it's also what keeps junk out. Nothing is silently destroyed that `me diff` wouldn't have shown you first, though; make `diff` a habit before `up`.
 
 ## Adding a new managed file
 
@@ -139,8 +139,8 @@ Unlike symlinked files, managed files have no live link back to the repo: deploy
 | `lib/compose.sh` | Marker discovery (`managed_files_under`), `$HOME` expansion, overlay discovery, merge dispatch + transformer execution, `deploy_config` / `deploy_managed_under` |
 | `lib/deep_merge.py` | Format parsing/emission (JSON native; YAML/TOML via `yq`) and the shared deep-merge semantics |
 | `lib/hunk_selector.py` | Fallback hunk picker for scripted/no-tty `me up` runs; interactive runs use native `git add -p` |
-| `run_drift` in `me` | Shared engine behind `me diff` (mode `show`: one combined diff) and `me up` / `absorb` (mode `absorb`: per-file review) |
-| `lib/manifests.sh` | Manifest validation/deployment plus automatic managed-marker handling |
+| `run_drift` in `me` | Shared engine behind `me diff` and `me up` / `absorb` for manifest copies and managed files |
+| `lib/manifests.sh` | Manifest validation/deployment, static-copy drift discovery, and automatic managed-marker handling |
 | `<file>.d/dest` markers | What is managed and where it deploys |
 
 Deploys replace an existing destination via temp file + move and **never write through an existing symlink** — the link is removed first, so a botched migration can't clobber your repo through the link.

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Declarative config-unit support. A manifest owns ordinary symlinks; managed
-# files remain declared solely by sibling <base>.d/dest markers.
+# Declarative config-unit support. A manifest owns ordinary symlinks and static
+# copies; managed files remain declared solely by sibling <base>.d/dest markers.
 
 MANIFEST_REPO_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
 
@@ -25,8 +25,27 @@ function manifest_relative {
 
 # Print src<TAB>literal-dest rows in manifest order. Callers must validate the
 # manifest first, so TSV is safe: tabs and newlines are rejected by validation.
+function manifest_rows {
+	# yq emits one newline even when an optional list has no rows.
+	yq -r "(.${2} // [])[] | [.src, .dest] | @tsv" "$1" | sed '/^$/d'
+}
+
 function manifest_symlink_rows {
-	yq -r '(.symlinks // [])[] | [.src, .dest] | @tsv' "$1"
+	manifest_rows "$1" symlinks
+}
+
+function manifest_copy_rows {
+	manifest_rows "$1" copies
+}
+
+# Print canonical repo-source<TAB>expanded-destination rows for drift review.
+# The manifest must already have passed validate_manifest_unit.
+function manifest_copy_files_under {
+	local unit="${1%/}" src dest resolved
+	while IFS=$'\t' read -r src dest; do
+		resolved="$(realpath -q "$unit/$src")" || return 1
+		printf '%s\t%s\n' "$(manifest_relative "$resolved")" "$(expand_dest "$dest")"
+	done < <(manifest_copy_rows "$unit/config.yml")
 }
 
 function validate_home_dest {
@@ -62,16 +81,19 @@ function validate_manifest_schema {
 	local manifest="$1"
 	if ! yq -e '
 		(type == "!!map") and
-		((((keys - ["symlinks"]) | length) == 0)) and
+		((((keys - ["symlinks", "copies"]) | length) == 0)) and
 		((((.symlinks // []) | type) == "!!seq")) and
-		(([(.symlinks // [])[] | (type == "!!map")] | all)) and
-		(([(.symlinks // [])[] | (((keys - ["src", "dest"]) | length) == 0)] | all)) and
-		(([(.symlinks // [])[] | ((keys | length) == 2)] | all)) and
-		(([(.symlinks // [])[] | (((.src | type) == "!!str") and ((.dest | type) == "!!str"))] | all)) and
-		(([(.symlinks // [])[] | ((.src != "") and (.dest != ""))] | all)) and
-		(([(.symlinks // [])[] | (((.src | test("[\\t\\n]") | not)) and ((.dest | test("[\\t\\n]") | not)))] | all))
+		((((.copies // []) | type) == "!!seq")) and
+		([(.symlinks // [])[], (.copies // [])[]] | all_c(
+			(type == "!!map") and
+			(((keys - ["src", "dest"]) | length) == 0) and
+			((keys | length) == 2) and
+			(((.src | type) == "!!str") and ((.dest | type) == "!!str")) and
+			((.src != "") and (.dest != "")) and
+			(((.src | test("[\\t\\n]") | not)) and ((.dest | test("[\\t\\n]") | not)))
+		))
 	' "$manifest" &>/dev/null; then
-		error "$(manifest_relative "$manifest"): expected only 'symlinks', containing exact string src/dest rows"
+		error "$(manifest_relative "$manifest"): expected only 'symlinks' and 'copies', containing exact string src/dest rows"
 		return 1
 	fi
 }
@@ -84,7 +106,7 @@ function validate_manifest_unit {
 	post="$unit/post.sh"
 	local validate_managed="${2:-yes}"
 	local validate_live="${3:-yes}"
-	local src dest resolved marker marker_dest claim normalized existing failed=0
+	local operation src dest resolved marker marker_dest claim normalized existing failed=0
 	local -a destinations=()
 
 	if ! require_yq; then
@@ -102,36 +124,45 @@ function validate_manifest_unit {
 		return 1
 	fi
 
-	while IFS=$'\t' read -r src dest; do
-		if [[ "$src" == /* ]]; then
-			error "$(manifest_relative "$manifest"): src must be relative: $src"
-			failed=1
-		elif ! resolved="$(realpath -q "$unit/$src")"; then
-			error "$(manifest_relative "$manifest"): source does not exist: $src"
-			failed=1
-		elif [[ "$resolved" != "$MANIFEST_REPO_ROOT" && "$resolved" != "$MANIFEST_REPO_ROOT/"* ]]; then
-			error "$(manifest_relative "$manifest"): source escapes the repository: $src"
-			failed=1
-		fi
-		if validate_home_dest "$dest" "$(manifest_relative "$manifest") ($src)"; then
-			normalized="$(expand_dest "$dest")"
-			if [[ "$validate_live" == yes && -e "$normalized" && ! -L "$normalized" ]]; then
-				error "$(manifest_relative "$manifest"): refusing non-symlink destination: $dest"
+	for operation in symlinks copies; do
+		while IFS=$'\t' read -r src dest; do
+			resolved=""
+			if [[ "$src" == /* ]]; then
+				error "$(manifest_relative "$manifest"): src must be relative: $src"
+				failed=1
+			elif ! resolved="$(realpath -q "$unit/$src")"; then
+				error "$(manifest_relative "$manifest"): source does not exist: $src"
+				failed=1
+			elif [[ "$resolved" != "$MANIFEST_REPO_ROOT" && "$resolved" != "$MANIFEST_REPO_ROOT/"* ]]; then
+				error "$(manifest_relative "$manifest"): source escapes the repository: $src"
+				failed=1
+			elif [[ "$operation" == copies && ! -f "$resolved" ]]; then
+				error "$(manifest_relative "$manifest"): copy source must be a regular file: $src"
 				failed=1
 			fi
-			if (( ${#destinations[@]} > 0 )); then
-				for existing in "${destinations[@]}"; do
-					if [[ "$existing" == "$normalized" ]]; then
-						error "$(manifest_relative "$manifest"): destination is claimed more than once: $dest"
-						failed=1
-					fi
-				done
+			if validate_home_dest "$dest" "$(manifest_relative "$manifest") ($src)"; then
+				normalized="$(expand_dest "$dest")"
+				if [[ "$validate_live" == yes && "$operation" == symlinks && -e "$normalized" && ! -L "$normalized" ]]; then
+					error "$(manifest_relative "$manifest"): refusing non-symlink destination: $dest"
+					failed=1
+				elif [[ "$validate_live" == yes && "$operation" == copies && ( -e "$normalized" || -L "$normalized" ) && ! -f "$normalized" && ! -L "$normalized" ]]; then
+					error "$(manifest_relative "$manifest"): refusing non-file copy destination: $dest"
+					failed=1
+				fi
+				if (( ${#destinations[@]} > 0 )); then
+					for existing in "${destinations[@]}"; do
+						if [[ "$existing" == "$normalized" ]]; then
+							error "$(manifest_relative "$manifest"): destination is claimed more than once: $dest"
+							failed=1
+						fi
+					done
+				fi
+				destinations+=("$normalized")
+			else
+				failed=1
 			fi
-			destinations+=("$normalized")
-		else
-			failed=1
-		fi
-	done < <(manifest_symlink_rows "$manifest")
+		done < <(manifest_rows "$manifest" "$operation")
+	done
 
 	if [[ "$validate_managed" == yes ]]; then
 		while IFS= read -r -d '' marker; do
@@ -141,7 +172,7 @@ function validate_manifest_unit {
 				if (( ${#destinations[@]} > 0 )); then
 					for existing in "${destinations[@]}"; do
 						if [[ "$existing" == "$normalized" ]]; then
-							error "$(manifest_relative "$unit"): symlink and managed file both claim $marker_dest"
+							error "$(manifest_relative "$unit"): manifest row and managed file both claim $marker_dest"
 							failed=1
 						fi
 					done
@@ -213,11 +244,52 @@ function deploy_manifest_symlinks {
 	done < <(manifest_symlink_rows "$unit/config.yml")
 }
 
+function deploy_manifest_copies {
+	local unit="$1" src dest resolved parent temp
+	while IFS=$'\t' read -r src dest; do
+		if ! resolved="$(realpath -q "$unit/$src")"; then
+			error "Source disappeared during deployment: $src"
+			return 1
+		fi
+		dest="$(expand_dest "$dest")"
+		parent="$(dirname "$dest")"
+		if ! mkdir -p "$parent"; then
+			error "Could not create destination parent: $parent"
+			return 1
+		fi
+		if [[ -e "$dest" && ! -f "$dest" && ! -L "$dest" ]]; then
+			error "Refusing to replace non-file copy destination: $dest"
+			return 1
+		fi
+		if ! temp="$(mktemp "$parent/.me-config.XXXXXX")"; then
+			error "Could not create temporary copy beside destination: $dest"
+			return 1
+		fi
+		if ! cp -p "$resolved" "$temp"; then
+			rm -f "$temp"
+			error "Could not copy source: $resolved"
+			return 1
+		fi
+		if [[ -L "$dest" ]] && ! rm "$dest"; then
+			rm -f "$temp"
+			error "Could not replace symlink destination: $dest"
+			return 1
+		fi
+		if ! mv -f "$temp" "$dest"; then
+			rm -f "$temp"
+			error "Could not install copy destination: $dest"
+			return 1
+		fi
+		message "Copied $(manifest_relative "$resolved") -> $dest"
+	done < <(manifest_copy_rows "$unit/config.yml")
+}
+
 function run_manifest_unit {
 	local unit
 	unit="$(dirname "$1")"
 	validate_manifest_unit "$unit" || return 1
 	deploy_manifest_symlinks "$unit" || return 1
+	deploy_manifest_copies "$unit" || return 1
 	deploy_managed_under "$unit" || return 1
 	if [[ -f "$unit/post.sh" ]]; then
 		(
@@ -234,6 +306,9 @@ function plan_manifest_unit {
 	while IFS=$'\t' read -r src dest; do
 		printf 'link %s -> %s\n' "$(manifest_relative "$unit")/$src" "$dest"
 	done < <(manifest_symlink_rows "$unit/config.yml")
+	while IFS=$'\t' read -r src dest; do
+		printf 'copy %s -> %s\n' "$(manifest_relative "$unit")/$src" "$dest"
+	done < <(manifest_copy_rows "$unit/config.yml")
 	while IFS= read -r -d '' marker; do
 		IFS= read -r marker_dest < "$marker"
 		src="${marker%/dest}"

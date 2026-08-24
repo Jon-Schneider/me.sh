@@ -15,7 +15,8 @@ existing destination. Consequently, symlink topology cannot be inspected,
 dry-run, linted, or checked for collisions without interpreting shell code.
 
 Managed/composed files already expose their topology declaratively through the
-`<base>.d/dest` convention. Ordinary symlinks should do the same.
+`<base>.d/dest` convention. Ordinary symlinks and static copies should do the
+same.
 
 ## Decision
 
@@ -68,7 +69,7 @@ from path rather than duplicated in metadata.
 
 ## Manifest shape
 
-`config.yml` describes symlinks only:
+`config.yml` describes symlinks and static copies:
 
 ```yaml
 symlinks:
@@ -76,11 +77,15 @@ symlinks:
     dest: $HOME/.finicky.js
   - src: themes/jon
     dest: $HOME/.config/ghostty/themes/jon
+copies:
+  - src: Default.idekeybindings
+    dest: $HOME/Library/Developer/Xcode/UserData/KeyBindings/Default.idekeybindings
 ```
 
-`symlinks` is optional and defaults to an empty list. Row order is preserved.
-A manifest with no symlink rows remains useful for a unit containing only
-managed files, `post.sh`, or both.
+Both sections are optional and default to empty lists. Row order within each
+section is preserved. Symlinks deploy first, followed by copies. A manifest
+with no rows remains useful for a unit containing only managed files,
+`post.sh`, or both.
 
 The schema deliberately has no general interpolation and no embedded shell:
 
@@ -103,7 +108,7 @@ execution.
 
 Lint and collision detection build one combined destination index from both:
 
-- every `config.yml` symlink row;
+- every `config.yml` symlink or copy row;
 - every `<base>.d/dest` marker.
 
 This catches a symlink and a composed file claiming the same destination, not
@@ -134,8 +139,9 @@ For a manifest unit:
 
 1. Parse and validate the complete manifest and the unit's managed markers.
 2. Create destination parent directories and deploy symlinks in row order.
-3. Deploy managed/composed files discovered under the unit directory.
-4. Execute `post.sh`, if present.
+3. Materialize static copies in row order.
+4. Deploy managed/composed files discovered under the unit directory.
+5. Execute `post.sh`, if present.
 
 Validation happens before mutation. A failure during deployment stops the
 current unit. As today, aggregate and multi-unit commands normally continue
@@ -196,6 +202,19 @@ System paths such as `/etc/sudoers.d` are intentionally outside this grammar;
 they belong in a legacy script or `post.sh`, where privileged mutation remains
 obvious during review.
 
+## Copy safety and drift
+
+Copy rows use the same source and destination grammar as symlinks, but their
+sources must be regular files. Deployment prepares a sibling temporary file
+and replaces an absent destination, a symlink, or a regular file. It refuses to
+replace a directory or any other non-file object.
+
+`me diff` compares each deployed copy directly with its repo source. `me up`
+(or `me absorb`) offers the same hunk-by-hunk review used for managed files and
+applies accepted content changes to that source. Re-run the unit afterward to
+redeploy the accepted state. Copy drift is not composed: units that need local
+overlay fragments should continue to use `<base>.d/dest`.
+
 ## Validation and doctor
 
 Runtime validation covers the selected unit. A read-only `me doctor` validates
@@ -232,7 +251,7 @@ corresponding aggregates. Planning requires `yq` for selected manifest units.
 
 Migration is per directory and reversible:
 
-1. Choose a unit whose deployment is mostly symlinks.
+1. Choose a unit whose deployment is mostly symlinks or static copies.
 2. Add `config.yml`; add `post.sh` only for genuine post-deployment behavior.
 3. Remove that directory's `configure_*.sh` in the same change.
 4. Run `me doctor`, `me plan <unit>`, the targeted unit, and relevant drift
