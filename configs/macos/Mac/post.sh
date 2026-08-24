@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-# Create Developer Dir
+# Create Developer directory.
 mkdir -p "$HOME/Developer" # I used to use '~/src' but then I found out '~/Developer' has a system icon
 
 # Disable Screenshot Previews
