@@ -8,8 +8,10 @@
 #   me app | apps               Full app sync
 #   me sys | system             Full system sync
 #   me [app|sys] <name>...      Sync only the named configs
-#   me diff [app|sys] <name>... Show drift between live managed configs and repo
-#   me up [app|sys] <name>...   Pick local changes to pull back into the repo
+#   me diff [app|sys] [<name>...]
+#                               Show drift between live managed configs and repo
+#                               (every config when no names given)
+#   me up [app|sys] [<name>...] Pick local changes to pull back into the repo
 #                               (alias for the older name: absorb)
 set -euo pipefail
 
@@ -175,11 +177,34 @@ function run_selected {
 # Run every configure script in a scope, collecting failures.
 function run_scope {
 	local scope="$1" script
+	select_scripts_in_scope "$scope"
+	run_selected
+}
+
+# Fill 'selected' with every script in a scope.
+function select_scripts_in_scope {
+	local script
 	selected=()
 	while IFS= read -r script; do
 		selected+=("$script")
-	done < <(list_scripts "$scope")
-	run_selected
+	done < <(list_scripts "$1")
+}
+
+# Fill 'selected' with every script in one scope, or both when no scope is given.
+function select_drift_scripts {
+	if [[ -n "$1" ]]; then
+		select_scripts_in_scope "$1"
+	else
+		select_all_scripts
+	fi
+}
+
+# Fill 'selected' with every script in both scopes.
+function select_all_scripts {
+	local script
+	selected=()
+	while IFS= read -r script; do selected+=("$script"); done < <(list_scripts "$APPS_SCOPE")
+	while IFS= read -r script; do selected+=("$script"); done < <(list_scripts "$SYS_SCOPE")
 }
 
 # --- Drift: diff / up (absorb) ----------------------------------------------
@@ -299,8 +324,9 @@ Examples:
   me karabiner-elements       Same: unambiguous, found in app configs
   me bin                      Same: 'me system bin'
   me app git ghostty          Several configs in one run
+  me diff                     Check every config for drift, app + system
   me diff agents              Preview machine-local drift in agent configs
-  me up agents                Review drift, keep what you want
+  me up                       Review drift everywhere, keep what you want
 
 Failing scripts never stop the run; failures are summarized at the end and
 reported with a non-zero exit code.
@@ -311,7 +337,8 @@ composed copy -- base file plus machine-local fragments (.json/.yaml/.yml/.toml
 merge; executables transform) -- instead of a symlink. Machine-local state
 written by apps lands only in the deployed copy. 'me diff' shows that drift;
 'me up' reviews it hunk by hunk and pulls what you approve back into the repo
-base. Requires yq for YAML/TOML fragments: brew install yq.
+base. Both accept an optional scope and names and cover every config when
+none are given. Requires yq for YAML/TOML fragments: brew install yq.
 
 Shell completion (zsh) lives in lib/completion/_me and is installed into
 ~/.zsh/completions by the shell config.
@@ -351,25 +378,29 @@ case "$1" in
 		;;
 	diff)
 		shift
-		if (( $# == 0 )); then
-			error "Usage: me diff [app|sys] <name>..."
-			exit 1
-		fi
 		scope=""
-		case "$1" in app|apps) scope="$APPS_SCOPE"; shift ;; sys|system) scope="$SYS_SCOPE"; shift ;; esac
-		resolve_args "$scope" "$@"
+		if (( $# > 0 )); then
+			case "$1" in app|apps) scope="$APPS_SCOPE"; shift ;; sys|system) scope="$SYS_SCOPE"; shift ;; esac
+		fi
+		if (( $# == 0 )); then
+			select_drift_scripts "$scope"
+		else
+			resolve_args "$scope" "$@"
+		fi
 		run_drift show
 		finish
 		;;
 	up|absorb)
 		shift
-		if (( $# == 0 )); then
-			error "Usage: me up [app|sys] <name>..."
-			exit 1
-		fi
 		scope=""
-		case "$1" in app|apps) scope="$APPS_SCOPE"; shift ;; sys|system) scope="$SYS_SCOPE"; shift ;; esac
-		resolve_args "$scope" "$@"
+		if (( $# > 0 )); then
+			case "$1" in app|apps) scope="$APPS_SCOPE"; shift ;; sys|system) scope="$SYS_SCOPE"; shift ;; esac
+		fi
+		if (( $# == 0 )); then
+			select_drift_scripts "$scope"
+		else
+			resolve_args "$scope" "$@"
+		fi
 		run_drift absorb
 		finish
 		;;
