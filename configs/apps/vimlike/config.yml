@@ -1,0 +1,3 @@
+symlinks:
+  - src: group.net.jasminestudios.Vimlike.plist
+    dest: $HOME/Library/Group Containers/group.net.jasminestudios.Vimlike/Library/Preferences/group.net.jasminestudios.Vimlike.plist
