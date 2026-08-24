@@ -53,6 +53,9 @@ next_workspace = "shift+down"
 # Cmd+W closes by preference: focused split pane, else active tab (no splits),
 # else the workspace when it holds the last tab. Ghostty sends raw Ctrl+W and
 # herdr intercepts it before panes see it (tmux did the same via bind -n C-w).
+# close-focused.sh first passes Ctrl+W through to foreground TUI apps that
+# own that key (micro = Quit, xlent = clear), matching tmux-app-key's old
+# process check.
 
 # Built-in tab cycling moved off prefix+n/p so the [[keys.command]] walkers
 # below own those keys unambiguously (Ghostty sends ctrl+tab /
