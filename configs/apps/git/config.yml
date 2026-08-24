@@ -1,0 +1,11 @@
+symlinks:
+  - src: .gitignore
+    dest: $HOME/.gitignore
+  - src: .gitconfig_shared
+    dest: $HOME/.gitconfig_shared
+  - src: .gitconfig_jsc
+    dest: $HOME/.gitconfig_jsc
+  - src: .gitattributes
+    dest: $HOME/.gitattributes
+  - src: git-branch-select
+    dest: $HOME/bin/git-branch-select
