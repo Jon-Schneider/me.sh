@@ -147,17 +147,20 @@ if [[ -n "$HERDR_PANE_ID" ]]; then
         fi
     done
 
-    tab_args=()
-    if [[ -n "$HERDR_TAB_ID" ]]; then
-        tab_args=(--tab "$HERDR_TAB_ID")
-    fi
-
-    exec herdr agent start "$agent" \
+    # herdr >= 0.8: agent start only launches into an existing shell pane;
+    # split first (with cwd/env/focus), then start the agent in the new pane.
+    local split_json new_pane
+    split_json=$(herdr pane split "$HERDR_PANE_ID" \
+        --direction right \
         --cwd "$PWD" \
-        "${tab_args[@]}" \
-        --split right \
         --focus \
-        "${env_args[@]}" \
+        "${env_args[@]}") || exit 1
+    new_pane=$(print -r -- "$split_json" | jq -r '.result.pane.pane_id')
+
+    exec herdr agent start "fa-${agent}-$$" \
+        --kind "$agent" \
+        --pane "$new_pane" \
+        --timeout 60000 \
         -- "${command[@]}"
 
 elif [[ -n "$TMUX" ]]; then
