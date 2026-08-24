@@ -1,0 +1,11 @@
+symlinks:
+  - src: .zshrc
+    dest: $HOME/.zshrc
+  - src: .zsh_plugins
+    dest: $HOME/.zsh_plugins
+  - src: starship.toml
+    dest: $HOME/.config/starship.toml
+  - src: autoenv.zsh
+    dest: $HOME/bin/autoenv.zsh
+  - src: ../../../lib/completion/_me
+    dest: $HOME/.zsh/completions/_me
