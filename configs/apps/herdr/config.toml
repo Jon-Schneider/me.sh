@@ -17,6 +17,10 @@
 # cwd; rows whose tokens are all missing disappear, so plain spaces show
 # only the path.
 
+# Must stay above every table header: bare keys below a header belong to
+# that table, and herdr only knows top-level onboarding.
+onboarding = false
+
 [ui.sidebar.spaces]
 rows = [
   ["state_icon", "workspace"],
@@ -40,7 +44,6 @@ prefix = "ctrl+space"
 # tmux muscle memory: prefix+, renames the focused space (default is
 # prefix+shift+w).
 rename_workspace = "prefix+comma"
-onboarding = false
 
 # Cmd+Shift+Left/Right focus panes: Ghostty sends prefix+h / prefix+l, which
 # hit the focus_pane_* defaults below. (Direct ctrl+shift+arrow chords were
