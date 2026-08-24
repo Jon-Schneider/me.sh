@@ -4,16 +4,20 @@
 # Usage:
 #   sync                        List available config names
 #   sync --help                 Show detailed help
-#   sync all                    Sync everything (app + system configs + git filters)
-#   sync app | apps             Full app sync (all app configs + git filters)
-#   sync sys | system           Full system sync (all system configs)
+#   sync all                    Sync everything (app + system configs)
+#   sync app | apps             Full app sync
+#   sync sys | system           Full system sync
 #   sync [app|sys] <name>...    Sync only the named configs
+#   sync diff [app|sys] <name>...  Show drift between live managed configs and repo
+#   sync up [app|sys] <name>...    Pick local changes to pull back into the repo
+#                                  (alias for the older name: absorb)
 set -euo pipefail
 
 repo_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$repo_root" || exit 1
 
 source "lib/common.sh"
+source "lib/compose.sh"
 
 readonly APPS_SCOPE="apps"
 readonly SYS_SCOPE="sys"
@@ -177,8 +181,73 @@ function run_scope {
 	run_selected
 }
 
-function run_git_filters {
-	"${repo_root}/sync_git_filters.sh"
+# --- Drift: diff / up (absorb) ----------------------------------------------
+
+# For every managed file in 'selected', diff the deployed copy against a fresh
+# composition of its repo base + overlays. MODE 'show' prints the diffs;
+# 'absorb' lets the user keep chosen hunks in the repo base, leaving the rest
+# local to the deployed copy.
+function run_drift {
+	local mode="$1" script src dst tmp difffile picked rc applied=0 files=0
+
+	if (( ${#selected[@]} == 0 )); then
+		error "needs at least one config name, e.g. 'sync $mode agents'"
+		exit 1
+	fi
+
+	for script in "${selected[@]}"; do
+		while IFS=$'\t' read -r src dst; do
+			[[ -e "$dst" ]] || {
+				error "Not deployed yet, skipping: $src -> $dst"
+				continue
+			}
+			tmp="$(mktemp -d "${TMPDIR:-/tmp}/me-drift.XXXXXX")"
+			# No fragments yet is fine for a managed file: compare against base.
+			rc=0
+			compose_file "$repo_root/$src" "$tmp/composed" || rc=$?
+			if (( rc == 2 )); then
+				cp "$repo_root/$src" "$tmp/composed"
+			elif (( rc != 0 )); then
+				error "Compose failed for $src; skipping drift review"
+				rm -rf "$tmp"
+				continue
+			fi
+			if cmp -s "$tmp/composed" "$dst"; then
+				message "Up to date: $src"
+				rm -rf "$tmp"
+				continue
+			fi
+			difffile="$tmp/diff"
+			diff -u -L "a/$src" -L "b/$src" "$tmp/composed" "$dst" > "$difffile" || true
+
+			if [[ "$mode" == show ]]; then
+				message "Drift in $src (a/ = repo, b/ = live):"
+				cat "$difffile"
+				rm -rf "$tmp"
+				continue
+			fi
+
+			message "Reviewing drift in $src (deployed copy differs from repo):"
+			picked="$tmp/picked"
+			lib/hunk_selector.py < "$difffile" > "$picked"
+			if [[ -s "$picked" ]]; then
+				if git apply "$picked"; then
+					(( ++files ))
+					applied=$(( applied + $(grep -c '^@@' "$picked" || true) ))
+				else
+					error "Some hunks could not be applied to $src; edit it manually (diff saved at $difffile)"
+					continue
+				fi
+			else
+				message "Kept nothing; remaining drift stays local in $dst"
+			fi
+			rm -rf "$tmp"
+		done < <(managed_files_under "$(dirname "$script")")
+	done
+
+	if (( files > 0 )); then
+		message "Absorbed $applied hunk(s) into $files managed file(s). Re-run your sync to redeploy clean copies."
+	fi
 }
 
 # Summarize failures and exit with an appropriate status.
@@ -229,9 +298,19 @@ Examples:
   sync karabiner-elements       Same: unambiguous, found in app configs
   sync bin                      Same: 'sync system bin'
   sync app git ghostty          Several configs in one run
+  sync diff agents              Preview machine-local drift in agent configs
+  sync up agents                Review drift, keep what you want
 
 Failing scripts never stop the run; failures are summarized at the end and
 reported with a non-zero exit code.
+
+Managed files declare themselves: a config file with a sibling '<file>.d/'
+overlay directory containing a 'dest' marker (the deployed path) deploys as a
+composed copy -- base file plus machine-local fragments (.json/.yaml/.yml/.toml
+merge; executables transform) -- instead of a symlink. Machine-local state
+written by apps lands only in the deployed copy. 'sync diff' shows that drift;
+'sync up' reviews it hunk by hunk and pulls what you approve back into the repo
+base. Requires yq for YAML/TOML fragments: brew install yq.
 
 Shell completion (zsh) lives in lib/completion/_sync and is installed into
 ~/.zsh/completions by the shell config.
@@ -266,8 +345,31 @@ case "$1" in
 		fi
 		message "Syncing everything..."
 		run_scope "$APPS_SCOPE"
-		run_git_filters
 		run_scope "$SYS_SCOPE"
+		finish
+		;;
+	diff)
+		shift
+		if (( $# == 0 )); then
+			error "Usage: sync diff [app|sys] <name>..."
+			exit 1
+		fi
+		scope=""
+		case "$1" in app|apps) scope="$APPS_SCOPE"; shift ;; sys|system) scope="$SYS_SCOPE"; shift ;; esac
+		resolve_args "$scope" "$@"
+		run_drift show
+		finish
+		;;
+	up|absorb)
+		shift
+		if (( $# == 0 )); then
+			error "Usage: sync up [app|sys] <name>..."
+			exit 1
+		fi
+		scope=""
+		case "$1" in app|apps) scope="$APPS_SCOPE"; shift ;; sys|system) scope="$SYS_SCOPE"; shift ;; esac
+		resolve_args "$scope" "$@"
+		run_drift absorb
 		finish
 		;;
 	app|apps)
@@ -275,7 +377,6 @@ case "$1" in
 		if (( $# == 0 )); then
 			message "Syncing all app configs..."
 			run_scope "$APPS_SCOPE"
-			run_git_filters
 			finish
 		fi
 		resolve_args "$APPS_SCOPE" "$@"

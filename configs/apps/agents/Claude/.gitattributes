@@ -1,3 +1,0 @@
-# Patterns are relative to this directory. The herdr-hooks filter is registered
-# per clone by sync_git_filters.sh; see ../clean_herdr-hooks for what it strips.
-settings.json filter=herdr-hooks

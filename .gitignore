@@ -1,2 +1,9 @@
 .DS_Store
 __pycache__
+
+# Machine-local overlay fragments for managed config files (see lib/compose.sh).
+# Overlay fragment contents are machine-local, but each <file>.d/ dir's
+# 'dest' marker declares management and is tracked. (**/ is required: a
+# middle slash anchors patterns to the repo root, where * cannot cross /.)
+**/*.d/*
+!**/*.d/dest

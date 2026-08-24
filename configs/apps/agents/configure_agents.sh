@@ -2,7 +2,10 @@
 set -euo pipefail
 
 echo "Configuring Agents..."
-current_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+repo_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../../.." && pwd )"
+source "${repo_root}/lib/compose.sh"
+
+current_dir="${repo_root}/configs/apps/agents"
 
 mkdir -p "$HOME/.claude"
 mkdir -p "$HOME/.codex"
@@ -17,12 +20,12 @@ ln -sfn "$current_dir/AGENTS.md" "$HOME/.agents/AGENTS.md"
 
 echo "Configuring Claude..."
 ln -sfn "$current_dir/AGENTS.md" "$HOME/.claude/CLAUDE.md"
-ln -sfn "$current_dir/Claude/settings.json" "$HOME/.claude/settings.json"
 ln -sfn "$current_dir/Claude/statusline-command.sh" "$HOME/.claude/statusline-command.sh"
 
-echo "Configuring Codex..."
-ln -sfn "$current_dir/Codex/config.toml" "$HOME/.codex/config.toml"
-ln -sfn "$current_dir/Codex/hooks.json" "$HOME/.codex/hooks.json"
+# Managed files (<file>.d/ with a dest marker) deploy as composed materialized
+# copies; everything else stays symlinked.
+echo "Deploying managed agent configs..."
+deploy_managed_under "$current_dir"
 
 echo "Configuring Opencode..."
 ln -sfn "$current_dir/Opencode/opencode.json" "$HOME/.config/opencode/opencode-shared.json"
@@ -67,9 +70,9 @@ ln -sfn "$current_dir/bin/sync-opencode-omlx-models" "$HOME/bin/sync-opencode-om
 
 # Herdr owns its integration files and rewrites them on update, so install them
 # through herdr rather than tracking copies here. This has to run after the
-# symlinks above, because installing edits the agent configs in place — those
-# edits land in the repo and are stripped back out by the herdr-hooks clean
-# filter (see clean_herdr-hooks).
+# deployments above: installing edits the agent configs in place — for managed
+# files those edits land in the deployed copy and stay out of the repo; review
+# them later with 'sync absorb'.
 if command -v herdr > /dev/null; then
   echo "Configuring Herdr integrations..."
   for agent in pi claude codex opencode; do

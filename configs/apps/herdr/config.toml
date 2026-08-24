@@ -81,9 +81,9 @@ show_agent_labels_on_pane_borders = true
 # ticket key) + agent name on one line; the body (pt -b, or bare `pt words`)
 # is word-wrapped onto up to two extra lines. Tokens are reported by ~/bin/pt
 # (source me.pt) — the shared applier used both by manual pt calls and by
-# update_shipyard_pane_title when an agent fetches a Shipyard issue, e.g.
-# "● me.sh · SHP-399 · pi" + wrapped summary lines. Rows whose tokens are all
-# missing disappear, so untitled agents stay one line. herdr has no native
+# per-machine pane-title hooks registered in agent configs' overlay fragments,
+# e.g. "● me.sh · SHP-399 · pi" + wrapped summary lines. Rows whose tokens are
+# all missing disappear, so untitled agents stay one line. herdr has no native
 # text wrapping — this is emulated script-side.
 [ui.sidebar.agents]
 # Inline { token = ..., dim = false } style tables: herdr renders agent-panel

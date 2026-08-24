@@ -17,7 +17,7 @@
 #
 # The split-pane title itself is "<title> <body>" concatenated.
 # Tokens are reported as title_key / title_sum1 / title_sum2 (source me.pt);
-# update_shipyard_pane_title delegates here, so this is the single writer of
+# pane-title integrations delegate here, so this is the single writer of
 # those tokens.
 #
 # usage: pt [-t <title>] [-b <body>]  set pane title (+ herdr agents-list entry)

@@ -22,17 +22,20 @@ _sync() {
 	done < <("$sync_script" --completion-names 2>/dev/null)
 
 	scopes=(
-		'all:everything (app configs, system configs, git filters)'
-		'app:full app sync (includes git filters)'
-		'apps:full app sync (includes git filters)'
+		'all:everything (app configs, system configs)'
+		'app:full app sync'
+		'apps:full app sync'
 		'sys:full system sync'
 		'system:full system sync'
+		'absorb:review managed-file drift, keep chosen hunks in the repo'
+		'diff:view machine-local drift in managed files'
+		'up:pick local changes to absorb back into the repo'
 	)
 
 	_arguments -C \
 		'(-h --help)'{-h,--help}'[show help]' \
 		'(-l --list)'{-l,--list}'[list available config names]' \
-		'1:scope:->scopes' \
+		'1:command-or-scope:->scopes' \
 		'*::name:->names'
 
 	case "$state" in

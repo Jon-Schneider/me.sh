@@ -1,5 +1,0 @@
-# Patterns are relative to this directory. Both filters are registered per clone
-# by sync_git_filters.sh; see clean_codex-config and ../clean_herdr-hooks for
-# what each one strips.
-config.toml filter=codex-config
-hooks.json filter=herdr-hooks
