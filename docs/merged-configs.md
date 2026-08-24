@@ -93,8 +93,8 @@ me absorb agents        # older name, same thing
 ```
 
 - **Drift** is everything the deployed copy contains beyond a fresh composition: app-written runtime state (herdr registrations, Codex `[projects]` trust), formatting churn from tools that rewrite configs, *and* any edits you made to the live file directly.
-- `me diff` prints unified diffs (`a/` = repo side, `b/` = live side). Read-only.
-- `me up` shows each hunk and prompts: `[y]es`, `[n]o`, `[a]ll remaining`, `[q]uit`. Accepted hunks are applied to the **repo base** with `git apply`; declined hunks stay in the deployed copy only. For scripted runs set `ABSORB_ANSWERS="y n q"` — answers are consumed in order but **restart for each managed file**, since each file spawns a fresh picker.
+- `me diff` renders one combined `git diff` covering every drifted managed file (`a/` = repo side, `b/` = live side), so the whole sweep pages through your git config (delta, less, …) in a single session whenever stdout is a terminal; plain when piped. Read-only.
+- `me up` reviews hunks with native `git add -p`: `[y]` stage, `[n]` skip, `[a]` stage the rest of this file, `[d]` skip the rest, `[s]` split, `[e]` edit, `[?]` help. Staged hunks are applied to the **repo base** with `git apply`; declined hunks stay in the deployed copy only. Scripted or non-tty runs fall back to `lib/hunk_selector.py`: set `ABSORB_ANSWERS="y n q"` — answers are consumed in order but **restart for each managed file**, since each file spawns a fresh picker.
 - After absorbing, re-run your normal sync (`me app agents`) to recompose deployed copies cleanly.
 - If a hunk won't apply (its context overlaps fragment-added regions), nothing is lost: the diff is kept in a `/tmp/me-drift.*` directory and its path is printed — resolve by editing the base or fragment by hand.
 
@@ -138,8 +138,8 @@ Unlike symlinked files, managed files have no live link back to the repo: deploy
 |---|---|
 | `lib/compose.sh` | Marker discovery (`managed_files_under`), `$HOME` expansion, overlay discovery, merge dispatch + transformer execution, `deploy_config` / `deploy_managed_under` |
 | `lib/deep_merge.py` | Format parsing/emission (JSON native; YAML/TOML via `yq`) and the shared deep-merge semantics |
-| `lib/hunk_selector.py` | Interactive hunk picker used by `me up` (tty prompts; `ABSORB_ANSWERS` for scripting) |
-| `run_drift` in `me` | Shared engine behind `me diff` (mode `show`) and `me up` / `absorb` (mode `absorb`) |
+| `lib/hunk_selector.py` | Fallback hunk picker for scripted/no-tty `me up` runs; interactive runs use native `git add -p` |
+| `run_drift` in `me` | Shared engine behind `me diff` (mode `show`: one combined diff) and `me up` / `absorb` (mode `absorb`: per-file review) |
 | `<file>.d/dest` markers | What is managed and where it deploys |
 
 Deploys replace an existing destination via temp file + move and **never write through an existing symlink** — the link is removed first, so a botched migration can't clobber your repo through the link.

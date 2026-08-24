@@ -9,8 +9,9 @@
 #   me sys | system             Full system sync
 #   me [app|sys] <name>...      Sync only the named configs
 #   me diff [app|sys] [<name>...]
-#                               Show drift between live managed configs and repo
-#                               (every config when no names given)
+#                               Show one combined diff of drift between live
+#                               managed configs and the repo (every config when
+#                               no names given)
 #   me up [app|sys] [<name>...] Pick local changes to pull back into the repo
 #                               (alias for the older name: absorb)
 set -euo pipefail
@@ -209,68 +210,118 @@ function select_all_scripts {
 
 # --- Drift: diff / up (absorb) ----------------------------------------------
 
-# For every managed file in 'selected', diff the deployed copy against a fresh
-# composition of its repo base + overlays. MODE 'show' prints the diffs;
-# 'absorb' lets the user keep chosen hunks in the repo base, leaving the rest
-# local to the deployed copy.
+# Diff every managed file in 'selected' against a fresh composition of its
+# repo base + overlays. MODE 'show' renders one combined colored git diff for
+# the whole sweep; 'absorb' reviews each drifted file separately and lets the
+# user keep chosen hunks in the repo base, leaving the rest local.
 function run_drift {
-	local mode="$1" script src dst tmp difffile picked rc applied=0 files=0
+	local mode="$1" script src dst tmp rc i applied=0 files=0 failed_apply=0
 
 	if (( ${#selected[@]} == 0 )); then
 		error "needs at least one config name, e.g. 'me $mode agents'"
 		exit 1
 	fi
 
+	tmp="$(mktemp -d "${TMPDIR:-/tmp}/me-drift.XXXXXX")"
+
+	# Phase 1: compose every managed file and collect the drifted ones.
+	local -a drift_src=() drift_dst=() drift_base=()
 	for script in "${selected[@]}"; do
 		while IFS=$'\t' read -r src dst; do
 			[[ -e "$dst" ]] || {
 				error "Not deployed yet, skipping: $src -> $dst"
 				continue
 			}
-			tmp="$(mktemp -d "${TMPDIR:-/tmp}/me-drift.XXXXXX")"
+			local composed="$tmp/base-${#drift_src[@]}"
 			# No fragments yet is fine for a managed file: compare against base.
 			rc=0
-			compose_file "$repo_root/$src" "$tmp/composed" || rc=$?
+			compose_file "$repo_root/$src" "$composed" || rc=$?
 			if (( rc == 2 )); then
-				cp "$repo_root/$src" "$tmp/composed"
+				cp "$repo_root/$src" "$composed"
 			elif (( rc != 0 )); then
 				error "Compose failed for $src; skipping drift review"
-				rm -rf "$tmp"
 				continue
 			fi
-			if cmp -s "$tmp/composed" "$dst"; then
+			if cmp -s "$composed" "$dst"; then
 				message "Up to date: $src"
-				rm -rf "$tmp"
 				continue
 			fi
-			difffile="$tmp/diff"
-			diff -u -L "a/$src" -L "b/$src" "$tmp/composed" "$dst" > "$difffile" || true
-
-			if [[ "$mode" == show ]]; then
-				message "Drift in $src (a/ = repo, b/ = live):"
-				cat "$difffile"
-				rm -rf "$tmp"
-				continue
-			fi
-
-			message "Reviewing drift in $src (deployed copy differs from repo):"
-			picked="$tmp/picked"
-			lib/hunk_selector.py < "$difffile" > "$picked"
-			if [[ -s "$picked" ]]; then
-				if git apply "$picked"; then
-					(( ++files ))
-					applied=$(( applied + $(grep -c '^@@' "$picked" || true) ))
-				else
-					error "Some hunks could not be applied to $src; edit it manually (diff saved at $difffile)"
-					continue
-				fi
-			else
-				message "Kept nothing; remaining drift stays local in $dst"
-			fi
-			rm -rf "$tmp"
+			drift_src+=("$src")
+			drift_dst+=("$dst")
+			drift_base+=("$composed")
 		done < <(managed_files_under "$(dirname "$script")")
 	done
 
+	if (( ${#drift_src[@]} == 0 )); then
+		rm -rf "$tmp"
+		return
+	fi
+
+	# Pin identity/hooks/filters so global git config can't block a throwaway commit.
+	local git_pin=("-c" "user.name=me.sh drift" "-c" "user.email=noreply@localhost" "-c" "commit.gpgsign=false" "-c" "core.autocrlf=false")
+
+	if [[ "$mode" == show ]]; then
+		# One throwaway repo holding every drifted file at its repo path: a
+		# single colored git diff covers the whole sweep in one pager session,
+		# with a/$src b/$src headers matching the repo layout.
+		local scratch="$tmp/repo"
+		for (( i=0; i<${#drift_src[@]}; i++ )); do
+			mkdir -p "$scratch/$(dirname "${drift_src[i]}")"
+			cp "${drift_base[i]}" "$scratch/${drift_src[i]}"
+		done
+		git -C "$scratch" -c advice.defaultBranchName=false init -q
+		git -C "$scratch" "${git_pin[@]}" add -A .
+		git -C "$scratch" "${git_pin[@]}" -c core.hooksPath=/dev/null commit -qm base
+		for (( i=0; i<${#drift_src[@]}; i++ )); do
+			cp "${drift_dst[i]}" "$scratch/${drift_src[i]}"
+		done
+		message "Drift across ${#drift_src[@]} managed file(s) (a/ = repo, b/ = live):"
+		# Unpinned on purpose: honors your pager (delta, less) and color config.
+		git -C "$scratch" diff --color=auto || true
+		rm -rf "$tmp"
+		return
+	fi
+
+	# Phase 2 (absorb): per-file review; each file gets its own scratch repo so
+	# accepted hunks are computed and applied independently.
+	for (( i=0; i<${#drift_src[@]}; i++ )); do
+		src="${drift_src[i]}"
+		dst="${drift_dst[i]}"
+		local scratch="$tmp/repo-$i"
+		mkdir -p "$scratch/$(dirname "$src")"
+		cp "${drift_base[i]}" "$scratch/$src"
+		git -C "$scratch" -c advice.defaultBranchName=false init -q
+		git -C "$scratch" "${git_pin[@]}" add "$src"
+		git -C "$scratch" "${git_pin[@]}" -c core.hooksPath=/dev/null commit -qm base
+		cp "$dst" "$scratch/$src"
+
+		local difffile="$tmp/diff-$i" picked="$tmp/picked-$i"
+		git --no-pager -C "$scratch" diff > "$difffile" || true
+
+		message "Reviewing drift in $src (deployed copy differs from repo):"
+		if [[ -z "${ABSORB_ANSWERS:-}" ]] && : </dev/tty 2>/dev/null; then
+			git -C "$scratch" add -p "$src" </dev/tty >/dev/tty || true
+			git --no-pager -C "$scratch" diff --cached > "$picked" || true
+		else
+			lib/hunk_selector.py < "$difffile" > "$picked"
+		fi
+		if [[ -s "$picked" ]]; then
+			if git apply "$picked"; then
+				(( ++files ))
+				applied=$(( applied + $(grep -c '^@@' "$picked" || true) ))
+			else
+				error "Some hunks could not be applied to $src; edit it manually (diff saved at $difffile)"
+				failed_apply=1
+				continue
+			fi
+		else
+			message "Kept nothing; remaining drift stays local in $dst"
+		fi
+	done
+
+	if (( failed_apply == 0 )); then
+		rm -rf "$tmp"
+	fi
 	if (( files > 0 )); then
 		message "Absorbed $applied hunk(s) into $files managed file(s). Re-run your sync to redeploy clean copies."
 	fi
@@ -324,7 +375,7 @@ Examples:
   me karabiner-elements       Same: unambiguous, found in app configs
   me bin                      Same: 'me system bin'
   me app git ghostty          Several configs in one run
-  me diff                     Check every config for drift, app + system
+  me diff                     Check every config for drift in one combined diff
   me diff agents              Preview machine-local drift in agent configs
   me up                       Review drift everywhere, keep what you want
 

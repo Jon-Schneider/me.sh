@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Interactive hunk picker for `sync absorb`.
+"""Fallback hunk picker for scripted/no-tty `me up` runs; interactive runs use git add -p.
 
 Reads a unified diff on stdin, shows each hunk, and writes only the accepted
 hunks (with the original file headers) to stdout. Prompts read from /dev/tty so
