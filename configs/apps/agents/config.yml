@@ -1,0 +1,59 @@
+symlinks:
+  - src: AGENTS.md
+    dest: $HOME/.agents/AGENTS.md
+  - src: AGENTS.md
+    dest: $HOME/.claude/CLAUDE.md
+  - src: Claude/statusline-command.sh
+    dest: $HOME/.claude/statusline-command.sh
+  - src: Opencode/opencode.json
+    dest: $HOME/.config/opencode/opencode-shared.json
+  - src: Opencode/opencode-tmux-agent-status.js
+    dest: $HOME/.config/opencode/plugins/opencode-tmux-agent-status.js
+  - src: AGENTS.md
+    dest: $HOME/.pi/agent/AGENTS.md
+  - src: Pi/settings.json
+    dest: $HOME/.pi/agent/settings.json
+  - src: Pi/extensions/dcg-guard.ts
+    dest: $HOME/.pi/agent/extensions/dcg-guard.ts
+  - src: Pi/extensions/tmux-agent-status.ts
+    dest: $HOME/.pi/agent/extensions/tmux-agent-status.ts
+  - src: Pi/extensions/statusline.ts
+    dest: $HOME/.pi/agent/extensions/statusline.ts
+  - src: Pi/statusline.json
+    dest: $HOME/.pi/agent/statusline.json
+  - src: Skills/claude-review
+    dest: $HOME/.agents/skills/claude-review
+  - src: Skills/codex-review
+    dest: $HOME/.claude/skills/codex-review
+  - src: Skills/hate-review
+    dest: $HOME/.agents/skills/hate-review
+  - src: Skills/hate-review
+    dest: $HOME/.claude/skills/hate-review
+  - src: Skills/hate-reviewer-cycle
+    dest: $HOME/.agents/skills/hate-reviewer-cycle
+  - src: Skills/hate-reviewer-cycle
+    dest: $HOME/.claude/skills/hate-reviewer-cycle
+  - src: Skills/patch-commit
+    dest: $HOME/.agents/skills/patch-commit
+  - src: Skills/patch-commit
+    dest: $HOME/.claude/skills/patch-commit
+  - src: Skills/patch-commit
+    dest: $HOME/.codex/skills/patch-commit
+  - src: Skills/rewrite-pr-history
+    dest: $HOME/.agents/skills/rewrite-pr-history
+  - src: Skills/rewrite-pr-history
+    dest: $HOME/.claude/skills/rewrite-pr-history
+  - src: Skills/use-jira
+    dest: $HOME/.agents/skills/use-jira
+  - src: Skills/use-jira
+    dest: $HOME/.claude/skills/use-jira
+  - src: bin/fa
+    dest: $HOME/bin/fa
+  - src: bin/pt
+    dest: $HOME/bin/pt
+  - src: bin/wt
+    dest: $HOME/bin/wt
+  - src: bin/xcsift-for-apple-build-tools
+    dest: $HOME/bin/xcsift-for-apple-build-tools
+  - src: bin/sync-opencode-omlx-models
+    dest: $HOME/bin/sync-opencode-omlx-models
