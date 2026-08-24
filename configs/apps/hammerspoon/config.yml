@@ -1,0 +1,3 @@
+symlinks:
+  - src: hammerspoon
+    dest: $HOME/.hammerspoon
