@@ -40,8 +40,34 @@ prefix = "ctrl+space"
 # tmux muscle memory: prefix+, renames the focused space (default is
 # prefix+shift+w).
 rename_workspace = "prefix+comma"
-
 onboarding = false
+
+# Cmd+Shift+Left/Right focus panes: Ghostty sends prefix+h / prefix+l, which
+# hit the focus_pane_* defaults below. (Direct ctrl+shift+arrow chords were
+# tried and not recognized by herdr at runtime.)
+
+# Cycle workspaces (tmux era: Shift+Up/Down ran HerdrPrevious/NextWorkspace).
+previous_workspace = "shift+up"
+next_workspace = "shift+down"
+
+# Cmd+W closes by preference: focused split pane, else active tab (no splits),
+# else the workspace when it holds the last tab. Ghostty sends raw Ctrl+W and
+# herdr intercepts it before panes see it (tmux did the same via bind -n C-w).
+
+# Built-in tab cycling moved off prefix+n/p so the [[keys.command]] walkers
+# below own those keys unambiguously (Ghostty sends ctrl+tab /
+# ctrl+shift+tab as \x00n / \x00p = prefix+n / prefix+p). The native
+# per-workspace cycling stays reachable on these alt chords.
+# NB: keep these above any [[keys.command]] header — bare keys after one are
+# absorbed into that array element instead of [keys].
+next_tab = "prefix+alt+n"
+previous_tab = "prefix+alt+p"
+
+[[keys.command]]
+key = "ctrl+w"
+type = "shell"
+command = "/Users/jsc/Developer/jsc/me.sh/configs/apps/herdr/close-focused.sh"
+description = "close pane / tab / workspace"
 
 [theme]
 name = "catppuccin"
@@ -53,6 +79,22 @@ show_agent_labels_on_pane_borders = true
 
 [ui.toast]
 delivery = "system"
+
+# Cross-workspace tab walking via ~/bin/herdr-tab-step: steps through every
+# tab of every workspace in order (workspaces by number, tabs by number) and
+# wraps globally, restoring what ~/bin/tmux-app-key did when herdr ran
+# inside tmux. Ghostty ctrl+tab / ctrl+shift+tab send prefix+n / prefix+p.
+[[keys.command]]
+key = "prefix+n"
+type = "shell"
+command = "$HOME/bin/herdr-tab-step next"
+description = "next tab across workspaces"
+
+[[keys.command]]
+key = "prefix+p"
+type = "shell"
+command = "$HOME/bin/herdr-tab-step previous"
+description = "previous tab across workspaces"
 
 # Move the focused space left/right in the sidebar (me.space-mover plugin).
 [[keys.command]]

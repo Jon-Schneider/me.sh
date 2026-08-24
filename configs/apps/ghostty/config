@@ -65,8 +65,11 @@ keybind = super+shift+enter=text:\x00s
 keybind = super+shift+alt+enter=text:\x00e
 keybind = cmd+z=text:\x00z
 keybind = cmd+d=unbind
-keybind = super+shift+left=text:\x00Y
-keybind = super+shift+right=text:\x00L
+# Focus pane left/right: send prefix+h / prefix+l (herdr focus_pane_* defaults).
+# NB raw ctrl+shift+arrow CSI sequences (\x1b[1;5D/C) were not recognized by
+# herdr at runtime, so chords route through the prefix instead.
+keybind = super+shift+left=text:\x00h
+keybind = super+shift+right=text:\x00l
 keybind = super+shift+up=text:\x00K
 keybind = super+shift+down=text:\x00J
 # Route macOS window-management chords through tmux so Herdr can use them for
@@ -90,7 +93,9 @@ keybind = cmd+i=text:\x09
 # Disable toggling fullscreen
 keybind = super+ctrl+f=unbind
 
-keybind = cmd+left=text:\x00B
+# Home/End pass straight through (like Cmd+Right below); sending Ctrl-Space+B
+# here made Herdr standalone toggle the sidebar instead.
+keybind = cmd+left=text:\x1b[H
 keybind = cmd+right=text:\x1b[F
 # Karabiner consumes Cmd+Ctrl+Arrow before AppKit can emit NSBeep and sends
 # these otherwise-unused function keys instead.
@@ -98,7 +103,10 @@ keybind = f13=text:\x00\x1b[D
 keybind = f14=text:\x00\x1b[C
 keybind = f15=text:\x00\x1b[A
 keybind = f16=text:\x00\x1b[B
-keybind = cmd+backspace=text:\x00D
+# Cmd+Backspace clears the line: send Ctrl+U straight through so shells get
+# kill-whole-line whether Herdr runs standalone or inside tmux. It previously
+# sent Ctrl-Space+D (prefix+D), which Herdr standalone interprets as close_workspace.
+keybind = cmd+backspace=text:\x15
 
 # Enable Shift + Enter going to new line in 'git commit -m "..."'
 keybind = shift+enter=text:\n
