@@ -3,7 +3,6 @@ set -euo pipefail
 
 echo "Configuring Karabiner Elements..."
 
-current_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 local_dir="$HOME/.config/me.sh/karabiner"
 local_module="$local_dir/local.libsonnet"
 output="$HOME/.config/karabiner/karabiner.json"
@@ -15,15 +14,16 @@ fi
 
 mkdir -p "$local_dir" "$(dirname "$output")"
 
-if [ ! -f "$local_module" ]; then
+if [[ ! -f "$local_module" ]]; then
   echo "Seeding empty $local_module"
   printf '{\n  rules: [],\n}\n' > "$local_module"
 fi
 
-# Machine-private rules live outside Git; -J resolves `import 'local.libsonnet'` to them.
+# Machine-private rules live outside Git; -J resolves `import
+# 'local.libsonnet'` to them.
 temp_output="$(mktemp)"
 trap 'rm -f "$temp_output"' EXIT
-jsonnet -J "$local_dir" "$current_dir/karabiner.jsonnet" > "$temp_output"
+jsonnet -J "$local_dir" "$ME_UNIT_DIR/karabiner.jsonnet" > "$temp_output"
 mv "$temp_output" "$output"
 trap - EXIT
 
