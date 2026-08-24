@@ -1,0 +1,3 @@
+copies:
+  - src: Default.idekeybindings
+    dest: $HOME/Library/Developer/Xcode/UserData/KeyBindings/Default.idekeybindings
