@@ -4,7 +4,7 @@
 # Installed into ~/.zsh/completions by configs/apps/shell/configure_shell.sh.
 
 _me() {
-	local -a app_names sys_names scopes
+	local -a app_names macos_names bootstrap_names scopes
 	local scope name runner line
 
 	# Locate the me runner to ask for valid names. Falls back to the
@@ -17,16 +17,20 @@ _me() {
 	while IFS=$'\t' read -r scope name; do
 		case "$scope" in
 			app) app_names+=("$name") ;;
-			sys) sys_names+=("$name") ;;
+			macos) macos_names+=("$name") ;;
+			bootstrap) bootstrap_names+=("$name") ;;
 		esac
 	done < <("$runner" --completion-names 2>/dev/null)
 
 	scopes=(
-		'all:everything (app configs, system configs)'
+		'all:everything (macOS configs, app configs)'
+		'bootstrap:fresh-machine setup steps'
 		'app:full app sync'
 		'apps:full app sync'
-		'sys:full system sync'
-		'system:full system sync'
+		'mac:full macOS sync'
+		'macos:full macOS sync'
+		'sys:full macOS sync'
+		'system:full macOS sync'
 		'absorb:review managed-file drift, keep chosen hunks in the repo'
 		'diff:view machine-local drift in managed files'
 		'up:pick local changes to absorb back into the repo'
@@ -34,7 +38,7 @@ _me() {
 
 	_arguments -C \
 		'(-h --help)'{-h,--help}'[show help]' \
-		'(-l --list)'{-l,--list}'[list available config names]' \
+		'(-l --list)'{-l,--list}'[list available units]' \
 		'1:command-or-scope:->scopes' \
 		'*::name:->names'
 
@@ -42,21 +46,30 @@ _me() {
 		scopes)
 			_describe -t scopes 'scope' scopes
 			(( ${#app_names[@]} )) && _describe -t app-names 'app config' app_names
-			(( ${#sys_names[@]} )) && _describe -t sys-names 'system config' sys_names
+			(( ${#macos_names[@]} )) && _describe -t macos-names 'macOS config' macos_names
+			(( ${#bootstrap_names[@]} )) && _describe -t bootstrap-names 'bootstrap unit' bootstrap_names
 			;;
 		names)
 			case "$words[1]" in
 				app|apps)
 					(( ${#app_names[@]} )) && _describe -t app-names 'app config' app_names
 					;;
-				sys|system)
-					(( ${#sys_names[@]} )) && _describe -t sys-names 'system config' sys_names
+				mac|macos|sys|system)
+					(( ${#macos_names[@]} )) && _describe -t macos-names 'macOS config' macos_names
+					;;
+				bootstrap)
+					(( ${#bootstrap_names[@]} )) && _describe -t bootstrap-names 'bootstrap unit' bootstrap_names
 					;;
 				all)
 					;; # no further arguments
+				diff|up|absorb)
+					(( ${#app_names[@]} )) && _describe -t app-names 'app config' app_names
+					(( ${#macos_names[@]} )) && _describe -t macos-names 'macOS config' macos_names
+					;;
 				*)
 					(( ${#app_names[@]} )) && _describe -t app-names 'app config' app_names
-					(( ${#sys_names[@]} )) && _describe -t sys-names 'system config' sys_names
+					(( ${#macos_names[@]} )) && _describe -t macos-names 'macOS config' macos_names
+					(( ${#bootstrap_names[@]} )) && _describe -t bootstrap-names 'bootstrap unit' bootstrap_names
 					;;
 			esac
 			;;

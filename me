@@ -2,17 +2,19 @@
 # Convenience runner for syncing all or part of the me.sh configuration.
 #
 # Usage:
-#   me                          List available config names
+#   me                          List available units
 #   me --help                   Show detailed help
-#   me all                      Sync everything (app + system configs)
+#   me all                      Sync everything (macOS + app configs)
+#   me bootstrap                Run fresh-machine setup steps in order
+#   me bootstrap <name>...      Run selected bootstrap steps
 #   me app | apps               Full app sync
-#   me sys | system             Full system sync
-#   me [app|sys] <name>...      Sync only the named configs
-#   me diff [app|sys] [<name>...]
+#   me macos | sys | system     Full macOS sync
+#   me [app|macos] <name>...    Sync only the named configs
+#   me diff [app|macos] [<name>...]
 #                               Show one combined diff of drift between live
 #                               managed configs and the repo (every config when
 #                               no names given)
-#   me up [app|sys] [<name>...] Pick local changes to pull back into the repo
+#   me up [app|macos] [<name>...] Pick local changes to pull back into the repo
 #                               (alias for the older name: absorb)
 set -euo pipefail
 
@@ -23,13 +25,22 @@ source "lib/common.sh"
 source "lib/compose.sh"
 
 readonly APPS_SCOPE="apps"
-readonly SYS_SCOPE="macos"
+readonly MACOS_SCOPE="macos"
+readonly BOOTSTRAP_SCOPE="bootstrap"
+readonly CONFIG_SCOPE="config"
+readonly ANY_SCOPE="any"
 
 # --- Discovery -------------------------------------------------------------
 
-# Print every configure script for a scope ('apps' or 'sys'), sorted.
+# Print every configure script for a config scope ('apps' or 'macos'), sorted.
 function list_scripts {
 	find -E "configs/$1" -name 'configure_*.sh' | sort
+}
+
+# Print bootstrap scripts in filename order. The two-digit prefix is the
+# sequence; the remainder of the filename is the public unit name.
+function list_bootstrap_scripts {
+	find "bootstrap" -maxdepth 1 -type f -name '[0-9][0-9]-*.sh' | sort
 }
 
 # Print the config name of a script path (configure_<name>.sh -> <name>).
@@ -39,30 +50,50 @@ function script_name {
 	printf '%s' "${base%.sh}"
 }
 
+# Print the public name of a bootstrap script (10-prerequisites.sh -> prerequisites).
+function bootstrap_script_name {
+	local base="${1##*/}"
+	base="${base#??-}"
+	printf '%s' "${base%.sh}"
+}
+
+# Config directories may use the same optional ordering prefix. It affects
+# execution order without leaking into the command name (00-homebrew -> homebrew).
+function config_dir_name {
+	local name
+	name="$(basename "$(dirname "$1")")"
+	case "$name" in
+		[0-9][0-9]-*) name="${name#??-}" ;;
+	esac
+	printf '%s' "$name"
+}
+
 # Print every accepted config name for a scope, one per line, sorted.
 # Both directory names and script names are accepted by 'me'.
 function list_names {
 	local script
 	{
 		while IFS= read -r script; do
-			basename "$(dirname "$script")"
-			script_name "$script"
-			printf '\n'
+			printf '%s\n' "$(config_dir_name "$script")"
+			printf '%s\n' "$(script_name "$script")"
 		done < <(list_scripts "$1")
 	} | sort -fu
 }
 
-# Emit 'scope<TAB>name' lines for zsh completion ('app'|'sys'; internal use only).
+# Emit 'scope<TAB>name' lines for zsh completion (internal use only).
 function show_completion_names {
 	local scope dir script
 	{
-		for scope in app sys; do
-			if [[ "$scope" == sys ]]; then dir="$SYS_SCOPE"; else dir="$APPS_SCOPE"; fi
+		for scope in app macos; do
+			if [[ "$scope" == macos ]]; then dir="$MACOS_SCOPE"; else dir="$APPS_SCOPE"; fi
 			while IFS= read -r script; do
-				printf '%s\t%s\n' "$scope" "$(basename "$(dirname "$script")")"
+				printf '%s\t%s\n' "$scope" "$(config_dir_name "$script")"
 				printf '%s\t%s\n' "$scope" "$(script_name "$script")"
 			done < <(list_scripts "$dir")
 		done
+		while IFS= read -r script; do
+			printf 'bootstrap\t%s\n' "$(bootstrap_script_name "$script")"
+		done < <(list_bootstrap_scripts)
 	} | sort -fu
 }
 
@@ -91,25 +122,38 @@ declare -a matches=()
 function collect_matches {
 	local scope="$1" name="$2" script
 	matches=()
+	if [[ "$scope" == "$BOOTSTRAP_SCOPE" ]]; then
+		while IFS= read -r script; do
+			if [[ "$(bootstrap_script_name "$script")" == "$name" ]]; then
+				matches+=("$script")
+			fi
+		done < <(list_bootstrap_scripts)
+		return
+	fi
 	while IFS= read -r script; do
-		if [[ "$(basename "$(dirname "$script")")" == "$name" || "$(script_name "$script")" == "$name" ]]; then
+		if [[ "$(config_dir_name "$script")" == "$name" || "$(script_name "$script")" == "$name" ]]; then
 			matches+=("$script")
 		fi
 	done < <(list_scripts "$scope")
 }
 
-# Resolve one requested name against a scope ('apps', 'sys', or '' for both),
-# appending matches to 'selected'. Exits on unknown or ambiguous names.
+# Resolve one requested name against a concrete scope, config scopes, or all
+# unit types. CONFIG_SCOPE deliberately excludes bootstrap for diff/up.
 function resolve_name {
 	local scope="$1" name="$2"
-	local -a app_matches=()
-	local m
+	local -a app_matches=() macos_matches=() bootstrap_matches=()
+	local m match_groups=0
 
-	if [[ -n "$scope" ]]; then
+	if [[ "$scope" == "$APPS_SCOPE" || "$scope" == "$MACOS_SCOPE" || "$scope" == "$BOOTSTRAP_SCOPE" ]]; then
 		collect_matches "$scope" "$name"
 		if (( ${#matches[@]} == 0 )); then
-			error "No config named '${name}' found in configs/$scope. Available names:"
-			list_names "$scope" | sed 's/^/  /' >&2
+			if [[ "$scope" == "$BOOTSTRAP_SCOPE" ]]; then
+				error "No bootstrap unit named '${name}'. Available names:"
+				list_bootstrap_names | sed 's/^/  /' >&2
+			else
+				error "No config named '${name}' found in configs/$scope. Available names:"
+				list_names "$scope" | sed 's/^/  /' >&2
+			fi
 			exit 1
 		fi
 		for m in "${matches[@]}"; do
@@ -118,35 +162,52 @@ function resolve_name {
 		return
 	fi
 
-	# No scope given: search both trees.
+	# Search both config trees, plus bootstrap units for an unrestricted lookup.
 	collect_matches "$APPS_SCOPE" "$name"
 	if (( ${#matches[@]} > 0 )); then
 		app_matches=("${matches[@]}")
+		(( ++match_groups ))
 	fi
-	collect_matches "$SYS_SCOPE" "$name"
+	collect_matches "$MACOS_SCOPE" "$name"
+	if (( ${#matches[@]} > 0 )); then
+		macos_matches=("${matches[@]}")
+		(( ++match_groups ))
+	fi
+	if [[ "$scope" == "$ANY_SCOPE" ]]; then
+		collect_matches "$BOOTSTRAP_SCOPE" "$name"
+		if (( ${#matches[@]} > 0 )); then
+			bootstrap_matches=("${matches[@]}")
+			(( ++match_groups ))
+		fi
+	fi
 
-	if (( ${#app_matches[@]} > 0 && ${#matches[@]} > 0 )); then
-		error "'${name}' matches configs in both app and system:"
-		for m in "${app_matches[@]}" "${matches[@]}"; do
+	if (( match_groups > 1 )); then
+		error "'${name}' is ambiguous:"
+		for m in ${app_matches[@]+"${app_matches[@]}"} ${macos_matches[@]+"${macos_matches[@]}"} ${bootstrap_matches[@]+"${bootstrap_matches[@]}"}; do
 			error "  ${m}"
 		done
-		error "Re-run with an explicit scope: 'me app ${name}' or 'me sys ${name}'"
+		error "Re-run with an explicit scope: app, macos, or bootstrap"
 		exit 1
 	fi
 
-	if (( ${#app_matches[@]} == 0 && ${#matches[@]} == 0 )); then
-		error "No config named '${name}'. Available names:"
-		show_list >&2
+	if (( match_groups == 0 )); then
+		if [[ "$scope" == "$CONFIG_SCOPE" ]]; then
+			error "No config named '${name}'. Available config names:"
+			show_config_list >&2
+		else
+			error "No unit named '${name}'. Available names:"
+			show_list >&2
+		fi
 		exit 1
 	fi
 
-	for m in ${app_matches[@]+"${app_matches[@]}"} ${matches[@]+"${matches[@]}"}; do
+	for m in ${app_matches[@]+"${app_matches[@]}"} ${macos_matches[@]+"${macos_matches[@]}"} ${bootstrap_matches[@]+"${bootstrap_matches[@]}"}; do
 		add_selected "$m"
 	done
 }
 
-# Resolve all requested names against a scope ('apps', 'sys', or '' for both),
-# filling 'selected'. Exits on the first unknown or ambiguous name.
+# Resolve all requested names against a scope, filling 'selected'. Exits on the
+# first unknown or ambiguous name.
 function resolve_args {
 	local scope="$1" name
 	shift
@@ -169,10 +230,36 @@ function run_selected {
 	for script in "${selected[@]}"; do
 		message "Running ${script}..."
 		if ! bash "$script"; then
-			error "${script} failed"
-			failed_scripts+=("$script")
+			if [[ "$script" == bootstrap/* ]]; then
+				error "${script} failed; bootstrap stopped"
+				exit 1
+			else
+				error "${script} failed"
+				failed_scripts+=("$script")
+			fi
 		fi
 	done
+}
+
+# Bootstrap is an ordered dependency chain, so stop at the first failed step.
+function run_bootstrap_selected {
+	local script
+	for script in "${selected[@]}"; do
+		message "Running ${script}..."
+		if ! bash "$script"; then
+			error "${script} failed; bootstrap stopped"
+			exit 1
+		fi
+	done
+}
+
+# Fill 'selected' with the complete ordered bootstrap sequence.
+function select_bootstrap_scripts {
+	local script
+	selected=()
+	while IFS= read -r script; do
+		selected+=("$script")
+	done < <(list_bootstrap_scripts)
 }
 
 # Run every configure script in a scope, collecting failures.
@@ -196,16 +283,16 @@ function select_drift_scripts {
 	if [[ -n "$1" ]]; then
 		select_scripts_in_scope "$1"
 	else
-		select_all_scripts
+		select_all_config_scripts
 	fi
 }
 
 # Fill 'selected' with every script in both scopes.
-function select_all_scripts {
+function select_all_config_scripts {
 	local script
 	selected=()
 	while IFS= read -r script; do selected+=("$script"); done < <(list_scripts "$APPS_SCOPE")
-	while IFS= read -r script; do selected+=("$script"); done < <(list_scripts "$SYS_SCOPE")
+	while IFS= read -r script; do selected+=("$script"); done < <(list_scripts "$MACOS_SCOPE")
 }
 
 # --- Drift: diff / up (absorb) ----------------------------------------------
@@ -343,13 +430,28 @@ function finish {
 # --- Help & listing --------------------------------------------------------
 
 function show_list {
-	echo "Available config names:"
+	echo "Available units:"
+	show_config_list
+	echo
+	echo "bootstrap (execution order):"
+	list_bootstrap_names | sed 's/^/  /'
+}
+
+function show_config_list {
 	echo
 	echo "app:"
 	list_names "$APPS_SCOPE" | sed 's/^/  /'
 	echo
-	echo "system:"
-	list_names "$SYS_SCOPE" | sed 's/^/  /'
+	echo "macOS:"
+	list_names "$MACOS_SCOPE" | sed 's/^/  /'
+}
+
+function list_bootstrap_names {
+	local script
+	while IFS= read -r script; do
+		bootstrap_script_name "$script"
+		printf '\n'
+	done < <(list_bootstrap_scripts)
 }
 
 function show_help {
@@ -357,30 +459,38 @@ function show_help {
 me — sync all or part of the me.sh configuration
 
 Usage:
-  me                          List available config names
+  me                          List available units
   me --help                   Show this help
-  me all                      Sync everything: app configs, system configs, git filters
-  me app | apps               Full app sync (all app configs + git filters)
-  me sys | system             Full system sync (all system configs)
-  me [app|sys] <name>...      Sync only the named configs
+  me all                      Sync macOS configs first, then app configs
+  me bootstrap               Run every fresh-machine step in filename order
+  me bootstrap <name>...     Run selected bootstrap steps, in argument order
+  me app | apps               Sync all app configs
+  me macos | sys | system     Sync all macOS configs
+  me [app|macos] <name>...    Sync only the named configs
+  me <name>...                Resolve names across configs and bootstrap
 
 A name matches either a config directory (e.g. 'karabiner', 'bin') or a
 configure script (e.g. 'karabiner-elements', 'user_bin'). A directory match
-runs every configure script inside it. With no scope, a name is looked up in
-both app and system configs; if it exists in both, re-run with an explicit
-scope.
+runs every configure script inside it. With no scope, names are looked up in
+app and macOS configs plus bootstrap units; collisions require an explicit
+scope. Bootstrap membership and order come from bootstrap/NN-name.sh.
 
 Examples:
   me app karabiner-elements   Sync one app config
   me karabiner-elements       Same: unambiguous, found in app configs
   me bin                      Same: 'me system bin'
+  me bootstrap               Prepare a fresh Mac
+  me bootstrap homebrew-install
+                              Re-run just Homebrew acquisition
+  me homebrew                Reconcile installed packages with the Brewfile
   me app git ghostty          Several configs in one run
   me diff                     Check every config for drift in one combined diff
   me diff agents              Preview machine-local drift in agent configs
   me up                       Review drift everywhere, keep what you want
 
-Failing scripts never stop the run; failures are summarized at the end and
-reported with a non-zero exit code.
+Config failures never stop the run; they are summarized at the end and reported
+with a non-zero exit code. Bootstrap is an ordered dependency chain and stops
+at the first failure.
 
 Managed files declare themselves: a config file with a sibling '<file>.d/'
 overlay directory containing a 'dest' marker (the deployed path) deploys as a
@@ -417,26 +527,36 @@ case "$1" in
 		show_completion_names
 		exit 0
 		;;
+	bootstrap)
+		shift
+		if (( $# == 0 )); then
+			select_bootstrap_scripts
+		else
+			resolve_args "$BOOTSTRAP_SCOPE" "$@"
+		fi
+		run_bootstrap_selected
+		finish
+		;;
 	all)
 		if (( $# > 1 )); then
 			error "'all' takes no additional arguments"
 			exit 1
 		fi
 		message "Syncing everything..."
+		run_scope "$MACOS_SCOPE"
 		run_scope "$APPS_SCOPE"
-		run_scope "$SYS_SCOPE"
 		finish
 		;;
 	diff)
 		shift
 		scope=""
 		if (( $# > 0 )); then
-			case "$1" in app|apps) scope="$APPS_SCOPE"; shift ;; sys|system) scope="$SYS_SCOPE"; shift ;; esac
+			case "$1" in app|apps) scope="$APPS_SCOPE"; shift ;; mac|macos|sys|system) scope="$MACOS_SCOPE"; shift ;; esac
 		fi
 		if (( $# == 0 )); then
 			select_drift_scripts "$scope"
 		else
-			resolve_args "$scope" "$@"
+			resolve_args "${scope:-$CONFIG_SCOPE}" "$@"
 		fi
 		run_drift show
 		finish
@@ -445,12 +565,12 @@ case "$1" in
 		shift
 		scope=""
 		if (( $# > 0 )); then
-			case "$1" in app|apps) scope="$APPS_SCOPE"; shift ;; sys|system) scope="$SYS_SCOPE"; shift ;; esac
+			case "$1" in app|apps) scope="$APPS_SCOPE"; shift ;; mac|macos|sys|system) scope="$MACOS_SCOPE"; shift ;; esac
 		fi
 		if (( $# == 0 )); then
 			select_drift_scripts "$scope"
 		else
-			resolve_args "$scope" "$@"
+			resolve_args "${scope:-$CONFIG_SCOPE}" "$@"
 		fi
 		run_drift absorb
 		finish
@@ -466,19 +586,19 @@ case "$1" in
 		run_selected
 		finish
 		;;
-	sys|system)
+	mac|macos|sys|system)
 		shift
 		if (( $# == 0 )); then
-			message "Syncing all system configs..."
-			run_scope "$SYS_SCOPE"
+			message "Syncing all macOS configs..."
+			run_scope "$MACOS_SCOPE"
 			finish
 		fi
-		resolve_args "$SYS_SCOPE" "$@"
+		resolve_args "$MACOS_SCOPE" "$@"
 		run_selected
 		finish
 		;;
 	*)
-		resolve_args "" "$@"
+		resolve_args "$ANY_SCOPE" "$@"
 		run_selected
 		finish
 		;;

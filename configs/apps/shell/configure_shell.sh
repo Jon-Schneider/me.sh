@@ -12,7 +12,7 @@ ln -sfn $current_dir/autoenv.zsh ~/bin/autoenv.zsh
 
 # Install zsh completion for the repo's 'me' runner (~/.zsh/completions is on fpath in .zshrc)
 mkdir -p ~/.zsh/completions
-ln -sfn "$current_dir/../../lib/completion/_me" ~/.zsh/completions/_me
+ln -sfn "$current_dir/../../../lib/completion/_me" ~/.zsh/completions/_me
 
 # Setup fastlane completions
 # bundle exec fastlane enable_auto_complete
