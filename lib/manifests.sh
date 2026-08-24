@@ -223,6 +223,7 @@ function deploy_manifest_symlinks {
 			return 1
 		fi
 		dest="$(expand_dest "$dest")"
+		message "Linking $(manifest_relative "$resolved") -> $dest"
 		if ! mkdir -p "$(dirname "$dest")"; then
 			error "Could not create destination parent: $(dirname "$dest")"
 			return 1
@@ -240,7 +241,6 @@ function deploy_manifest_symlinks {
 			error "Could not create symlink destination: $dest"
 			return 1
 		fi
-		message "Linked $(manifest_relative "$resolved") -> $dest"
 	done < <(manifest_symlink_rows "$unit/config.yml")
 }
 
@@ -252,6 +252,7 @@ function deploy_manifest_copies {
 			return 1
 		fi
 		dest="$(expand_dest "$dest")"
+		message "Copying $(manifest_relative "$resolved") -> $dest"
 		parent="$(dirname "$dest")"
 		if ! mkdir -p "$parent"; then
 			error "Could not create destination parent: $parent"
@@ -280,7 +281,6 @@ function deploy_manifest_copies {
 			error "Could not install copy destination: $dest"
 			return 1
 		fi
-		message "Copied $(manifest_relative "$resolved") -> $dest"
 	done < <(manifest_copy_rows "$unit/config.yml")
 }
 
@@ -292,6 +292,7 @@ function run_manifest_unit {
 	deploy_manifest_copies "$unit" || return 1
 	deploy_managed_under "$unit" || return 1
 	if [[ -f "$unit/post.sh" ]]; then
+		message "Running $(manifest_relative "$unit")/post.sh..."
 		(
 			cd "$unit"
 			ME_REPO_ROOT="$MANIFEST_REPO_ROOT" ME_UNIT_DIR="$unit" ./post.sh

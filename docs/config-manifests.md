@@ -143,6 +143,11 @@ For a manifest unit:
 4. Deploy managed/composed files discovered under the unit directory.
 5. Execute `post.sh`, if present.
 
+Immediately before each deployment or hook, the engine prints the symlink,
+copy, managed-file composition, or `post.sh` path it is about to run. Hooks do
+not need their own boilerplate status messages; their output can focus on the
+work they perform.
+
 Validation happens before mutation. A failure during deployment stops the
 current unit. As today, aggregate and multi-unit commands normally continue
 with the next selected unit, summarize failures, and ultimately return nonzero.

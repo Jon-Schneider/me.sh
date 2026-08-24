@@ -134,6 +134,7 @@ function deploy_config {
 function deploy_managed_under {
 	local src dest tmp rc mode failed=0
 	while IFS=$'\t' read -r src dest; do
+		message "Composing ${src#$COMPOSE_REPO_ROOT/} -> $dest"
 		if ! mkdir -p "$(dirname "$dest")"; then
 			error "Could not create destination parent for $dest"
 			failed=1
@@ -172,7 +173,6 @@ function deploy_managed_under {
 			failed=1
 			continue
 		fi
-		message "Composed ${src#$COMPOSE_REPO_ROOT/} -> $dest"
 	done < <(managed_files_under "$1")
 	return "$failed"
 }
