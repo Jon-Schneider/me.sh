@@ -1,0 +1,5 @@
+symlinks:
+  - src: config
+    dest: $HOME/.config/ghostty/config
+  - src: themes/jon
+    dest: $HOME/.config/ghostty/themes/jon
