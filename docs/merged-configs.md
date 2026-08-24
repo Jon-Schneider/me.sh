@@ -1,6 +1,6 @@
 # Merged configs ("managed files")
 
-Most files in this repo are **symlinked** into place by `configure_*.sh` scripts: edit either side of the link and both sides change. That liveness is great for tweaking configs, but it cuts both ways — apps that rewrite their own config (herdr, Codex, work-machine system tools) spray machine-local state straight into your working tree, which is how the old git clean-filter hack was born.
+Most files in this repo are **symlinked** into place by a unit's `config.yml` or legacy `configure_*.sh`: edit either side of the link and both sides change. That liveness is great for tweaking configs, but it cuts both ways — apps that rewrite their own config (herdr, Codex, work-machine system tools) spray machine-local state straight into your working tree, which is how the old git clean-filter hack was born.
 
 Files marked **managed** use a different model: they are deployed as **materialized copies**, composed from a canonical repo base plus machine-local overlay fragments. App-written state lands only in the deployed copy and never reaches the repo; changes you *do* want to keep flow back through an explicit review step (`me up`).
 
@@ -24,7 +24,7 @@ configs/apps/agents/Claude/settings.json.d/*.json # machine-local fragments (git
 
 The marker lives *inside* the gitignored overlay dir, so it's the dir's single tracked file: it makes an otherwise-empty `.d/` directory committable, which is how a managed file with no fragments yet (e.g. `Codex/config.toml.d/dest`, managed purely to isolate app-written state) stays declared.
 
-Deployment scripts call `deploy_managed_under <config-dir>`, and `me diff` / `me up` discover rows the same way, so declaration and behavior can't drift apart. Currently managed:
+Manifest units deploy these markers automatically; legacy deployment scripts call `deploy_managed_under <config-dir>`. `me diff` / `me up` discover rows the same way, so declaration and behavior can't drift apart. Currently managed:
 
 | Repo base | Deploys to |
 |---|---|
@@ -86,7 +86,7 @@ Non-executable files with unknown extensions are silently skipped (so editor dro
 
 ```sh
 me diff agents          # preview drift for one config
-me diff                 # error: names required
+me diff                 # preview drift across every config
 me diff app agents git  # several configs, explicit scope
 me up agents            # interactive hunk-by-hunk review
 me absorb agents        # older name, same thing
@@ -111,7 +111,7 @@ Unlike symlinked files, managed files have no live link back to the repo: deploy
 ## Adding a new managed file
 
 1. Add a sibling `<file>.d/` directory containing a `dest` marker with the deploy path.
-2. Make sure the owning `configure_*.sh` deploys it — either its config directory already calls `deploy_managed_under`, or call `deploy_config <src> <dst>` (which materializes when fragments exist and otherwise symlinks; managed files under `deploy_managed_under` always materialize).
+2. If the owning unit has `config.yml`, nothing else is required: managed markers are discovered and deployed automatically. For a legacy unit, make sure its `configure_*.sh` calls `deploy_managed_under` (or use `deploy_config <src> <dst>` when that behavior is specifically wanted).
 3. Optionally add fragments to the `.d/` directory.
 4. `me <scope> <name>`.
 
@@ -140,6 +140,7 @@ Unlike symlinked files, managed files have no live link back to the repo: deploy
 | `lib/deep_merge.py` | Format parsing/emission (JSON native; YAML/TOML via `yq`) and the shared deep-merge semantics |
 | `lib/hunk_selector.py` | Fallback hunk picker for scripted/no-tty `me up` runs; interactive runs use native `git add -p` |
 | `run_drift` in `me` | Shared engine behind `me diff` (mode `show`: one combined diff) and `me up` / `absorb` (mode `absorb`: per-file review) |
+| `lib/manifests.sh` | Manifest validation/deployment plus automatic managed-marker handling |
 | `<file>.d/dest` markers | What is managed and where it deploys |
 
 Deploys replace an existing destination via temp file + move and **never write through an existing symlink** — the link is removed first, so a botched migration can't clobber your repo through the link.

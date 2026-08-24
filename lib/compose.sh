@@ -74,7 +74,8 @@ function merge_fragment {
 # Executable fragments act as transformers: content on stdin, rewritten content
 # on stdout.
 function compose_file {
-	local base="$1" out="$2" fmt="${base##*.}" frag tmp
+	local base="$1" out="$2" fmt frag tmp
+	fmt="${base##*.}"
 	case "$fmt" in json|yaml|yml|toml) ;; *) fmt="json" ;; esac
 	local -a fragments=()
 	while IFS= read -r frag; do
@@ -131,22 +132,47 @@ function deploy_config {
 # runtime state lands in the deployed copy instead of the repo. A broken
 # fragment aborts that file's deploy loudly instead of shipping an uncomposed base.
 function deploy_managed_under {
-	local src dest tmp rc
+	local src dest tmp rc mode failed=0
 	while IFS=$'\t' read -r src dest; do
-		mkdir -p "$(dirname "$dest")"
-		tmp="$(mktemp "${TMPDIR:-/tmp}/me-deploy.XXXXXX")"
+		if ! mkdir -p "$(dirname "$dest")"; then
+			error "Could not create destination parent for $dest"
+			failed=1
+			continue
+		fi
+		if ! tmp="$(mktemp "${TMPDIR:-/tmp}/me-deploy.XXXXXX")"; then
+			error "Could not create a temporary file for $src"
+			failed=1
+			continue
+		fi
 		rc=0
 		compose_file "$COMPOSE_REPO_ROOT/$src" "$tmp" || rc=$?
 		if (( rc == 2 )); then
-			cp "$COMPOSE_REPO_ROOT/$src" "$tmp"
+			if ! cp "$COMPOSE_REPO_ROOT/$src" "$tmp"; then
+				error "Could not copy managed base $src"
+				rm -f "$tmp"
+				failed=1
+				continue
+			fi
 		elif (( rc != 0 )); then
 			error "Compose failed for $src; destination left untouched"
 			rm -f "$tmp"
+			failed=1
 			continue
 		fi
-		rm -f "$dest"
-		mv "$tmp" "$dest"
-		chmod "$(stat -f '%Lp' "$COMPOSE_REPO_ROOT/$src")" "$dest"
+		if [[ -e "$dest" && -d "$dest" && ! -L "$dest" ]]; then
+			error "Refusing to replace directory destination: $dest"
+			rm -f "$tmp"
+			failed=1
+			continue
+		fi
+		mode="$(stat -f '%Lp' "$COMPOSE_REPO_ROOT/$src")"
+		if ! chmod "$mode" "$tmp" || ! rm -f "$dest" || ! mv "$tmp" "$dest"; then
+			error "Could not deploy $src to $dest"
+			rm -f "$tmp"
+			failed=1
+			continue
+		fi
 		message "Composed ${src#$COMPOSE_REPO_ROOT/} -> $dest"
 	done < <(managed_files_under "$1")
+	return "$failed"
 }

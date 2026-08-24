@@ -16,6 +16,8 @@
 #                               no names given)
 #   me up [app|macos] [<name>...] Pick local changes to pull back into the repo
 #                               (alias for the older name: absorb)
+#   me doctor                   Validate every declarative config and claim
+#   me plan [scope] [<name>...] Validate and print actions without deploying
 set -euo pipefail
 
 repo_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -23,6 +25,7 @@ cd "$repo_root" || exit 1
 
 source "lib/common.sh"
 source "lib/compose.sh"
+source "lib/manifests.sh"
 
 readonly APPS_SCOPE="apps"
 readonly MACOS_SCOPE="macos"
@@ -32,9 +35,17 @@ readonly ANY_SCOPE="any"
 
 # --- Discovery -------------------------------------------------------------
 
-# Print every configure script for a config scope ('apps' or 'macos'), sorted.
-function list_scripts {
-	find -E "configs/$1" -name 'configure_*.sh' | sort
+# Print executable config entries for a scope, in directory order. A config.yml
+# replaces every legacy configure script in its direct-child unit directory.
+function list_config_units {
+	local dir
+	while IFS= read -r dir; do
+		if [[ -f "$dir/config.yml" ]]; then
+			printf '%s\n' "$dir/config.yml"
+		else
+			find "$dir" -type f -name 'configure_*.sh' | LC_ALL=C sort
+		fi
+	done < <(find "configs/$1" -mindepth 1 -maxdepth 1 -type d | LC_ALL=C sort)
 }
 
 # Print bootstrap scripts in filename order. The two-digit prefix is the
@@ -68,28 +79,37 @@ function config_dir_name {
 	printf '%s' "$name"
 }
 
+function is_manifest_unit {
+	[[ "${1##*/}" == config.yml ]]
+}
+
 # Print every accepted config name for a scope, one per line, sorted.
-# Both directory names and script names are accepted by 'me'.
+# Legacy units accept directory and script aliases. Manifest units use only
+# their directory-derived canonical name.
 function list_names {
-	local script
+	local unit
 	{
-		while IFS= read -r script; do
-			printf '%s\n' "$(config_dir_name "$script")"
-			printf '%s\n' "$(script_name "$script")"
-		done < <(list_scripts "$1")
+		while IFS= read -r unit; do
+			printf '%s\n' "$(config_dir_name "$unit")"
+			if ! is_manifest_unit "$unit"; then
+				printf '%s\n' "$(script_name "$unit")"
+			fi
+		done < <(list_config_units "$1")
 	} | sort -fu
 }
 
 # Emit 'scope<TAB>name' lines for zsh completion (internal use only).
 function show_completion_names {
-	local scope dir script
+	local scope dir unit
 	{
 		for scope in app macos; do
 			if [[ "$scope" == macos ]]; then dir="$MACOS_SCOPE"; else dir="$APPS_SCOPE"; fi
-			while IFS= read -r script; do
-				printf '%s\t%s\n' "$scope" "$(config_dir_name "$script")"
-				printf '%s\t%s\n' "$scope" "$(script_name "$script")"
-			done < <(list_scripts "$dir")
+			while IFS= read -r unit; do
+				printf '%s\t%s\n' "$scope" "$(config_dir_name "$unit")"
+				if ! is_manifest_unit "$unit"; then
+					printf '%s\t%s\n' "$scope" "$(script_name "$unit")"
+				fi
+			done < <(list_config_units "$dir")
 		done
 		while IFS= read -r script; do
 			printf 'bootstrap\t%s\n' "$(bootstrap_script_name "$script")"
@@ -117,10 +137,9 @@ function add_selected {
 # Raw matches from the most recent collect_matches call.
 declare -a matches=()
 
-# Fill 'matches' with every script in a scope whose directory name or script
-# name equals NAME.
+# Fill 'matches' with every unit in a scope whose accepted name equals NAME.
 function collect_matches {
-	local scope="$1" name="$2" script
+	local scope="$1" name="$2" unit
 	matches=()
 	if [[ "$scope" == "$BOOTSTRAP_SCOPE" ]]; then
 		while IFS= read -r script; do
@@ -130,11 +149,11 @@ function collect_matches {
 		done < <(list_bootstrap_scripts)
 		return
 	fi
-	while IFS= read -r script; do
-		if [[ "$(config_dir_name "$script")" == "$name" || "$(script_name "$script")" == "$name" ]]; then
-			matches+=("$script")
+	while IFS= read -r unit; do
+		if [[ "$(config_dir_name "$unit")" == "$name" ]] || { ! is_manifest_unit "$unit" && [[ "$(script_name "$unit")" == "$name" ]]; }; then
+			matches+=("$unit")
 		fi
-	done < <(list_scripts "$scope")
+	done < <(list_config_units "$scope")
 }
 
 # Resolve one requested name against a concrete scope, config scopes, or all
@@ -219,25 +238,40 @@ function resolve_args {
 
 # --- Execution -------------------------------------------------------------
 
-declare -a failed_scripts=()
+declare -a failed_units=()
 
-# Run every script in 'selected', collecting failures.
+# Run every config unit in 'selected', collecting failures. The Homebrew unit
+# is fail-fast only when it is part of a macOS aggregate.
 function run_selected {
-	local script
+	local unit aggregate_scope="${1:-}"
 	if (( ${#selected[@]} == 0 )); then
 		return
 	fi
-	for script in "${selected[@]}"; do
-		message "Running ${script}..."
-		if ! bash "$script"; then
-			if [[ "$script" == bootstrap/* ]]; then
-				error "${script} failed; bootstrap stopped"
-				exit 1
-			else
-				error "${script} failed"
-				failed_scripts+=("$script")
+	for unit in "${selected[@]}"; do
+		message "Running ${unit}..."
+		if is_manifest_unit "$unit"; then
+			if run_manifest_unit "$repo_root/$unit"; then
+				continue
+			fi
+		else
+			if bash "$unit"; then
+				# The Homebrew unit runs in a child shell. Reload its environment in
+				# this process so a just-installed yq is visible to later units.
+				if [[ "$aggregate_scope" == "$MACOS_SCOPE" && "$unit" == configs/macos/00-homebrew/configure_homebrew.sh ]]; then
+					load_homebrew || {
+						error "Homebrew was reconciled but could not be loaded into PATH"
+						exit 1
+					}
+				fi
+				continue
 			fi
 		fi
+		if [[ "$aggregate_scope" == "$MACOS_SCOPE" && "$unit" == configs/macos/00-homebrew/configure_homebrew.sh ]]; then
+			error "${unit} failed; configuration prerequisites stopped"
+			exit 1
+		fi
+		error "${unit} failed"
+		failed_units+=("$unit")
 	done
 }
 
@@ -264,35 +298,35 @@ function select_bootstrap_scripts {
 
 # Run every configure script in a scope, collecting failures.
 function run_scope {
-	local scope="$1" script
-	select_scripts_in_scope "$scope"
-	run_selected
+	local scope="$1"
+	select_units_in_scope "$scope"
+	run_selected "$scope"
 }
 
-# Fill 'selected' with every script in a scope.
-function select_scripts_in_scope {
-	local script
+# Fill 'selected' with every unit in a scope.
+function select_units_in_scope {
+	local unit
 	selected=()
-	while IFS= read -r script; do
-		selected+=("$script")
-	done < <(list_scripts "$1")
+	while IFS= read -r unit; do
+		selected+=("$unit")
+	done < <(list_config_units "$1")
 }
 
 # Fill 'selected' with every script in one scope, or both when no scope is given.
 function select_drift_scripts {
 	if [[ -n "$1" ]]; then
-		select_scripts_in_scope "$1"
+		select_units_in_scope "$1"
 	else
-		select_all_config_scripts
+		select_all_config_units
 	fi
 }
 
-# Fill 'selected' with every script in both scopes.
-function select_all_config_scripts {
-	local script
+# Fill 'selected' with every config unit in macOS-then-app execution order.
+function select_all_config_units {
+	local unit
 	selected=()
-	while IFS= read -r script; do selected+=("$script"); done < <(list_scripts "$APPS_SCOPE")
-	while IFS= read -r script; do selected+=("$script"); done < <(list_scripts "$MACOS_SCOPE")
+	while IFS= read -r unit; do selected+=("$unit"); done < <(list_config_units "$MACOS_SCOPE")
+	while IFS= read -r unit; do selected+=("$unit"); done < <(list_config_units "$APPS_SCOPE")
 }
 
 # --- Drift: diff / up (absorb) ----------------------------------------------
@@ -302,7 +336,7 @@ function select_all_config_scripts {
 # the whole sweep; 'absorb' reviews each drifted file separately and lets the
 # user keep chosen hunks in the repo base, leaving the rest local.
 function run_drift {
-	local mode="$1" script src dst tmp rc i applied=0 files=0 failed_apply=0
+	local mode="$1" unit src dst tmp rc i applied=0 files=0 failed_apply=0
 
 	if (( ${#selected[@]} == 0 )); then
 		error "needs at least one config name, e.g. 'me $mode agents'"
@@ -313,7 +347,7 @@ function run_drift {
 
 	# Phase 1: compose every managed file and collect the drifted ones.
 	local -a drift_src=() drift_dst=() drift_base=()
-	for script in "${selected[@]}"; do
+	for unit in "${selected[@]}"; do
 		while IFS=$'\t' read -r src dst; do
 			[[ -e "$dst" ]] || {
 				error "Not deployed yet, skipping: $src -> $dst"
@@ -336,7 +370,7 @@ function run_drift {
 			drift_src+=("$src")
 			drift_dst+=("$dst")
 			drift_base+=("$composed")
-		done < <(managed_files_under "$(dirname "$script")")
+		done < <(managed_files_under "$(dirname "$unit")")
 	done
 
 	if (( ${#drift_src[@]} == 0 )); then
@@ -416,15 +450,119 @@ function run_drift {
 
 # Summarize failures and exit with an appropriate status.
 function finish {
-	if (( ${#failed_scripts[@]} > 0 )); then
-		error "${#failed_scripts[@]} script(s) failed:"
-		local failed_script
-		for failed_script in "${failed_scripts[@]}"; do
-			error "  ${failed_script}"
+	if (( ${#failed_units[@]} > 0 )); then
+		error "${#failed_units[@]} unit(s) failed:"
+		local failed_unit
+		for failed_unit in "${failed_units[@]}"; do
+			error "  ${failed_unit}"
 		done
 		exit 1
 	fi
 	exit 0
+}
+
+# --- Validation & dry run -------------------------------------------------
+
+function run_doctor {
+	local scope dir base canonical manifest src dest marker marker_dest duplicate duplicate_scope
+	local failed=0 claims names
+	claims="$(mktemp "${TMPDIR:-/tmp}/me-claims.XXXXXX")"
+	names="$(mktemp "${TMPDIR:-/tmp}/me-names.XXXXXX")"
+
+	if ! require_yq; then
+		failed=1
+	fi
+
+	for scope in "$APPS_SCOPE" "$MACOS_SCOPE"; do
+		while IFS= read -r dir; do
+			base="${dir##*/}"
+			if [[ ! -f "$dir/config.yml" ]] && ! find "$dir" -type f -name 'configure_*.sh' | grep -q .; then
+				if [[ -e "$dir/post.sh" ]]; then
+					error "$dir/post.sh: post.sh belongs only to a manifest unit"
+					failed=1
+				fi
+				continue
+			fi
+			case "$base" in
+				[0-9]* )
+					if [[ "$base" != [0-9][0-9]-?* ]]; then
+						error "$dir: numeric ordering prefixes must be two digits followed by '-'"
+						failed=1
+					fi
+					;;
+			esac
+			canonical="$base"
+			[[ "$canonical" == [0-9][0-9]-* ]] && canonical="${canonical#??-}"
+			printf '%s\t%s\t%s\n' "$scope" "$canonical" "$dir" >> "$names"
+
+			if [[ -f "$dir/config.yml" ]]; then
+				manifest="$dir/config.yml"
+				if ! validate_manifest_unit "$repo_root/$dir" no no; then
+					failed=1
+				fi
+				if validate_manifest_schema "$manifest" &>/dev/null; then
+					while IFS=$'\t' read -r src dest; do
+						if validate_home_dest "$dest" "$manifest ($src)" &>/dev/null; then
+							printf '%s\t%s (%s)\n' "$(expand_dest "$dest")" "$manifest" "$src" >> "$claims"
+						fi
+					done < <(manifest_symlink_rows "$manifest")
+				fi
+			elif [[ -e "$dir/post.sh" ]]; then
+				error "$dir/post.sh: legacy units may not contain post.sh"
+				failed=1
+			fi
+		done < <(find "configs/$scope" -mindepth 1 -maxdepth 1 -type d | LC_ALL=C sort)
+	done
+
+	while IFS= read -r -d '' dir; do
+		if [[ ! -f "$dir/dest" ]]; then
+			error "$dir: fragment directory is missing its dest marker"
+			failed=1
+		fi
+	done < <(find configs -type d -name '*.d' -print0 | LC_ALL=C sort -z)
+	while IFS= read -r -d '' marker; do
+		if validate_managed_marker "$repo_root/$marker"; then
+			IFS= read -r marker_dest < "$marker"
+			printf '%s\t%s\n' "$(expand_dest "$marker_dest")" "$marker" >> "$claims"
+		else
+			failed=1
+		fi
+	done < <(find configs -type f -path '*.d/dest' -print0 | LC_ALL=C sort -z)
+
+	while IFS=$'\t' read -r duplicate_scope duplicate; do
+		[[ -n "$duplicate" ]] || continue
+		error "Duplicate config unit name '$duplicate' in configs/$duplicate_scope:"
+		awk -F '\t' -v scope="$duplicate_scope" -v key="$duplicate" '$1 == scope && $2 == key { print "  " $3 }' "$names" >&2
+		failed=1
+	done < <(awk -F '\t' '{ print $1 "\t" $2 }' "$names" | sort | uniq -d)
+
+	while IFS= read -r duplicate; do
+		[[ -n "$duplicate" ]] || continue
+		error "Destination is claimed more than once: $duplicate"
+		awk -F '\t' -v key="$duplicate" '$1 == key { print "  " $2 }' "$claims" >&2
+		failed=1
+	done < <(cut -f1 "$claims" | sort | uniq -d)
+
+	rm -f "$claims" "$names"
+	if (( failed )); then
+		return 1
+	fi
+	message "All config manifests and managed-file claims are valid."
+}
+
+function run_plan_selected {
+	local unit
+	for unit in "${selected[@]}"; do
+		if is_manifest_unit "$unit"; then
+			message "Planning ${unit}..."
+			if ! plan_manifest_unit "$repo_root/$unit"; then
+				error "${unit} failed validation"
+				failed_units+=("$unit")
+			fi
+		else
+			printf 'run %s (legacy; actions are opaque)\n' "$unit"
+		fi
+	done
 }
 
 # --- Help & listing --------------------------------------------------------
@@ -468,12 +606,14 @@ Usage:
   me macos | sys | system     Sync all macOS configs
   me [app|macos] <name>...    Sync only the named configs
   me <name>...                Resolve names across configs and bootstrap
+  me doctor                   Validate manifests and destination claims
+  me plan [scope] [<name>...] Show config actions without deploying
 
-A name matches either a config directory (e.g. 'karabiner', 'bin') or a
-configure script (e.g. 'karabiner-elements', 'user_bin'). A directory match
-runs every configure script inside it. With no scope, names are looked up in
-app and macOS configs plus bootstrap units; collisions require an explicit
-scope. Bootstrap membership and order come from bootstrap/NN-name.sh.
+A manifest unit is named by its directory (e.g. 'finicky'). A legacy name
+matches either its config directory (e.g. 'karabiner', 'bin') or a configure
+script (e.g. 'karabiner-elements', 'user_bin'). With no scope, names are
+looked up in app and macOS configs plus bootstrap units; collisions require an
+explicit scope. Bootstrap membership and order come from bootstrap/NN-name.sh.
 
 Examples:
   me app karabiner-elements   Sync one app config
@@ -487,6 +627,9 @@ Examples:
   me diff                     Check every config for drift in one combined diff
   me diff agents              Preview machine-local drift in agent configs
   me up                       Review drift everywhere, keep what you want
+  me doctor                   Validate the complete config registry
+  me plan finicky             Validate and preview one unit
+  me plan app                 Preview every app unit
 
 Config failures never stop the run; they are summarized at the end and reported
 with a non-zero exit code. Bootstrap is an ordered dependency chain and stops
@@ -500,6 +643,10 @@ written by apps lands only in the deployed copy. 'me diff' shows that drift;
 'me up' reviews it hunk by hunk and pulls what you approve back into the repo
 base. Both accept an optional scope and names and cover every config when
 none are given. Requires yq for YAML/TOML fragments: brew install yq.
+
+Config directories may replace their configure scripts with config.yml. Its
+'symlinks' rows are deployed safely, sibling managed files are auto-discovered,
+and an executable post.sh runs last. Use 'me plan' to preview these operations.
 
 Shell completion (zsh) lives in lib/completion/_me and is installed into
 ~/.zsh/completions by the shell config.
@@ -526,6 +673,37 @@ case "$1" in
 		# Internal: consumed by lib/completion/_me.
 		show_completion_names
 		exit 0
+		;;
+	doctor)
+		if (( $# > 1 )); then
+			error "'doctor' takes no additional arguments"
+			exit 1
+		fi
+		run_doctor
+		exit $?
+		;;
+	plan)
+		shift
+		scope=""
+		if (( $# > 0 )); then
+			case "$1" in
+				all) scope=all; shift ;;
+				app|apps) scope="$APPS_SCOPE"; shift ;;
+				mac|macos|sys|system) scope="$MACOS_SCOPE"; shift ;;
+			esac
+		fi
+		if [[ "$scope" == all && $# -gt 0 ]]; then
+			error "'me plan all' takes no config names"
+			exit 1
+		elif (( $# > 0 )); then
+			resolve_args "${scope:-$CONFIG_SCOPE}" "$@"
+		elif [[ "$scope" == "$APPS_SCOPE" || "$scope" == "$MACOS_SCOPE" ]]; then
+			select_units_in_scope "$scope"
+		else
+			select_all_config_units
+		fi
+		run_plan_selected
+		finish
 		;;
 	bootstrap)
 		shift

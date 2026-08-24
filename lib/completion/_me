@@ -33,6 +33,8 @@ _me() {
 		'system:full macOS sync'
 		'absorb:review managed-file drift, keep chosen hunks in the repo'
 		'diff:view machine-local drift in managed files'
+		'doctor:validate config manifests and destination claims'
+		'plan:preview config actions without deploying'
 		'up:pick local changes to absorb back into the repo'
 	)
 
@@ -62,7 +64,7 @@ _me() {
 					;;
 				all)
 					;; # no further arguments
-				diff|up|absorb)
+				diff|up|absorb|plan)
 					(( ${#app_names[@]} )) && _describe -t app-names 'app config' app_names
 					(( ${#macos_names[@]} )) && _describe -t macos-names 'macOS config' macos_names
 					;;
