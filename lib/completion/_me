@@ -1,7 +1,7 @@
 #compdef me
 
 # Zsh completion for the me.sh 'me' runner.
-# Installed into ~/.zsh/completions by configs/apps/shell/configure_shell.sh.
+# Installed into ~/.zsh/completions by configs/apps/shell/config.yml.
 
 _me() {
 	local -a app_names macos_names bootstrap_names scopes

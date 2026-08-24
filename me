@@ -657,15 +657,15 @@ Usage:
   me doctor                   Validate manifests and destination claims
   me plan [scope] [<name>...] Show config actions without deploying
 
-A manifest unit is named by its directory (e.g. 'finicky'). A legacy name
-matches either its config directory (e.g. 'karabiner', 'bin') or a configure
-script (e.g. 'karabiner-elements', 'user_bin'). With no scope, names are
-looked up in app and macOS configs plus bootstrap units; collisions require an
-explicit scope. Bootstrap membership and order come from bootstrap/NN-name.sh.
+A manifest unit is named by its directory (e.g. 'finicky' or 'karabiner'). A
+legacy name matches either its config directory or its configure script. With
+no scope, names are looked up in app and macOS configs plus bootstrap units;
+collisions require an explicit scope. Bootstrap membership and order come from
+bootstrap/NN-name.sh.
 
 Examples:
-  me app karabiner-elements   Sync one app config
-  me karabiner-elements       Same: unambiguous, found in app configs
+  me app karabiner            Sync one app config
+  me karabiner                Same: unambiguous, found in app configs
   me bin                      Same: 'me system bin'
   me bootstrap               Prepare a fresh Mac
   me bootstrap homebrew-install

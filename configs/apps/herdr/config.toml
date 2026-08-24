@@ -1,5 +1,5 @@
 # Managed in ~/Developer/jsc/me.sh (configs/apps/herdr). Symlinked into
-# ~/.config/herdr/config.toml by configs/apps/herdr/configure_herdr.sh.
+# ~/.config/herdr/config.toml by configs/apps/herdr/config.yml.
 #
 # Split/close even-layout behavior is provided by the me.even-panes herdr
 # plugin (plugin/ in this directory): it evens out panes tmux-style whenever

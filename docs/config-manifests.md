@@ -1,6 +1,6 @@
 # Declarative Config Manifests
 
-Status: implemented, with incremental per-unit migration.
+Status: implemented; repository file-deployment units are migrated.
 
 ## Problem
 
@@ -56,13 +56,13 @@ filenames are an implementation detail and no longer create public aliases.
 For example, a converted `configs/apps/vscode/` is invoked as `me vscode`; the
 incidental `me vscode_extensions` alias disappears.
 
-Migration must account for directories that currently expose multiple useful
-names:
+The repository migration accounted for directories that exposed multiple
+useful names:
 
-- Move `configs/apps/shell/configure_sudoers.sh` to its own macOS unit before
-  converting `shell`, preserving `me sudoers` and correcting its scope.
-- Keep VS Code settings and extension reconciliation in the single `vscode`
-  unit; intentionally retire `me vscode_extensions`.
+- Sudoers setup moved out of `shell` into its own macOS unit, preserving
+  `me sudoers` and correcting its scope.
+- VS Code settings and extension reconciliation became the single `vscode`
+  unit, intentionally retiring `me vscode_extensions`.
 
 No `name:` or `aliases:` fields are added to YAML. Identity remains derived
 from path rather than duplicated in metadata.
@@ -262,12 +262,11 @@ Migration is per directory and reversible:
 4. Run `me doctor`, `me plan <unit>`, the targeted unit, and relevant drift
    checks.
 
-The pilot implementation is `finicky`, which is one symlink and has no
-bespoke behavior.
-Good follow-ups include `ghostty`, `micro`, `htop`, `tmux`, and `bin`.
-Complex units such as `agents`, `bbedit`, `login`, and the general macOS
-settings unit should wait until the engine and migration conventions have been
-proven on simple cases.
+All units that deploy repository-owned files now use manifests. Purely
+imperative legacy units remain for Homebrew, Ruby, npm globals, Finder, and
+Night Shift. Units such as Karabiner and the general macOS settings unit use an
+empty manifest plus `post.sh` because their file changes are generated or
+privileged rather than declarative repo-file copies.
 
 ## Deliberate non-goals
 

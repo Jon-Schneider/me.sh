@@ -24,7 +24,7 @@ Most config files are symlinked into place, so editing either side edits both. M
 ### Updates
 
 - Run ```me``` with no arguments to list every config and bootstrap unit.
-- Run ```me app karabiner-elements``` to sync one app config, ```me app``` / ```me macos``` to sync a whole tree, or ```me all``` for everything.
+- Run ```me app karabiner``` to sync one app config, ```me app``` / ```me macos``` to sync a whole tree, or ```me all``` for everything.
 - Run ```me bootstrap``` for all fresh-machine steps or, for example, ```me bootstrap homebrew-install``` for one. Bare names work when unambiguous.
 - Run ```me install``` to (re)copy a ```~/bin/me``` shim that execs this checkout, so ```me``` works from any directory.
 - Edit the Brewfile and run ```me homebrew``` for packages only, or let the next ```me all``` reconcile them automatically. Zsh tab-completion includes every scope and unit.
