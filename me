@@ -16,6 +16,7 @@
 #                               no names given)
 #   me up [app|macos] [<name>...] Pick local changes to pull back into the repo
 #                               (alias for the older name: absorb)
+#   me install                  Copy a 'me' shim into ~/bin so this runner is on PATH
 #   me doctor                   Validate every declarative config and claim
 #   me plan [scope] [<name>...] Validate and print actions without deploying
 set -euo pipefail
@@ -579,6 +580,23 @@ function run_doctor {
 	message "All config manifests and managed-file claims are valid."
 }
 
+# Write a ~/bin/me shim that execs this checkout's runner with the absolute path
+# baked in at install time, so the command survives repo moves without re-editing.
+function install_me_shim {
+	local shim_dir="$HOME/bin" shim="$HOME/bin/me"
+	mkdir -p "$shim_dir"
+	{
+		printf '#!/bin/bash\n'
+		printf '# Installed by me.sh; refresh with "me install".\n'
+		printf 'exec %q "$@"\n' "$repo_root/me"
+	} > "$shim"
+	chmod +x "$shim"
+	message "Installed $shim -> $repo_root/me"
+	if [[ ":$PATH:" != *":$shim_dir:"* ]]; then
+		error "Note: $shim_dir is not on your PATH; it is added by the shell config sync"
+	fi
+}
+
 function run_plan_selected {
 	local unit
 	for unit in "${selected[@]}"; do
@@ -635,6 +653,7 @@ Usage:
   me macos | sys | system     Sync all macOS configs
   me [app|macos] <name>...    Sync only the named configs
   me <name>...                Resolve names across configs and bootstrap
+  me install                  Copy a 'me' shim into ~/bin (bakes this repo's path)
   me doctor                   Validate manifests and destination claims
   me plan [scope] [<name>...] Show config actions without deploying
 
@@ -702,6 +721,13 @@ case "$1" in
 		# Internal: consumed by lib/completion/_me.
 		show_completion_names
 		exit 0
+		;;
+	install)
+		if (( $# > 1 )); then
+			error "'install' takes no additional arguments"
+			exit 1
+		fi
+		install_me_shim
 		;;
 	doctor)
 		if (( $# > 1 )); then
