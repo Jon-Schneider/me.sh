@@ -15,8 +15,7 @@ There are several scripts in the project root for syncing app and system config.
 ### Updates
 
 - Run ```sync``` for targeted syncing: run it with no arguments to list config names, ```sync app karabiner-elements``` to sync one config, ```sync app``` / ```sync sys``` to sync a whole tree, or ```sync all``` for everything. Zsh tab-completion is installed by the shell config.
-- Run ```sync_app_config.sh``` (alias ```sac```) when there are changes to your installed apps.
+- The shell aliases ```sac``` and ```ssc``` are shorthand for ```sync app``` and ```sync sys```.
 - Run ```sync_packages.sh``` when there are new apps to be installed.
-- Run ```sync_sys_config.sh``` when there are changes to the system config.
 
-I find ```sync_app_config.sh``` to be the one that I need to run most frequently because I'm constantly optimizing my app configurations, especially Karabiner-Elements.
+I find ```sync app``` to be the one that I need to run most frequently because I'm constantly optimizing my app configurations, especially Karabiner-Elements.

@@ -77,5 +77,4 @@ ln -sfn ~/Developer/jsc ~/repos
 
 # Sync scripts exit non-zero if any configure script failed; don't abort setup over it,
 # the errors have already been printed.
-"${SCRIPT_DIR}/sync_app_config.sh" || error "sync_app_config.sh reported failures"
-"${SCRIPT_DIR}/sync_sys_config.sh" || error "sync_sys_config.sh reported failures"
+"${SCRIPT_DIR}/sync" all || error "sync reported failures"
