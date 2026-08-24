@@ -214,18 +214,12 @@ load_non_git_aliases() {
     alias pw="pwgen -ysB1 20 | pbcopy"
     alias repos="cd ~/Developer/jsc"
     alias rz="source ~/.zshrc && source ~/.zshrc_local && source ~/.zshrc_ms" # Reload zsh
-    alias sac="pushd -q ~/Developer/jsc/me.sh && ./sync app && popd -q"
-    alias sacl="pushd -q ~/Developer/jsc/me.sh && gl && ./sync app && popd -q"
-    alias sasc="sac && ssc"
-    alias sascl="pushd -q ~/Developer/jsc/me.sh && sac && ssc && popd -q"
     alias scan="scanned"
     scanned() { convert -density 175 "$1" +noise Gaussian -rotate 0.5 -depth 2 ~/Tmp/SCAN.pdf }
     scannedg() { convert -density 175 "$1" -colorspace gray +noise Gaussian -rotate 0.5 -depth 2 ~/Tmp/SCAN.pdf }
     alias sims="cd ~/Library/Developer/CoreSimulator/Devices"
     alias slq="swiftlint --quiet"
     alias slqa="slq --autocorrect"
-    alias ssc="pushd -q ~/Developer/jsc/me.sh && ./sync sys && popd -q"
-    alias sscl="pushd -q ~/Developer/jsc/me.sh && gl && ./sync sys && popd -q"
     alias src="cd ~/Developer"
     alias spd="speedtest"
     alias tc="tokencount"

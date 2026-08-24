@@ -72,7 +72,7 @@ ln -sfn "$current_dir/bin/sync-opencode-omlx-models" "$HOME/bin/sync-opencode-om
 # through herdr rather than tracking copies here. This has to run after the
 # deployments above: installing edits the agent configs in place — for managed
 # files those edits land in the deployed copy and stay out of the repo; review
-# them later with 'sync absorb'.
+# them later with 'me absorb'.
 if command -v herdr > /dev/null; then
   echo "Configuring Herdr integrations..."
   for agent in pi claude codex opencode; do

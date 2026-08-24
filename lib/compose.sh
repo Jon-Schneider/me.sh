@@ -4,7 +4,7 @@
 # directory contains a 'dest' marker naming where it deploys. Managed files are
 # materialized copies composed from the repo base plus machine-local overlay
 # fragments, instead of symlinked. App-written runtime state lands in the
-# deployed copy and never reaches the repo; 'sync up' reviews it for keepers.
+# deployed copy and never reaches the repo; 'me up' reviews it for keepers.
 
 COMPOSE_REPO_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
 source "${COMPOSE_REPO_ROOT}/lib/common.sh"

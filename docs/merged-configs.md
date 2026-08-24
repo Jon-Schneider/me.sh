@@ -2,7 +2,7 @@
 
 Most files in this repo are **symlinked** into place by `configure_*.sh` scripts: edit either side of the link and both sides change. That liveness is great for tweaking configs, but it cuts both ways — apps that rewrite their own config (herdr, Codex, work-machine system tools) spray machine-local state straight into your working tree, which is how the old git clean-filter hack was born.
 
-Files marked **managed** use a different model: they are deployed as **materialized copies**, composed from a canonical repo base plus machine-local overlay fragments. App-written state lands only in the deployed copy and never reaches the repo; changes you *do* want to keep flow back through an explicit review step (`sync up`).
+Files marked **managed** use a different model: they are deployed as **materialized copies**, composed from a canonical repo base plus machine-local overlay fragments. App-written state lands only in the deployed copy and never reaches the repo; changes you *do* want to keep flow back through an explicit review step (`me up`).
 
 ```
 repo base                    deployed copy (real file)
@@ -24,7 +24,7 @@ configs/apps/agents/Claude/settings.json.d/*.json # machine-local fragments (git
 
 The marker lives *inside* the gitignored overlay dir, so it's the dir's single tracked file: it makes an otherwise-empty `.d/` directory committable, which is how a managed file with no fragments yet (e.g. `Codex/config.toml.d/dest`, managed purely to isolate app-written state) stays declared.
 
-Deployment scripts call `deploy_managed_under <config-dir>`, and `sync diff` / `sync up` discover rows the same way, so declaration and behavior can't drift apart. Currently managed:
+Deployment scripts call `deploy_managed_under <config-dir>`, and `me diff` / `me up` discover rows the same way, so declaration and behavior can't drift apart. Currently managed:
 
 | Repo base | Deploys to |
 |---|---|
@@ -80,40 +80,40 @@ python3 -c 'import json,sys; d=json.load(sys.stdin); d.setdefault("env",{})["MY_
 
 Non-executable files with unknown extensions are silently skipped (so editor droppings and `.DS_Store` don't explode a deploy).
 
-**Composition caveats:** the *composed output* is re-emitted from parsed data, so comments in a YAML/TOML base are dropped from the deployed copy, TOML datetimes may come back as strings, and key order follows the base document. Repo bases are never rewritten by composition — only `sync up` (via your explicit approval) touches them.
+**Composition caveats:** the *composed output* is re-emitted from parsed data, so comments in a YAML/TOML base are dropped from the deployed copy, TOML datetimes may come back as strings, and key order follows the base document. Repo bases are never rewritten by composition — only `me up` (via your explicit approval) touches them.
 
 ## Daily usage
 
 ```sh
-sync diff agents          # preview drift for one config
-sync diff                 # error: names required
-sync diff app agents git  # several configs, explicit scope
-sync up agents            # interactive hunk-by-hunk review
-sync absorb agents        # older name, same thing
+me diff agents          # preview drift for one config
+me diff                 # error: names required
+me diff app agents git  # several configs, explicit scope
+me up agents            # interactive hunk-by-hunk review
+me absorb agents        # older name, same thing
 ```
 
 - **Drift** is everything the deployed copy contains beyond a fresh composition: app-written runtime state (herdr registrations, Codex `[projects]` trust), formatting churn from tools that rewrite configs, *and* any edits you made to the live file directly.
-- `sync diff` prints unified diffs (`a/` = repo side, `b/` = live side). Read-only.
-- `sync up` shows each hunk and prompts: `[y]es`, `[n]o`, `[a]ll remaining`, `[q]uit`. Accepted hunks are applied to the **repo base** with `git apply`; declined hunks stay in the deployed copy only. For scripted runs set `ABSORB_ANSWERS="y n q"` — answers are consumed in order but **restart for each managed file**, since each file spawns a fresh picker.
-- After absorbing, re-run your normal sync (`sync app agents`) to recompose deployed copies cleanly.
+- `me diff` prints unified diffs (`a/` = repo side, `b/` = live side). Read-only.
+- `me up` shows each hunk and prompts: `[y]es`, `[n]o`, `[a]ll remaining`, `[q]uit`. Accepted hunks are applied to the **repo base** with `git apply`; declined hunks stay in the deployed copy only. For scripted runs set `ABSORB_ANSWERS="y n q"` — answers are consumed in order but **restart for each managed file**, since each file spawns a fresh picker.
+- After absorbing, re-run your normal sync (`me app agents`) to recompose deployed copies cleanly.
 - If a hunk won't apply (its context overlaps fragment-added regions), nothing is lost: the diff is kept in a `/tmp/me-drift.*` directory and its path is printed — resolve by editing the base or fragment by hand.
 
 ## Editing workflows
 
 | You change… | Then… | Effect |
 |---|---|---|
-| Repo base or a committed file elsewhere | `sync app <name>` | Recomposed into the deployed copy |
-| An overlay fragment | `sync app <name>` | Same — fragments compose on every deploy |
-| The deployed (live) file | `sync diff` to see it, `sync up <name>` to keep some/all of it | Keeper hunks land in the repo base |
+| Repo base or a committed file elsewhere | `me app <name>` | Recomposed into the deployed copy |
+| An overlay fragment | `me app <name>` | Same — fragments compose on every deploy |
+| The deployed (live) file | `me diff` to see it, `me up <name>` to keep some/all of it | Keeper hunks land in the repo base |
 
-Unlike symlinked files, managed files have no live link back to the repo: deploying overwrites the copy with a fresh composition. That's the point — it's also what keeps junk out. Nothing is silently destroyed that `sync diff` wouldn't have shown you first, though; make `diff` a habit before `up`.
+Unlike symlinked files, managed files have no live link back to the repo: deploying overwrites the copy with a fresh composition. That's the point — it's also what keeps junk out. Nothing is silently destroyed that `me diff` wouldn't have shown you first, though; make `diff` a habit before `up`.
 
 ## Adding a new managed file
 
 1. Add a sibling `<file>.d/` directory containing a `dest` marker with the deploy path.
 2. Make sure the owning `configure_*.sh` deploys it — either its config directory already calls `deploy_managed_under`, or call `deploy_config <src> <dst>` (which materializes when fragments exist and otherwise symlinks; managed files under `deploy_managed_under` always materialize).
 3. Optionally add fragments to the `.d/` directory.
-4. `sync <scope> <name>`.
+4. `me <scope> <name>`.
 
 **One-time cost when converting a formerly-symlinked file:** the fresh composition starts from the clean repo base, so runtime state the app had written into the old link target disappears from the live copy (Codex re-prompts project trust once; herdr registrations return on the next `configure` run because it reinstalls integrations). Back up the live file first if in doubt.
 
@@ -138,8 +138,8 @@ Unlike symlinked files, managed files have no live link back to the repo: deploy
 |---|---|
 | `lib/compose.sh` | Marker discovery (`managed_files_under`), `$HOME` expansion, overlay discovery, merge dispatch + transformer execution, `deploy_config` / `deploy_managed_under` |
 | `lib/deep_merge.py` | Format parsing/emission (JSON native; YAML/TOML via `yq`) and the shared deep-merge semantics |
-| `lib/hunk_selector.py` | Interactive hunk picker used by `sync up` (tty prompts; `ABSORB_ANSWERS` for scripting) |
-| `run_drift` in `sync` | Shared engine behind `sync diff` (mode `show`) and `sync up` / `absorb` (mode `absorb`) |
+| `lib/hunk_selector.py` | Interactive hunk picker used by `me up` (tty prompts; `ABSORB_ANSWERS` for scripting) |
+| `run_drift` in `me` | Shared engine behind `me diff` (mode `show`) and `me up` / `absorb` (mode `absorb`) |
 | `<file>.d/dest` markers | What is managed and where it deploys |
 
 Deploys replace an existing destination via temp file + move and **never write through an existing symlink** — the link is removed first, so a botched migration can't clobber your repo through the link.

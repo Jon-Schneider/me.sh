@@ -75,6 +75,6 @@ mkdir -p ~/Developer/jsc
 ln -sfn ~/Developer/jsc ~/repo
 ln -sfn ~/Developer/jsc ~/repos
 
-# Sync scripts exit non-zero if any configure script failed; don't abort setup over it,
+# 'me' exits non-zero if any configure script failed; don't abort setup over it,
 # the errors have already been printed.
-"${SCRIPT_DIR}/sync" all || error "sync reported failures"
+"${SCRIPT_DIR}/me" all || error "me reported failures"

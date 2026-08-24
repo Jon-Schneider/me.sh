@@ -1,17 +1,17 @@
-#compdef sync
+#compdef me
 
-# Zsh completion for the me.sh 'sync' runner.
+# Zsh completion for the me.sh 'me' runner.
 # Installed into ~/.zsh/completions by configs/apps/shell/configure_shell.sh.
 
-_sync() {
+_me() {
 	local -a app_names sys_names scopes
-	local scope name sync_script line
+	local scope name runner line
 
-	# Locate the sync script to ask for valid names. Falls back to the
+	# Locate the me runner to ask for valid names. Falls back to the
 	# canonical checkout location when the repo root is not on PATH.
-	sync_script="$(whence -p sync 2>/dev/null)"
-	if [[ -z "$sync_script" ]]; then
-		sync_script="$HOME/Developer/jsc/me.sh/sync"
+	runner="$(whence -p me 2>/dev/null)"
+	if [[ -z "$runner" ]]; then
+		runner="$HOME/Developer/jsc/me.sh/me"
 	fi
 
 	while IFS=$'\t' read -r scope name; do
@@ -19,7 +19,7 @@ _sync() {
 			app) app_names+=("$name") ;;
 			sys) sys_names+=("$name") ;;
 		esac
-	done < <("$sync_script" --completion-names 2>/dev/null)
+	done < <("$runner" --completion-names 2>/dev/null)
 
 	scopes=(
 		'all:everything (app configs, system configs)'
@@ -65,4 +65,4 @@ _sync() {
 	return 0
 }
 
-_sync "$@"
+_me "$@"

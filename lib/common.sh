@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Shared helpers for the me.sh setup and sync scripts.
+# Shared helpers for the me.sh setup and sync commands.
 
 # Print a green status message. Uses %s so messages containing '%' or '\' are printed literally.
 function message {

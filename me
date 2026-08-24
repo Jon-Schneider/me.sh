@@ -2,15 +2,15 @@
 # Convenience runner for syncing all or part of the me.sh configuration.
 #
 # Usage:
-#   sync                        List available config names
-#   sync --help                 Show detailed help
-#   sync all                    Sync everything (app + system configs)
-#   sync app | apps             Full app sync
-#   sync sys | system           Full system sync
-#   sync [app|sys] <name>...    Sync only the named configs
-#   sync diff [app|sys] <name>...  Show drift between live managed configs and repo
-#   sync up [app|sys] <name>...    Pick local changes to pull back into the repo
-#                                  (alias for the older name: absorb)
+#   me                          List available config names
+#   me --help                   Show detailed help
+#   me all                      Sync everything (app + system configs)
+#   me app | apps               Full app sync
+#   me sys | system             Full system sync
+#   me [app|sys] <name>...      Sync only the named configs
+#   me diff [app|sys] <name>... Show drift between live managed configs and repo
+#   me up [app|sys] <name>...   Pick local changes to pull back into the repo
+#                               (alias for the older name: absorb)
 set -euo pipefail
 
 repo_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -37,7 +37,7 @@ function script_name {
 }
 
 # Print every accepted config name for a scope, one per line, sorted.
-# Both directory names and script names are accepted by 'sync'.
+# Both directory names and script names are accepted by 'me'.
 function list_names {
 	local script
 	{
@@ -126,7 +126,7 @@ function resolve_name {
 		for m in "${app_matches[@]}" "${matches[@]}"; do
 			error "  ${m}"
 		done
-		error "Re-run with an explicit scope: 'sync app ${name}' or 'sync sys ${name}'"
+		error "Re-run with an explicit scope: 'me app ${name}' or 'me sys ${name}'"
 		exit 1
 	fi
 
@@ -191,7 +191,7 @@ function run_drift {
 	local mode="$1" script src dst tmp difffile picked rc applied=0 files=0
 
 	if (( ${#selected[@]} == 0 )); then
-		error "needs at least one config name, e.g. 'sync $mode agents'"
+		error "needs at least one config name, e.g. 'me $mode agents'"
 		exit 1
 	fi
 
@@ -277,15 +277,15 @@ function show_list {
 
 function show_help {
 	cat <<EOF
-sync — run all or part of the me.sh configuration sync
+me — sync all or part of the me.sh configuration
 
 Usage:
-  sync                        List available config names
-  sync --help                 Show this help
-  sync all                    Sync everything: app configs, system configs, git filters
-  sync app | apps             Full app sync (all app configs + git filters)
-  sync sys | system           Full system sync (all system configs)
-  sync [app|sys] <name>...    Sync only the named configs
+  me                          List available config names
+  me --help                   Show this help
+  me all                      Sync everything: app configs, system configs, git filters
+  me app | apps               Full app sync (all app configs + git filters)
+  me sys | system             Full system sync (all system configs)
+  me [app|sys] <name>...      Sync only the named configs
 
 A name matches either a config directory (e.g. 'karabiner', 'bin') or a
 configure script (e.g. 'karabiner-elements', 'user_bin'). A directory match
@@ -294,12 +294,12 @@ both app and system configs; if it exists in both, re-run with an explicit
 scope.
 
 Examples:
-  sync app karabiner-elements   Sync one app config
-  sync karabiner-elements       Same: unambiguous, found in app configs
-  sync bin                      Same: 'sync system bin'
-  sync app git ghostty          Several configs in one run
-  sync diff agents              Preview machine-local drift in agent configs
-  sync up agents                Review drift, keep what you want
+  me app karabiner-elements   Sync one app config
+  me karabiner-elements       Same: unambiguous, found in app configs
+  me bin                      Same: 'me system bin'
+  me app git ghostty          Several configs in one run
+  me diff agents              Preview machine-local drift in agent configs
+  me up agents                Review drift, keep what you want
 
 Failing scripts never stop the run; failures are summarized at the end and
 reported with a non-zero exit code.
@@ -308,11 +308,11 @@ Managed files declare themselves: a config file with a sibling '<file>.d/'
 overlay directory containing a 'dest' marker (the deployed path) deploys as a
 composed copy -- base file plus machine-local fragments (.json/.yaml/.yml/.toml
 merge; executables transform) -- instead of a symlink. Machine-local state
-written by apps lands only in the deployed copy. 'sync diff' shows that drift;
-'sync up' reviews it hunk by hunk and pulls what you approve back into the repo
+written by apps lands only in the deployed copy. 'me diff' shows that drift;
+'me up' reviews it hunk by hunk and pulls what you approve back into the repo
 base. Requires yq for YAML/TOML fragments: brew install yq.
 
-Shell completion (zsh) lives in lib/completion/_sync and is installed into
+Shell completion (zsh) lives in lib/completion/_me and is installed into
 ~/.zsh/completions by the shell config.
 EOF
 }
@@ -334,7 +334,7 @@ case "$1" in
 		exit 0
 		;;
 	--completion-names)
-		# Internal: consumed by lib/completion/_sync.
+		# Internal: consumed by lib/completion/_me.
 		show_completion_names
 		exit 0
 		;;
@@ -351,7 +351,7 @@ case "$1" in
 	diff)
 		shift
 		if (( $# == 0 )); then
-			error "Usage: sync diff [app|sys] <name>..."
+			error "Usage: me diff [app|sys] <name>..."
 			exit 1
 		fi
 		scope=""
@@ -363,7 +363,7 @@ case "$1" in
 	up|absorb)
 		shift
 		if (( $# == 0 )); then
-			error "Usage: sync up [app|sys] <name>..."
+			error "Usage: me up [app|sys] <name>..."
 			exit 1
 		fi
 		scope=""
