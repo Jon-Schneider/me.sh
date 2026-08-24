@@ -1,0 +1,3 @@
+symlinks:
+  - src: 55-integrations-optional
+    dest: $HOME/.config/agent-safehouse/profiles/55-integrations-optional
