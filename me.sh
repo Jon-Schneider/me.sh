@@ -52,7 +52,7 @@ npm install --global trash-cli
 
 # Ruby Config
 message "Installing Ruby"
-rbenv install $(rbenv install -l | grep -v - | tail -1) # Install Latest MRI Ruby using rbenv, installed via homebrew
+rbenv install "$(rbenv install -l | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | tail -1)" # Install Latest MRI Ruby using rbenv, installed via homebrew
 export PATH="$HOME/.rbenv/bin:$PATH" # Add rbenv to path
 eval "$(rbenv init -)" # Load rbenv
 

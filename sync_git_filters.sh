@@ -16,7 +16,7 @@ message "Updating Git Filters..."
 repo_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$repo_root" || exit 1
 
-find -E configs -type f -name 'clean_*' | while read -r filter_path; do
+find configs -type f -name 'clean_*' -print0 | while IFS= read -r -d '' filter_path; do
 	[ -x "$filter_path" ] || continue
 
 	filter_name="$(basename "$filter_path")"

@@ -58,6 +58,7 @@ ln -Fsn "$current_dir/Skills/use-jira" "$HOME/.agents/skills/"
 ln -Fsn "$current_dir/Skills/use-jira" "$HOME/.claude/skills/"
 
 echo "Configuring Agent bin..."
+mkdir -p "$HOME/bin"
 ln -sfn "$current_dir/bin/fa" "$HOME/bin/fa"
 ln -sfn "$current_dir/bin/pt" "$HOME/bin/pt"
 ln -sfn "$current_dir/bin/wt" "$HOME/bin/wt"
