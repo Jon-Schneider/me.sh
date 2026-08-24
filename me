@@ -20,6 +20,11 @@
 #   me up [app|macos] [<name>|<path>...]
 #                               Pick local changes to pull back into the repo
 #                               (alias for the older name: absorb)
+#   me add <file> [--link symlink|copy] [--app name] [--dest \$HOME/...]
+#                               Adopt a file into a config unit: copy it into
+#                               configs/<scope>/<unit>/, wire it into that
+#                               unit's config.yml, and deploy. Prompts for
+#                               anything not passed as a flag.
 #   me install                  Copy a 'me' shim into ~/bin so this runner is on PATH
 #   me doctor                   Validate every declarative config and claim
 #   me plan [scope] [<name>...] Validate and print actions without deploying
@@ -31,6 +36,7 @@ cd "$repo_root" || exit 1
 source "lib/common.sh"
 source "lib/compose.sh"
 source "lib/manifests.sh"
+source "lib/add.sh"
 
 readonly APPS_SCOPE="apps"
 readonly MACOS_SCOPE="macos"
@@ -800,6 +806,9 @@ Usage:
   me macos | sys | system     Sync all macOS configs
   me [app|macos] <name>...    Sync only the named configs
   me <name>...                Resolve names across configs and bootstrap
+  me add <file> [--link symlink|copy] [--app name] [--dest \$HOME/...]
+                              Adopt a file into a config unit and deploy it;
+                              missing flags are prompted for interactively
   me install                  Copy a 'me' shim into ~/bin (bakes this repo's path)
   me doctor                   Validate manifests and destination claims
   me plan [scope] [<name>...] Show config actions without deploying
@@ -817,6 +826,11 @@ collisions require an explicit scope. Bootstrap membership and order come from
 bootstrap/NN-name.sh.
 
 Examples:
+  me add ~/.gitconfig         Adopt a file: prompts for link type, unit, dest
+  me add ~/.vimrc --link symlink --app vim
+                              Non-interactive adoption into an existing unit
+  me add ~/notes.conf --app mytool --scope apps --copy --dest '\$HOME/.config/mytool/notes.conf'
+                              Create a new unit with a static copy
   me app karabiner            Sync one app config
   me karabiner                Same: unambiguous, found in app configs
   me bin                      Same: 'me system bin'
@@ -884,6 +898,11 @@ case "$1" in
 		# Internal: consumed by lib/completion/_me.
 		show_completion_names
 		exit 0
+		;;
+	add)
+		shift
+		run_add "$@"
+		finish
 		;;
 	install)
 		if (( $# > 1 )); then
