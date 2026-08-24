@@ -1,0 +1,5 @@
+symlinks:
+  - src: keybindings.json
+    dest: $HOME/Library/Application Support/Code/User/keybindings.json
+  - src: settings.json
+    dest: $HOME/Library/Application Support/Code/User/settings.json
