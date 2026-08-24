@@ -1,0 +1,3 @@
+symlinks:
+  - src: htoprc
+    dest: $HOME/.config/htop/htoprc
