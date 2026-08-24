@@ -20,7 +20,7 @@ source "lib/common.sh"
 source "lib/compose.sh"
 
 readonly APPS_SCOPE="apps"
-readonly SYS_SCOPE="sys"
+readonly SYS_SCOPE="macos"
 
 # --- Discovery -------------------------------------------------------------
 
@@ -49,15 +49,16 @@ function list_names {
 	} | sort -fu
 }
 
-# Emit 'scope<TAB>name' lines for zsh completion (internal use only).
+# Emit 'scope<TAB>name' lines for zsh completion ('app'|'sys'; internal use only).
 function show_completion_names {
-	local scope script
+	local scope dir script
 	{
-		for scope in "$APPS_SCOPE" "$SYS_SCOPE"; do
+		for scope in app sys; do
+			if [[ "$scope" == sys ]]; then dir="$SYS_SCOPE"; else dir="$APPS_SCOPE"; fi
 			while IFS= read -r script; do
 				printf '%s\t%s\n' "$scope" "$(basename "$(dirname "$script")")"
 				printf '%s\t%s\n' "$scope" "$(script_name "$script")"
-			done < <(list_scripts "$scope")
+			done < <(list_scripts "$dir")
 		done
 	} | sort -fu
 }
