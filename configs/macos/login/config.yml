@@ -1,0 +1,6 @@
+symlinks:
+  - src: login.sh
+    dest: $HOME/bin/login.sh
+copies:
+  - src: com.user.loginscript.plist
+    dest: $HOME/Library/LaunchAgents/com.user.loginscript.plist
