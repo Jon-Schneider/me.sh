@@ -1,0 +1,9 @@
+symlinks:
+  - src: get_finder_selected_item_paths
+    dest: $HOME/bin/get_finder_selected_item_paths
+  - src: git_rebase_bbedit
+    dest: $HOME/bin/git_rebase_bbedit
+  - src: starship-github-pr
+    dest: $HOME/bin/starship-github-pr
+  - src: starship-github-pr-refresh
+    dest: $HOME/bin/starship-github-pr-refresh
