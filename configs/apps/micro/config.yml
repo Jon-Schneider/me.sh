@@ -1,0 +1,5 @@
+symlinks:
+  - src: bindings.json
+    dest: $HOME/.config/micro/bindings.json
+  - src: settings.json
+    dest: $HOME/.config/micro/settings.json
