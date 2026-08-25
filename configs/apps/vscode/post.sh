@@ -10,7 +10,7 @@ extensions=(
 	ms-kubernetes-tools.vscode-kubernetes-tools
 	ms-python.python
 	ms-vscode.cpptools
-	ms-vscode.go
+	golang.go
 	ms-azuretools.vscode-docker
 	pkief.material-icon-theme
 	rangav.vscode-thunder-client
