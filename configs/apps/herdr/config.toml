@@ -46,6 +46,8 @@ prefix = "ctrl+space"
 rename_workspace = "prefix+comma"
 new_tab = "prefix+shift+t"
 rename_tab = "prefix+t"
+# Open an existing Git worktree as a nested space in its repository group.
+open_worktree = "cmd+shift+x"
 
 # Cmd+Shift+Left/Right focus panes: Ghostty sends prefix+h / prefix+l, which
 # hit the focus_pane_* defaults below. (Direct ctrl+shift+arrow chords were
