@@ -111,9 +111,10 @@ rows = [
 delivery = "system"
 
 # Cross-workspace tab walking via ~/bin/herdr-tab-step: steps through every
-# tab of every workspace in order (workspaces by number, tabs by number) and
-# wraps globally, restoring what ~/bin/tmux-app-key did when herdr ran
-# inside tmux. Ghostty ctrl+tab / ctrl+shift+tab send prefix+n / prefix+p.
+# tab of every workspace in sidebar display order (including Herdr's grouped
+# worktree-tree projection) and wraps globally, restoring what ~/bin/tmux-app-key
+# did when herdr ran inside tmux. Ghostty ctrl+tab / ctrl+shift+tab send
+# prefix+n / prefix+p.
 [[keys.command]]
 key = "prefix+n"
 type = "shell"

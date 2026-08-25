@@ -1,0 +1,154 @@
+#!/usr/bin/env python3
+"""Step through every Herdr tab in sidebar workspace order."""
+
+from __future__ import annotations
+
+import json
+import os
+import shutil
+import subprocess
+import sys
+
+
+def run(argv: list[str]) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(argv, capture_output=True, text=True, check=False)
+
+
+def herdr_result(herdr: str, *args: str) -> dict:
+    result = run([herdr, *args])
+    if result.returncode != 0:
+        print(result.stderr.strip() or result.stdout.strip(), file=sys.stderr)
+        sys.exit(1)
+    try:
+        return json.loads(result.stdout)["result"]
+    except (json.JSONDecodeError, KeyError) as error:
+        print(f"herdr-tab-step: invalid Herdr response: {error}", file=sys.stderr)
+        sys.exit(1)
+
+
+def workspace_display_order(workspaces: list[dict]) -> list[dict]:
+    """Match Herdr's expanded sidebar worktree-tree projection.
+
+    The workspace API returns raw storage order. The sidebar groups workspaces
+    with the same repo key when the group contains a parent checkout: the
+    parent is displayed first, followed by linked worktrees in storage order.
+    The complete group is emitted where its first raw member occurred.
+    """
+    members_by_key: dict[str, list[dict]] = {}
+    for workspace in workspaces:
+        worktree = workspace.get("worktree") or {}
+        repo_key = worktree.get("repo_key")
+        if isinstance(repo_key, str):
+            members_by_key.setdefault(repo_key, []).append(workspace)
+
+    grouped_keys = {
+        repo_key
+        for repo_key, members in members_by_key.items()
+        if len(members) >= 2
+        and any(
+            not (member.get("worktree") or {}).get("is_linked_worktree")
+            for member in members
+        )
+    }
+
+    emitted: set[str] = set()
+    ordered: list[dict] = []
+    for workspace in workspaces:
+        worktree = workspace.get("worktree") or {}
+        repo_key = worktree.get("repo_key")
+        if repo_key not in grouped_keys:
+            ordered.append(workspace)
+            continue
+        if repo_key in emitted:
+            continue
+
+        emitted.add(repo_key)
+        members = members_by_key[repo_key]
+        parent = next(
+            member
+            for member in members
+            if not (member.get("worktree") or {}).get("is_linked_worktree")
+        )
+        ordered.append(parent)
+        ordered.extend(member for member in members if member is not parent)
+
+    return ordered
+
+
+def tab_sequence(workspaces: list[dict], tabs: list[dict]) -> list[str]:
+    tabs_by_workspace: dict[str, list[str]] = {}
+    for tab in tabs:
+        workspace_id = tab.get("workspace_id")
+        tab_id = tab.get("tab_id")
+        if isinstance(workspace_id, str) and isinstance(tab_id, str):
+            tabs_by_workspace.setdefault(workspace_id, []).append(tab_id)
+
+    sequence: list[str] = []
+    for workspace in workspace_display_order(workspaces):
+        workspace_id = workspace.get("workspace_id")
+        if isinstance(workspace_id, str):
+            sequence.extend(tabs_by_workspace.get(workspace_id, []))
+    return sequence
+
+
+def focused_tab(workspaces: list[dict], tabs: list[dict]) -> str | None:
+    active_tab = os.environ.get("HERDR_ACTIVE_TAB_ID")
+    if active_tab:
+        return active_tab
+    return next(
+        (
+            tab["tab_id"]
+            for tab in tabs
+            if tab.get("focused") and isinstance(tab.get("tab_id"), str)
+        ),
+        None,
+    ) or next(
+        (
+            workspace["active_tab_id"]
+            for workspace in workspaces
+            if workspace.get("focused")
+            and isinstance(workspace.get("active_tab_id"), str)
+        ),
+        None,
+    )
+
+
+def main() -> int:
+    if len(sys.argv) < 2 or sys.argv[1] not in {"next", "previous"}:
+        print("usage: herdr-tab-step next|previous [--dry-run]", file=sys.stderr)
+        return 64
+    operation = sys.argv[1]
+    dry_run = "--dry-run" in sys.argv[2:]
+
+    herdr = shutil.which("herdr")
+    if not herdr:
+        print("herdr-tab-step: herdr not found", file=sys.stderr)
+        return 127
+
+    workspaces = herdr_result(herdr, "workspace", "list").get("workspaces", [])
+    tabs = herdr_result(herdr, "tab", "list").get("tabs", [])
+    sequence = tab_sequence(workspaces, tabs)
+    current = focused_tab(workspaces, tabs)
+    if not current:
+        print("herdr-tab-step: Herdr has no focused tab", file=sys.stderr)
+        return 1
+    if current not in sequence:
+        print("herdr-tab-step: focused tab missing from walk order", file=sys.stderr)
+        return 1
+    if len(sequence) < 2:
+        return 0
+
+    offset = -1 if operation == "previous" else 1
+    target = sequence[(sequence.index(current) + offset) % len(sequence)]
+    if dry_run:
+        print(target)
+        return 0
+
+    result = run([herdr, "tab", "focus", target])
+    if result.returncode != 0:
+        print(result.stderr.strip() or result.stdout.strip(), file=sys.stderr)
+    return result.returncode
+
+
+if __name__ == "__main__":
+    sys.exit(main())
