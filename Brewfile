@@ -1,4 +1,3 @@
-brew "atlassian/homebrew-acli/acli"
 brew "cameroncooke/axe/axe"
 brew "antidote"
 brew "cloc"
