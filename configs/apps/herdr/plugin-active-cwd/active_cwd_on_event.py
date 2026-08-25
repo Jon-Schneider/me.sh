@@ -14,9 +14,11 @@ The value is reported via workspace.report_metadata as tokens consumed by
 [ui.sidebar.spaces] rows in config.toml:
 
   $active_cwd   ~-substituted path of the space's focused pane, e.g.
-                ~/Developer/jsc/me.sh
-  $active_repo  "Repo (worktree)" label for worktree-backed spaces; null
-                for plain checkouts, which drops it from the row
+                ~/Developer/jsc/me.sh; omitted for worktree-backed spaces
+                (their paths live under ~/.herdr/worktrees and read as noise)
+  $active_repo  Branch name of worktree-backed spaces (the workspace label
+                above it is the checkout dir); null for plain checkouts,
+                which drops it from the row
 
 Every space carries its own row persistently; a space with no known cwd yet
 reports nothing, and rows whose tokens are all null simply don't render.
@@ -115,21 +117,48 @@ def tilde(path: str) -> str:
     return path
 
 
-def repo_token(workspace: dict, cwd: str | None) -> str | None:
-    """'Repo (worktree)' label for worktree-backed spaces, else None.
+def linked_worktree_branch(checkout: str | None) -> str | None:
+    """Branch name of a linked-worktree checkout from its .git file.
 
-    Prefers herdr's native per-workspace worktree metadata; falls back to a
-    path check under the worktrees root (~/.herdr/worktrees/<Repo>/<Name>).
+    Linked worktrees carry a .git file (not dir) pointing at
+    <common-dir>/worktrees/<name>, whose HEAD holds the checked-out ref.
+    Falls back to the short SHA on detached HEAD, None if unreadable.
+    """
+    if not checkout:
+        return None
+    try:
+        with open(os.path.join(checkout, ".git")) as f:
+            line = f.readline().strip()
+        if not line.startswith("gitdir:"):
+            return None
+        gitdir = line[len("gitdir:"):].strip()
+        if not os.path.isabs(gitdir):
+            gitdir = os.path.normpath(os.path.join(checkout, gitdir))
+        with open(os.path.join(gitdir, "HEAD")) as f:
+            head = f.readline().strip()
+    except OSError:
+        return None
+    if head.startswith("ref: refs/heads/"):
+        # Strip herdr's own "worktree/" branch prefix, matching its sidebar
+        # workspace naming, else rows read "worktree/foo (worktree)".
+        branch = head[len("ref: refs/heads/"):].removeprefix("worktree/")
+        return branch or None
+    return head[:7] or None
+
+
+def repo_token(workspace: dict, cwd: str | None) -> str | None:
+    """Branch name for linked-worktree checkouts, else None.
+
+    Plain (non-linked) checkouts report nothing so the row collapses to
+    just the path. Prefers herdr's native per-workspace worktree metadata;
+    falls back to a path check under the worktrees root
+    (~/.herdr/worktrees/<Repo>/<Name>).
     """
     wt = workspace.get("worktree") or {}
     if wt:
-        repo = wt.get("repo_key") or os.path.basename(wt.get("path", "").rstrip("/")) or None
-        if not repo:
+        if not wt.get("is_linked_worktree"):
             return None
-        label = wt.get("label")
-        if label and label != repo:
-            return f"{repo} ({label})"
-        return repo
+        return linked_worktree_branch(wt.get("checkout_path") or cwd)
 
     if cwd:
         try:
@@ -138,7 +167,7 @@ def repo_token(workspace: dict, cwd: str | None) -> str | None:
             return None
         parts = rel.split(os.sep)
         if len(parts) >= 2 and parts[0] not in ("..", "."):
-            return f"{parts[0]} ({parts[1]})"
+            return parts[1]
     return None
 
 
@@ -173,7 +202,14 @@ def desired_tokens(sock: str, workspaces: list | None = None) -> tuple[dict[str,
         if not cwd:
             booting.append(wid)  # shell not up yet; leave previous tokens untouched
             continue
-        out[wid] = {"active_cwd": tilde(cwd), "active_repo": repo_token(ws, cwd)}
+        # Worktree-backed spaces: the checkout path lives under
+        # ~/.herdr/worktrees/<Repo>/<Slug>, which is useless noise in a narrow
+        # sidebar — show only the branch name instead.
+        repo = repo_token(ws, cwd)
+        out[wid] = {
+            "active_cwd": None if repo else tilde(cwd),
+            "active_repo": repo,
+        }
     return out, booting
 
 

@@ -1,6 +1,6 @@
 id = "me.active-cwd"
 name = "Active CWD"
-version = "1.2.0"
+version = "1.3.0"
 min_herdr_version = "0.7.0"
 description = "Report each space's focused-pane working directory as workspace metadata ($active_repo / $active_cwd) for the sidebar space rows"
 platforms = ["macos"]
