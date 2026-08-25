@@ -43,10 +43,6 @@ symlinks:
     dest: $HOME/.agents/skills/rewrite-pr-history
   - src: Skills/rewrite-pr-history
     dest: $HOME/.claude/skills/rewrite-pr-history
-  - src: Skills/use-jira
-    dest: $HOME/.agents/skills/use-jira
-  - src: Skills/use-jira
-    dest: $HOME/.claude/skills/use-jira
   - src: bin/fa
     dest: $HOME/bin/fa
   - src: bin/pt
