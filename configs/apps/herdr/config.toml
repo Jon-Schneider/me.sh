@@ -44,6 +44,8 @@ prefix = "ctrl+space"
 # tmux muscle memory: prefix+, renames the focused space (default is
 # prefix+shift+w).
 rename_workspace = "prefix+comma"
+new_tab = "prefix+shift+t"
+rename_tab = "prefix+t"
 
 # Cmd+Shift+Left/Right focus panes: Ghostty sends prefix+h / prefix+l, which
 # hit the focus_pane_* defaults below. (Direct ctrl+shift+arrow chords were
@@ -81,6 +83,7 @@ auto_switch = false
 
 [ui]
 agent_panel_sort = "priority"
+prompt_new_tab_name = false
 show_agent_labels_on_pane_borders = true
 
 # Agent rows: state icon + workspace + short title (pt -t, typically a
