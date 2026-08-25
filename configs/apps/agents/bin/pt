@@ -20,12 +20,30 @@
 # pane-title integrations delegate here, so this is the single writer of
 # those tokens.
 #
+# After every herdr label change this spawns the me.active-tab-title handler
+# (symlinked to ~/.config/herdr/active_tab_title_on_event.py), so the tab
+# title re-syncs immediately — herdr fires no plugin event for label
+# changes. `pt tab` forces that sync without touching the label.
+#
 # usage: pt [-t <title>] [-b <body>]  set pane title (+ herdr agents-list entry)
 #        pt <body>                    bare words are the body
 #        pt -c|--clear                clear pane title and agents-list entry
+#        pt tab                       re-sync focused tab title now
 #        echo <body> | pt             read body from stdin
 
 set -u
+
+TAB_TITLE_SYNC="$HOME/.config/herdr/active_tab_title_on_event.py"
+
+# Detached: never block or fail the title update on the sync.
+sync_tab_title() {
+  [[ -f "$TAB_TITLE_SYNC" ]] || return 0
+  "/usr/bin/python3" "$TAB_TITLE_SYNC" "$@" >/dev/null 2>&1 &
+}
+
+case "${1:-}" in
+  tab) sync_tab_title; exit 0 ;;
+esac
 
 usage() {
   echo "usage: pt [-t <title>] [-b <body>]  set pane title (+ herdr agents-list entry)" >&2
@@ -152,10 +170,12 @@ if [[ "${HERDR_ENV:-}" == "1" && -n "${HERDR_SOCKET_PATH:-}" && -n "${HERDR_PANE
   if ((clear)); then
     herdr pane rename "${HERDR_PANE_ID}" --clear >/dev/null 2>&1 || true
     clear_sidebar_tokens
+    sync_tab_title "${HERDR_PANE_ID}"
     exit 0
   fi
   herdr pane rename "${HERDR_PANE_ID}" "$full" >/dev/null 2>&1 || true
   report_sidebar_tokens "$title" "$body"
+  sync_tab_title "${HERDR_PANE_ID}"
   exit 0
 fi
 

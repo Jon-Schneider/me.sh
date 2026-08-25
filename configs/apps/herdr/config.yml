@@ -5,3 +5,5 @@ symlinks:
     dest: $HOME/.config/herdr/even_panes.py
   - src: plugin-active-cwd/active_cwd_on_event.py
     dest: $HOME/.config/herdr/active_cwd_on_event.py
+  - src: plugin-active-tab-title/active_tab_title_on_event.py
+    dest: $HOME/.config/herdr/active_tab_title_on_event.py
