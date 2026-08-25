@@ -65,11 +65,11 @@ _me() {
 					;;
 				all)
 					;; # no further arguments
-				diff|up|absorb|plan|status)
+				diff|up|absorb|plan|status|remove)
 					(( ${#app_names[@]} )) && _describe -t app-names 'app config' app_names
 					(( ${#macos_names[@]} )) && _describe -t macos-names 'macOS config' macos_names
 					case "$words[1]" in
-						diff|status|up|absorb) _files ;;
+						diff|status|up|absorb|remove) _files ;;
 					esac
 					;;
 				*)

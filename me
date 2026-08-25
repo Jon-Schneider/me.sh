@@ -25,6 +25,9 @@
 #                               configs/<scope>/<unit>/, wire it into that
 #                               unit's config.yml, and deploy. Prompts for
 #                               anything not passed as a flag.
+#   me remove [--delete|--unlink] <unit|file>...
+#                               Undo an add: drop matching manifest rows and
+#                               their repo sources, retire deployed copies.
 #   me install                  Copy a 'me' shim into ~/bin so this runner is on PATH
 #   me doctor                   Validate every declarative config and claim
 #   me plan [scope] [<name>...] Validate and print actions without deploying
@@ -37,6 +40,7 @@ source "lib/common.sh"
 source "lib/compose.sh"
 source "lib/manifests.sh"
 source "lib/add.sh"
+source "lib/remove.sh"
 
 readonly APPS_SCOPE="apps"
 readonly MACOS_SCOPE="macos"
@@ -809,6 +813,9 @@ Usage:
   me add <file> [--link symlink|copy] [--app name] [--dest \$HOME/...]
                               Adopt a file into a config unit and deploy it;
                               missing flags are prompted for interactively
+  me remove [--delete|--unlink] <unit|file>...
+                              Remove claimed files from the repo and this
+                              machine; prompts for how to retire each copy
   me install                  Copy a 'me' shim into ~/bin (bakes this repo's path)
   me doctor                   Validate manifests and destination claims
   me plan [scope] [<name>...] Show config actions without deploying
@@ -831,6 +838,13 @@ Examples:
                               Non-interactive adoption into an existing unit
   me add ~/notes.conf --app mytool --scope apps --copy --dest '\$HOME/.config/mytool/notes.conf'
                               Create a new unit with a static copy
+  me remove git               Remove every file the 'git' unit claims from the
+                              repo and delete its deployed symlinks/copies
+  me remove ~/.gitconfig      Find which row claims that path and undo it
+  me remove configs/apps/git/gitconfig
+                              Same, matched by repository source path
+  me remove ghostty --unlink  Retire deployed symlinks but keep their content
+                              in place as plain files
   me app karabiner            Sync one app config
   me karabiner                Same: unambiguous, found in app configs
   me bin                      Same: 'me system bin'
@@ -865,6 +879,15 @@ filter matches on '/' boundaries against either side — the repo source or the
 deployed destination — so 'ghostty/config', '~/.gitconfig', and 'configs/apps/git'
 all work; arguments containing '/' are always paths, bare words resolve as
 config names first, and multiple filters union.
+
+'me remove' undoes 'me add': it deletes manifest rows (and their copied repo
+sources) plus the deployed destinations. Bare-word arguments are manifest unit
+names and remove every row they own; arguments containing '/' match by deployed
+path or repo source. Deployed symlinks are deleted by default or replaced with
+a plain file holding their content via --unlink; live copies of static-copy
+rows are kept unless you confirm deletion (--delete skips all prompts). Units
+left owning nothing after removal, including their config.yml, are pruned.
+Managed (<base>.d) files are out of scope.
 
 Requires yq for manifests and YAML/TOML fragments.
 
@@ -902,6 +925,11 @@ case "$1" in
 	add)
 		shift
 		run_add "$@"
+		finish
+		;;
+	remove|rm)
+		shift
+		run_remove "$@"
 		finish
 		;;
 	install)
