@@ -76,7 +76,7 @@ previous_tab = "prefix+alt+p"
 [[keys.command]]
 key = "ctrl+w"
 type = "shell"
-command = "/Users/jsc/Developer/jsc/me.sh/configs/apps/herdr/close-focused.sh"
+command = "$HOME/Developer/jsc/me.sh/configs/apps/herdr/close-focused.sh"
 description = "close pane / tab / workspace"
 
 [theme]
@@ -120,13 +120,13 @@ delivery = "system"
 [[keys.command]]
 key = "prefix+n"
 type = "shell"
-command = "$HOME/bin/herdr-tab-step next"
+command = "$HOME/Developer/jsc/me.sh/configs/apps/herdr/tab-step.sh next"
 description = "next tab across workspaces"
 
 [[keys.command]]
 key = "prefix+p"
 type = "shell"
-command = "$HOME/bin/herdr-tab-step previous"
+command = "$HOME/Developer/jsc/me.sh/configs/apps/herdr/tab-step.sh previous"
 description = "previous tab across workspaces"
 
 # Move the focused space left/right in the sidebar (me.space-mover plugin).

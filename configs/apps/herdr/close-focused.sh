@@ -12,26 +12,27 @@ set -euo pipefail
 ws="${HERDR_ACTIVE_WORKSPACE_ID:?}"
 tab="${HERDR_ACTIVE_TAB_ID:?}"
 pane="${HERDR_ACTIVE_PANE_ID:?}"
+herdr_bin="${HERDR_BIN_PATH:-herdr}"
 
-foreground_apps=$(herdr pane process-info --pane "$pane" |
+foreground_apps=$("$herdr_bin" pane process-info --pane "$pane" |
   jq -r '.result.process_info.foreground_processes[]?.name // empty')
 
 if grep -qx -e micro -e xlent <<<"$foreground_apps"; then
-  herdr pane send-text "$pane" $'\x17'
+  "$herdr_bin" pane send-text "$pane" $'\x17'
   exit 0
 fi
 
-info=$(herdr workspace get "$ws" | jq '.result.workspace')
-panes_in_tab=$(herdr pane list --workspace "$ws" |
+info=$("$herdr_bin" workspace get "$ws" | jq '.result.workspace')
+panes_in_tab=$("$herdr_bin" pane list --workspace "$ws" |
   jq --arg t "$tab" '[.result.panes[] | select(.tab_id == $t)] | length')
 
 if (( panes_in_tab > 1 )); then
-  herdr pane close "$pane"
+  "$herdr_bin" pane close "$pane"
 else
   tabs=$(jq -r '.tab_count' <<<"$info")
   if (( tabs > 1 )); then
-    herdr tab close "$tab"
+    "$herdr_bin" tab close "$tab"
   else
-    herdr workspace close "$ws"
+    "$herdr_bin" workspace close "$ws"
   fi
 fi
