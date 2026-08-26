@@ -1,0 +1,214 @@
+"""Classify a hook payload's issue key and, if it names the task, retitle the pane.
+
+Run detached by agent-issue-hook; see that script for the why. Reads the hook
+JSON on stdin, writes nothing, and never raises out of main().
+"""
+
+import asyncio
+import json
+import os
+import re
+import shlex
+import subprocess
+import sys
+
+ISSUE_KEY = re.compile(r"\b[A-Z][A-Z0-9]*-\d+\b")
+
+# Verbs that mean "this key is the session's work" with no room to read them
+# any other way. Investigating and researching an issue count: the issue is
+# still what the session is about, whether or not code changes.
+SHORTCUT_VERBS = (
+    r"fix|imp|impl|implement|investigate|research|look\s+into|dig\s+into|debug|"
+    r"resolve|address|solve|patch|refactor|rework|build|ship|land|start|begin|"
+    r"continue|resume|finish|complete|do|handle|tackle|take|pick\s+up|work\s+on"
+)
+
+# Trailing politeness that shouldn't disqualify a prompt from the fast path.
+FILLER = r"(?:please|now|thanks|thx|pls|for\s+me|next)"
+
+# A prompt that is nothing but a key, or a shortcut verb and a key. Both mean
+# "this one" outright, so they skip the model: dropping in a key is how a
+# session gets opened, and "fix SHP-123" has no second reading to weigh.
+TASK_PROMPT = re.compile(
+    rf"^\W*(?i:{SHORTCUT_VERBS})?\W*([A-Z][A-Z0-9]*-\d+)"
+    rf"(?:\W+(?i:{FILLER}))*\W*$"
+)
+
+# Checked in order, then any nested dict/list, so one worker serves all three
+# CLIs' payload shapes without a per-agent adapter.
+PROMPT_KEYS = ("prompt", "user_prompt", "message", "text", "input")
+
+CLASSIFIER_TIMEOUT_SECONDS = 10
+
+# Command receiving a single issue key, for trackers that can resolve a key to
+# a summary worth showing beside it. Set it per machine (~/.zshrc_local) so
+# this repo stays tracker-agnostic; unset just means no summary.
+APPLIER = shlex.split(os.environ.get("AGENT_ISSUE_APPLIER", ""))
+
+INSTRUCTIONS = (
+    "You classify a software developer's request to a coding agent.\n"
+    "The request mentions one or more issue-tracker keys.\n"
+    "List the keys naming work the agent is being asked to carry out. This is "
+    "usually exactly one key; list several only when the request asks for work "
+    "on each of them. A key is NOT being worked on when it is named as prior "
+    "art to learn from, as a regression to avoid or not break, as context or "
+    "background, as something to read first, or as explicitly out of scope -- "
+    "leave those out of the list even though the request mentions them.\n"
+    "Then decide whether the developer is asking the agent to actually do "
+    "work on that key -- implement, fix, build, debug, investigate, research, "
+    "review, test, continue, ship -- rather than only to read, fetch, "
+    "summarize, compare, or answer a question about it.\n"
+    "Investigating or researching an issue counts as working on it even when "
+    "what comes back is a finding or a recommendation rather than a change."
+)
+
+# Consulted only when the on-device model is unavailable. Deliberately biased
+# toward "no": a wrong yes mislabels the pane for the rest of the session.
+LOOKUP_VERBS = re.compile(
+    r"\b(what|why|when|who|where|which|summar\w*|describe|explain|read|look\s+up|"
+    r"check|show|tell\s+me|find|search|list|compare|status\s+of|duplicate)\b",
+    re.IGNORECASE,
+)
+WORK_VERBS = re.compile(
+    r"\b(fix|implement|build|write|add|do|work\s+on|start|continue|resume|"
+    r"refactor|debug|resolve|address|ship|finish|complete|handle|tackle|"
+    r"solve|patch|update|migrate|port|test|imp|impl|investigate|research|"
+    r"look\s+into|dig\s+into|rework|land|begin|pick\s+up)\b",
+    re.IGNORECASE,
+)
+
+
+def prompt_from_payload(payload):
+    """Best-effort prompt text: known keys first, then any nested string."""
+
+    def walk(node):
+        if isinstance(node, dict):
+            for key in PROMPT_KEYS:
+                value = node.get(key)
+                if isinstance(value, str) and value.strip():
+                    return value
+            for value in node.values():
+                found = walk(value)
+                if found:
+                    return found
+        elif isinstance(node, list):
+            for value in node:
+                found = walk(value)
+                if found:
+                    return found
+        return None
+
+    return walk(payload)
+
+
+def issue_keys(prompt):
+    seen = set()
+    keys = []
+    for key in ISSUE_KEY.findall(prompt):
+        if key not in seen:
+            seen.add(key)
+            keys.append(key)
+    return keys
+
+
+def keys_by_heuristic(prompt, keys):
+    if LOOKUP_VERBS.search(prompt) or not WORK_VERBS.search(prompt):
+        return []
+    return keys[:1]
+
+
+async def keys_by_model(prompt, keys):
+    import apple_fm_sdk as fm
+
+    available, _ = fm.SystemLanguageModel().is_available()
+    if not available:
+        return [], False
+
+    @fm.generable("The issues the developer is asking the agent to work on")
+    class Verdict:
+        # Generated in declaration order, so naming the work first gives the
+        # model somewhere to settle on the task before it has to commit to a
+        # key -- without it, a key mentioned only for reference often wins.
+        requested_work: str
+        working_on_it: bool
+        # Naming the excluded keys before the included ones gives the model a
+        # place to put prior art and regressions-to-avoid; without it they
+        # tend to leak into `issues`.
+        issues_only_referenced: list[str]
+        issues: list[str]
+
+    session = fm.LanguageModelSession(instructions=INSTRUCTIONS)
+    verdict = await asyncio.wait_for(
+        session.respond(
+            f"Issue keys mentioned: {', '.join(keys)}\n\n"
+            f"Developer's request:\n{prompt}",
+            generating=Verdict,
+        ),
+        timeout=CLASSIFIER_TIMEOUT_SECONDS,
+    )
+
+    if not verdict.working_on_it:
+        return [], True
+    # Guided generation still leaves the model free to echo a key that was
+    # never in the prompt; only keys we actually saw may retitle the pane, and
+    # they stay in the order the prompt mentioned them.
+    chosen = [key for key in keys if key in set(verdict.issues)]
+    return (chosen or keys[:1]), True
+
+
+def apply_title(keys):
+    """One issue can carry a tracker summary; several are just listed."""
+    if not keys:
+        return
+
+    if len(keys) == 1 and APPLIER:
+        applier = os.path.expanduser(APPLIER[0])
+        if os.access(applier, os.X_OK):
+            subprocess.run([applier, *APPLIER[1:], keys[0]], check=False)
+            return
+
+    # Nothing to resolve a summary against, or several keys and no summary
+    # worth showing for a set. pt is the single writer of the sidebar tokens.
+    pt = os.path.expanduser("~/bin/pt")
+    if os.access(pt, os.X_OK):
+        subprocess.run([pt, "-t", ", ".join(keys)], check=False)
+
+
+def main():
+    try:
+        payload = json.load(sys.stdin)
+    except Exception:
+        return 0
+
+    prompt = prompt_from_payload(payload)
+    if not prompt:
+        return 0
+
+    keys = issue_keys(prompt)
+    if not keys:
+        return 0
+
+    shortcut = TASK_PROMPT.match(prompt.strip())
+    if shortcut:
+        apply_title([shortcut.group(1)])
+        return 0
+
+    try:
+        chosen, decided = asyncio.run(keys_by_model(prompt, keys))
+    except Exception:
+        chosen, decided = [], False
+
+    if not decided:
+        chosen = keys_by_heuristic(prompt, keys)
+
+    apply_title(chosen)
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except SystemExit:
+        raise
+    except Exception:
+        raise SystemExit(0)

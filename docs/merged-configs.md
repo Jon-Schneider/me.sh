@@ -7,7 +7,7 @@ Files marked **managed** use a different model: they are deployed as **materiali
 ```
 repo base                    deployed copy (real file)
 configs/apps/agents/Claude/settings.json
-  + settings.json.d/10-shipyard-pane-title.json   ──compose──▶   ~/.claude/settings.json
+  + settings.json.d/10-issue-pane-title.json      ──compose──▶   ~/.claude/settings.json
   + settings.json.d/20-whatever.json              (gitignored)   (app-writable, repo-safe)
         gitignored overlays
 ```
@@ -52,16 +52,15 @@ Merge semantics:
 | array | array | concatenation, exact duplicates dropped |
 | anything | anything | fragment replaces |
 
-Array concatenation is deliberate: hook groups append instead of clobbering. Example JSON fragment that adds a PostToolUse hook without touching any base hooks:
+Array concatenation is deliberate: hook groups append instead of clobbering. Example JSON fragment that adds a UserPromptSubmit hook without touching any base hooks:
 
 ```json
 {
   "hooks": {
-    "PostToolUse": [
+    "UserPromptSubmit": [
       {
-        "matcher": "Bash",
         "hooks": [
-          { "command": "/Users/$(whoami)/bin/update_shipyard_pane_title", "type": "command" }
+          { "command": "/Users/$(whoami)/bin/agent-issue-hook", "type": "command" }
         ]
       }
     ]

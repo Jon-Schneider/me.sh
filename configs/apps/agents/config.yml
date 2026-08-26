@@ -17,6 +17,8 @@ symlinks:
     dest: $HOME/.pi/agent/extensions/dcg-guard.ts
   - src: Pi/extensions/tmux-agent-status.ts
     dest: $HOME/.pi/agent/extensions/tmux-agent-status.ts
+  - src: Pi/extensions/issue-pane-title.ts
+    dest: $HOME/.pi/agent/extensions/issue-pane-title.ts
   - src: Pi/extensions/statusline.ts
     dest: $HOME/.pi/agent/extensions/statusline.ts
   - src: Pi/statusline.json
@@ -43,6 +45,10 @@ symlinks:
     dest: $HOME/.agents/skills/rewrite-pr-history
   - src: Skills/rewrite-pr-history
     dest: $HOME/.claude/skills/rewrite-pr-history
+  - src: bin/agent-issue-hook
+    dest: $HOME/bin/agent-issue-hook
+  - src: bin/agent-issue-hook-worker
+    dest: $HOME/bin/agent-issue-hook-worker
   - src: bin/fa
     dest: $HOME/bin/fa
   - src: bin/pt

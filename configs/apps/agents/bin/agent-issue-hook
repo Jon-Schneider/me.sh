@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# agent-issue-hook — UserPromptSubmit hook for Claude Code, Codex, and Pi.
+#
+# Spots a Jira-style issue key in what the user just typed, decides whether the
+# key names the work being asked for (rather than one merely being consulted),
+# and if so labels the herdr pane + agents-list entry with it.
+#
+# This replaces scraping issue lookups out of Bash tool calls: an agent reading
+# a related ticket no longer relabels the pane.
+#
+# $AGENT_ISSUE_APPLIER optionally names a command taking one issue key, for
+# trackers that can resolve a key to a summary to show beside it.
+#
+# The fast path is this file alone — one grep over the raw hook payload, no
+# python, no fork. Only a payload that already looks like it mentions an issue
+# pays for the worker, and that runs detached so the agent is never blocked.
+#
+# usage: agent-issue-hook          # hook: reads hook JSON on stdin
+#        agent-issue-hook --worker # internal: classify + apply, foreground
+
+set -u
+
+SELF="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
+WORKER="${SELF%/*}/agent-issue-hook-worker"
+VENV_PYTHON="$HOME/.local/share/agent-issue-hook/venv/bin/python"
+
+# Same shape the worker matches on, kept loose here: this pass only decides
+# whether spawning the worker is worth it, and the worker re-checks against the
+# parsed prompt rather than the raw JSON.
+KEY_PATTERN='[A-Z][A-Z0-9]*-[0-9]+'
+
+if [[ "${1:-}" == "--worker" ]]; then
+  python_bin="$VENV_PYTHON"
+  # No venv means no on-device model; the worker falls back to its verb
+  # heuristic, which needs nothing beyond the standard library.
+  [[ -x "$python_bin" ]] || python_bin="$(command -v python3 || true)"
+  [[ -n "$python_bin" && -f "$WORKER" ]] || exit 0
+  exec "$python_bin" "$WORKER"
+fi
+
+payload="$(cat)"
+[[ -n "$payload" ]] || exit 0
+grep -qE "$KEY_PATTERN" <<<"$payload" || exit 0
+
+printf '%s' "$payload" | nohup "$SELF" --worker >/dev/null 2>&1 &
+disown 2>/dev/null || true
+exit 0
