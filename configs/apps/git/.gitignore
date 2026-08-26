@@ -9,6 +9,7 @@ Plans/
 
 ### macOS (899509f, https://github.com/github/gitignore/blob/master/Global/macOS.gitignore)
 
+.DS_Store
 *.DS_Store
 .AppleDouble
 .LSOverride
@@ -59,7 +60,10 @@ xcuserdata/
 
 # Python
 venv/*
+__pycache__
 
 # dotenv
 .env
 **/.claude/settings.local.json
+
+.worktrees
