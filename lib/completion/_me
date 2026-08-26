@@ -42,6 +42,7 @@ _me() {
 	_arguments -C \
 		'(-h --help)'{-h,--help}'[show help]' \
 		'(-l --list)'{-l,--list}'[list available units]' \
+		'(-f --force)'{-f,--force}'[move conflicting destinations aside before deploying]' \
 		'1:command-or-scope:->scopes' \
 		'*::name:->names'
 

@@ -142,11 +142,13 @@ function validate_manifest_unit {
 			fi
 			if validate_home_dest "$dest" "$(manifest_relative "$manifest") ($src)"; then
 				normalized="$(expand_dest "$dest")"
-				if [[ "$validate_live" == yes && "$operation" == symlinks && -e "$normalized" && ! -L "$normalized" ]]; then
-					error "$(manifest_relative "$manifest"): refusing non-symlink destination: $dest"
+				if force_enabled; then
+					: # A conflicting destination is moved aside at deploy time.
+				elif [[ "$validate_live" == yes && "$operation" == symlinks && -e "$normalized" && ! -L "$normalized" ]]; then
+					error "$(manifest_relative "$manifest"): refusing non-symlink destination: $dest (--force moves it aside)"
 					failed=1
 				elif [[ "$validate_live" == yes && "$operation" == copies && ( -e "$normalized" || -L "$normalized" ) && ! -f "$normalized" && ! -L "$normalized" ]]; then
-					error "$(manifest_relative "$manifest"): refusing non-file copy destination: $dest"
+					error "$(manifest_relative "$manifest"): refusing non-file copy destination: $dest (--force moves it aside)"
 					failed=1
 				fi
 				if (( ${#destinations[@]} > 0 )); then
@@ -223,7 +225,6 @@ function deploy_manifest_symlinks {
 			return 1
 		fi
 		dest="$(expand_dest "$dest")"
-		message "Linking $(manifest_relative "$resolved") -> $dest"
 		if ! mkdir -p "$(dirname "$dest")"; then
 			error "Could not create destination parent: $(dirname "$dest")"
 			return 1
@@ -234,9 +235,13 @@ function deploy_manifest_symlinks {
 				return 1
 			fi
 		elif [[ -e "$dest" ]]; then
-			error "Refusing to replace non-symlink destination: $dest"
-			return 1
+			if ! force_enabled; then
+				error "Refusing to replace non-symlink destination: $dest"
+				return 1
+			fi
+			backup_dest "$dest" || return 1
 		fi
+		message "Linking $(manifest_relative "$resolved") -> $dest"
 		if ! ln -s "$resolved" "$dest"; then
 			error "Could not create symlink destination: $dest"
 			return 1
@@ -259,8 +264,11 @@ function deploy_manifest_copies {
 			return 1
 		fi
 		if [[ -e "$dest" && ! -f "$dest" && ! -L "$dest" ]]; then
-			error "Refusing to replace non-file copy destination: $dest"
-			return 1
+			if ! force_enabled; then
+				error "Refusing to replace non-file copy destination: $dest"
+				return 1
+			fi
+			backup_dest "$dest" || return 1
 		fi
 		if ! temp="$(mktemp "$parent/.me-config.XXXXXX")"; then
 			error "Could not create temporary copy beside destination: $dest"
@@ -300,14 +308,28 @@ function run_manifest_unit {
 	fi
 }
 
+# Print the backup a forced deploy would perform before writing DEST, if any.
+function plan_backup_line {
+	local kind="$1" dest="$2" expanded
+	force_enabled || return 0
+	expanded="$(expand_dest "$dest")"
+	if [[ "$kind" == symlink && -e "$expanded" && ! -L "$expanded" ]]; then
+		printf 'backup %s\n' "$dest"
+	elif [[ "$kind" == copy && -e "$expanded" && ! -f "$expanded" && ! -L "$expanded" ]]; then
+		printf 'backup %s\n' "$dest"
+	fi
+}
+
 function plan_manifest_unit {
 	local unit src dest marker marker_dest
 	unit="$(dirname "$1")"
 	validate_manifest_unit "$unit" || return 1
 	while IFS=$'\t' read -r src dest; do
+		plan_backup_line symlink "$dest"
 		printf 'link %s -> %s\n' "$(manifest_relative "$unit")/$src" "$dest"
 	done < <(manifest_symlink_rows "$unit/config.yml")
 	while IFS=$'\t' read -r src dest; do
+		plan_backup_line copy "$dest"
 		printf 'copy %s -> %s\n' "$(manifest_relative "$unit")/$src" "$dest"
 	done < <(manifest_copy_rows "$unit/config.yml")
 	while IFS= read -r -d '' marker; do

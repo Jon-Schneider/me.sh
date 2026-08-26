@@ -31,6 +31,8 @@
 #   me install                  Copy a 'me' shim into ~/bin so this runner is on PATH
 #   me doctor                   Validate every declarative config and claim
 #   me plan [scope] [<name>...] Validate and print actions without deploying
+#   me --force ...              Move conflicting destinations aside before
+#                               deploying, instead of failing the unit
 set -euo pipefail
 
 repo_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -803,6 +805,7 @@ me — sync all or part of the me.sh configuration
 Usage:
   me                          List available units
   me --help                   Show this help
+  me --force <any sync>       Move conflicting destinations aside, then deploy
   me all                      Sync macOS configs first, then app configs
   me bootstrap               Run every fresh-machine step in filename order
   me bootstrap <name>...     Run selected bootstrap steps, in argument order
@@ -864,6 +867,14 @@ Examples:
   me plan finicky             Validate and preview one unit
   me plan app                 Preview every app unit
 
+Deployment refuses destinations it does not already own: a symlink row whose
+destination is a regular file or directory, a copy row blocked by a directory,
+or a managed file blocked by a directory. One such conflict fails the whole unit
+before anything is written. '--force' (or '-f', accepted anywhere in the
+argument list) moves each conflicting destination to
+'<dest>.me-backup-<timestamp>' and continues. 'me plan --force' shows those
+backups as 'backup' lines.
+
 Config failures never stop the run; they are summarized at the end and reported
 with a non-zero exit code. Bootstrap is an ordered dependency chain and stops
 at the first failure.
@@ -902,6 +913,17 @@ EOF
 }
 
 # --- Main ------------------------------------------------------------------
+
+# --force is global: strip it wherever it appears so subcommand parsing is
+# unaffected. Only deployment reads it.
+declare -a passthrough_args=()
+for arg in "$@"; do
+	case "$arg" in
+		-f|--force) ME_FORCE=1 ;;
+		*) passthrough_args+=("$arg") ;;
+	esac
+done
+set -- ${passthrough_args[@]+"${passthrough_args[@]}"}
 
 if (( $# == 0 )); then
 	show_list

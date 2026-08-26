@@ -28,3 +28,26 @@ function load_homebrew {
 	error "Homebrew is not installed; run 'me bootstrap homebrew-install' first"
 	return 1
 }
+
+# Deployment force mode. When enabled, a destination that would otherwise be
+# refused is moved aside instead of failing its unit.
+ME_FORCE="${ME_FORCE:-0}"
+
+function force_enabled {
+	[[ "$ME_FORCE" == 1 ]]
+}
+
+# Move a conflicting destination aside. Timestamped, and never overwrites an
+# earlier rescue, so repeated forced runs stay recoverable.
+function backup_dest {
+	local dest="$1" backup
+	backup="${dest}.me-backup-$(date +%Y%m%d%H%M%S)"
+	while [[ -e "$backup" || -L "$backup" ]]; do
+		backup="${backup}~"
+	done
+	if ! mv "$dest" "$backup"; then
+		error "Could not move existing destination aside: $dest"
+		return 1
+	fi
+	message "Backed up $dest -> $backup"
+}

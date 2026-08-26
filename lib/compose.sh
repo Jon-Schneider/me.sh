@@ -161,10 +161,12 @@ function deploy_managed_under {
 			continue
 		fi
 		if [[ -e "$dest" && -d "$dest" && ! -L "$dest" ]]; then
-			error "Refusing to replace directory destination: $dest"
-			rm -f "$tmp"
-			failed=1
-			continue
+			if ! force_enabled || ! backup_dest "$dest"; then
+				error "Refusing to replace directory destination: $dest"
+				rm -f "$tmp"
+				failed=1
+				continue
+			fi
 		fi
 		mode="$(stat -f '%Lp' "$COMPOSE_REPO_ROOT/$src")"
 		if ! chmod "$mode" "$tmp" || ! rm -f "$dest" || ! mv "$tmp" "$dest"; then
