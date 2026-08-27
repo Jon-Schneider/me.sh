@@ -139,3 +139,15 @@ command = "herdr plugin action invoke move-left --plugin me.space-mover"
 key = "shift+right"
 type = "shell"
 command = "herdr plugin action invoke move-right --plugin me.space-mover"
+
+[[keys.command]]
+key = "cmd+r"
+type = "plugin_action"
+command = "jhochenbaum.hunkdiff.review"
+description = "review changes in hunk"
+
+[[keys.command]]
+key = "prefix+shift+s"
+type = "plugin_action"
+command = "jhochenbaum.hunkdiff.send-review"
+description = "send hunk review to agent"
