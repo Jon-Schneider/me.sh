@@ -29,7 +29,7 @@
       {
         "hooks": [
           {
-            "command": "$HOME/.local/bin/dcg",
+            "command": "dcg",
             "type": "command"
           }
         ],
