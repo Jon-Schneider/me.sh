@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # wt — set the workspace title ("workspace title"): the herdr space when
-# running under herdr, otherwise the tmux window. The space-level sibling of
+# running under herdr. The space-level sibling of
 # `pt` (pane title): panes label their split, workspaces label their whole
 # sidebar row.
 #
@@ -12,7 +12,7 @@
 #   echo "release prep" | wt   -> read label from stdin
 #   wt -c|--clear              -> restore the default label (basename of the
 #                                 space's startup cwd under herdr; re-enables
-#                                 tmux automatic-rename under tmux)
+#                                 default workspace label)
 #
 # usage: wt [-c|--clear] <label>   set workspace/space title
 #        wt <label>                bare words are the label
@@ -28,7 +28,7 @@ usage() {
   echo "       echo <label> | wt         read label from stdin" >&2
 }
 
-# Collapse whitespace: herdr/tmux titles are single-line.
+# Collapse whitespace: Herdr titles are single-line.
 norm() {
   printf '%s' "$1" | tr '\r\n\t' '   ' | tr -s ' ' | sed 's/^ //; s/ $//'
 }
@@ -71,19 +71,5 @@ if [[ "${HERDR_ENV:-}" == "1" && -n "${HERDR_SOCKET_PATH:-}" && -n "${HERDR_WORK
   exit 0
 fi
 
-if [[ -n "${TMUX:-}" ]]; then
-  pane_id="${TMUX_PANE:-}"
-  helper="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/tmux-pane-for-process"
-  if [[ -x "$helper" ]]; then
-    pane_id="$("$helper")"
-  fi
-  [[ -n "$pane_id" ]] || { echo "wt: couldn't identify tmux pane" >&2; exit 1; }
-  if ((clear)); then
-    exec tmux set-option -w -t "$pane_id" automatic-rename on
-  fi
-  tmux set-option -w -t "$pane_id" automatic-rename off >/dev/null 2>&1 || true
-  exec tmux rename-window -t "$pane_id" "$label"
-fi
-
-echo "wt: not inside herdr or tmux" >&2
+echo "wt: not running inside Herdr" >&2
 exit 1

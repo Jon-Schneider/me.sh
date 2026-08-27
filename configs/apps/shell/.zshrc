@@ -267,15 +267,12 @@ load_non_git_aliases() {
     safe() {
       local safehouse_xcode_override="$HOME/.config/agent-safehouse/profiles/55-integrations-optional/xcode-cli.sb"
 
-      # HERDR_* pass-through: under the always-inside-herdr workflow, sandboxed
-      # agents need these to register with herdr's agent sidebar (TMUX vars kept
-      # while tmux remains in use manually).
       safehouse \
         --enable=xcode \
         --enable=lldb \
         --enable=macos-gui \
         --enable=keychain \
-        --env-pass=TMUX,TMUX_PANE,HERDR_ENV,HERDR_SOCKET_PATH,HERDR_PANE_ID,HERDR_TAB_ID,HERDR_WORKSPACE_ID \
+        --env-pass=HERDR_ENV,HERDR_SOCKET_PATH,HERDR_PANE_ID,HERDR_TAB_ID,HERDR_WORKSPACE_ID \
         --append-profile="$safehouse_xcode_override" \
         --add-dirs="$HOME/.agents:$HOME/bin:$HOME/.claude:$HOME/.codex:$HOME/Developer/jsc/me.sh:$HOME/Library/Caches:$HOME/Library/Developer" \
         --add-dirs-ro="$HOME/.config/acli" \
@@ -312,18 +309,6 @@ load_non_git_aliases() {
         | sed -E 's#git@github.com:(.*)\.git#https://github.com/\1#; s#\.git$##')
       open "$url/commit/$(git rev-parse HEAD)"
     }
-
-    # Tmux aliases
-    alias ta="tmux attach"
-    alias tls="tmux list-sessions"
-    alias tk="tmux kill-session -t"
-    alias tm="tmux"
-    tmnw() {
-      printf "new window: "
-      read NEW_WINDOW
-      tmux new-window -n $NEW_WINDOW
-    }
-    alias tmr="tmux rename-session"
 }
 
 load_worktree_functions() {
@@ -408,11 +393,10 @@ shell_has_preassigned_directory() {
 }
 
 # Always-inside-herdr: every top-level interactive shell opens inside the one
-# persistent herdr session, mirroring the previous always-inside-tmux setup.
+# persistent herdr session
 #
 # - Session already active: attach to it. When this terminal was opened for a
-#   specific directory, first create and focus a workspace there (herdr's
-#   equivalent of `tmux new-window -t main -c "$PWD"`). A bare reattach would
+#   specific directory, first create and focus a workspace there. A bare reattach would
 #   NOT open anything at $PWD: herdr only honors the startup cwd when the
 #   session has no workspaces at all.
 # - No session yet: plain `herdr` spawns the background server and opens its

@@ -2,7 +2,7 @@ id = "me.even-panes"
 name = "Even Panes"
 version = "1.0.0"
 min_herdr_version = "0.7.0"
-description = "Rebalance panes evenly tmux-style after splits, closes, and moves"
+description = "Rebalance panes evenly after splits, closes, and moves"
 platforms = ["macos"]
 
 [[startup]]

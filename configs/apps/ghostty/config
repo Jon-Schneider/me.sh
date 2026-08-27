@@ -51,8 +51,8 @@
 theme = jon
 copy-on-select = clipboard
 
-# Split keybindings. Each Cmd combo sends Ctrl-Space (tmux prefix \x00) + a
-# letter bound in .tmux.conf. Option = "stay" (keep focus on original pane).
+# Split keybindings. Each Cmd combo sends the Herdr prefix (Ctrl-Space) + a
+# Herdr command. Option = "stay" (keep focus on original pane).
 #   Cmd+Enter            -> prefix+v -> split right, focus NEW pane
 #   Cmd+Opt+Enter        -> prefix+o -> split right, stay on original (-d)
 #   Cmd+Shift+Enter      -> prefix+s -> split down,  focus NEW pane
@@ -72,8 +72,8 @@ keybind = super+shift+left=text:\x00h
 keybind = super+shift+right=text:\x00l
 keybind = super+shift+up=text:\x00K
 keybind = super+shift+down=text:\x00J
-# Route macOS window-management chords through tmux so Herdr can use them for
-# spaces and tabs while other panes retain their existing behavior.
+# Route macOS window-management chords through Herdr so it can manage spaces
+# and tabs while other panes retain their existing behavior.
 keybind = super+w=text:\x17
 keybind = super+s=text:\x00S
 keybind = super+x=text:\x00G
@@ -84,9 +84,8 @@ keybind = super+q=text:\x00Q
 keybind = ctrl+tab=text:\x00n
 keybind = ctrl+shift+tab=text:\x00p
 
-# xlent bold/italic: Cmd+B sends Ctrl+B (tmux prefix is Ctrl+Space, so it passes
-# straight through to the pane). Cmd+I sends Ctrl+I, which in terminal byte
-# encoding is identical to Tab.
+# xlent bold/italic: Cmd+B sends Ctrl+B straight through to the pane. Cmd+I
+# sends Ctrl+I, which in terminal byte encoding is identical to Tab.
 keybind = cmd+b=text:\x02
 keybind = cmd+i=text:\x09
 
@@ -104,8 +103,8 @@ keybind = f14=text:\x00\x1b[C
 keybind = f15=text:\x00\x1b[A
 keybind = f16=text:\x00\x1b[B
 # Cmd+Backspace clears the line: send Ctrl+U straight through so shells get
-# kill-whole-line whether Herdr runs standalone or inside tmux. It previously
-# sent Ctrl-Space+D (prefix+D), which Herdr standalone interprets as close_workspace.
+# kill-whole-line. Sending Ctrl-Space+D here would invoke Herdr's
+# close_workspace command.
 keybind = cmd+backspace=text:\x15
 
 # Enable Shift + Enter going to new line in 'git commit -m "..."'

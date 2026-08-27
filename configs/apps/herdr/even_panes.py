@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""Even out Herdr split panes tmux-style.
+"""Even out Herdr split panes.
 
 Herdr halves the source pane on split and collapses the containing split
 on close without redistributing space, so three panes end up 50/25/25.
 This script wraps pane split/close and then rebalances every split in
-the focused tab so leaves sharing an axis get equal shares — what tmux's
-select-layout even-horizontal/even-vertical would produce, preserving
+the focused tab so leaves sharing an axis get equal shares, preserving
 the existing pane arrangement (no panes are created or killed here).
 
 Usage:

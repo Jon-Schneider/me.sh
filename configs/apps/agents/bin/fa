@@ -2,7 +2,7 @@
 
 # fa - Fork Agent
 # Forks a running Codex CLI, Claude CLI, or pi-agent session into a new split pane.
-# Splits inside Herdr when run from a Herdr pane, otherwise falls back to tmux.
+# Splits inside Herdr when run from a Herdr pane.
 #
 # Usage: fa [pi-session-id]
 #
@@ -135,45 +135,34 @@ if [[ -n "${FA_DEBUG:-}" ]]; then
     exit 0
 fi
 
-# The new pane inherits the multiplexer server's environment, not this process's,
-# so forward the session variables explicitly.
+# The new pane does not inherit this process's environment, so forward the
+# session variables explicitly.
 forwarded_vars=(CODEX_THREAD_ID CLAUDE_CODE_SESSION_ID PI_SESSION_ID PI_SESSION_FILE PI_PROVIDER PI_MODEL PI_REASONING_LEVEL)
 
-if [[ -n "$HERDR_PANE_ID" ]]; then
-    env_args=()
-    for var in $forwarded_vars; do
-        if [[ -n "${(P)var}" ]]; then
-            env_args+=(--env "$var=${(P)var}")
-        fi
-    done
-
-    # herdr >= 0.8: agent start only launches into an existing shell pane;
-    # split first (with cwd/env/focus), then start the agent in the new pane.
-    local split_json new_pane
-    split_json=$(herdr pane split "$HERDR_PANE_ID" \
-        --direction right \
-        --cwd "$PWD" \
-        --focus \
-        "${env_args[@]}") || exit 1
-    new_pane=$(print -r -- "$split_json" | jq -r '.result.pane.pane_id')
-
-    exec herdr agent start "fa-${agent}-$$" \
-        --kind "$agent" \
-        --pane "$new_pane" \
-        --timeout 60000 \
-        -- "${command[@]}"
-
-elif [[ -n "$TMUX" ]]; then
-    env_args=()
-    for var in $forwarded_vars; do
-        if [[ -n "${(P)var}" ]]; then
-            env_args+=(-e "$var=${(P)var}")
-        fi
-    done
-
-    exec tmux split-window -h -c "$PWD" "${env_args[@]}" "$(printf '%q ' "${command[@]}")" ";" select-layout even-horizontal
-
-else
-    echo "fa: not running inside Herdr or tmux"
+if [[ -z "$HERDR_PANE_ID" ]]; then
+    echo "fa: not running inside Herdr"
     exit 1
 fi
+
+env_args=()
+for var in $forwarded_vars; do
+    if [[ -n "${(P)var}" ]]; then
+        env_args+=(--env "$var=${(P)var}")
+    fi
+done
+
+# herdr >= 0.8: agent start only launches into an existing shell pane;
+# split first (with cwd/env/focus), then start the agent in the new pane.
+local split_json new_pane
+split_json=$(herdr pane split "$HERDR_PANE_ID" \
+    --direction right \
+    --cwd "$PWD" \
+    --focus \
+    "${env_args[@]}") || exit 1
+new_pane=$(print -r -- "$split_json" | jq -r '.result.pane.pane_id')
+
+exec herdr agent start "fa-${agent}-$$" \
+    --kind "$agent" \
+    --pane "$new_pane" \
+    --timeout 60000 \
+    -- "${command[@]}"

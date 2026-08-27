@@ -13,55 +13,18 @@
       {
         "hooks": [
           {
-            "command": "/Users/$(whoami)/bin/set_tmux_agent_status needs-input",
-            "type": "command"
-          },
-          {
             "command": "afplay /System/Library/Sounds/Funk.aiff",
             "type": "command"
           }
         ],
         "matcher": "permission_prompt"
-      },
-      {
-        "hooks": [
-          {
-            "command": "/Users/$(whoami)/bin/set_tmux_agent_status ready",
-            "type": "command"
-          }
-        ],
-        "matcher": "idle_prompt"
       }
     ],
     "PermissionRequest": [
       {
         "hooks": [
           {
-            "command": "/Users/$(whoami)/bin/set_tmux_agent_status needs-input",
-            "type": "command"
-          },
-          {
             "command": "afplay /System/Library/Sounds/Funk.aiff",
-            "type": "command"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "hooks": [
-          {
-            "command": "/Users/$(whoami)/bin/set_tmux_agent_status running",
-            "type": "command"
-          }
-        ]
-      }
-    ],
-    "PostToolUseFailure": [
-      {
-        "hooks": [
-          {
-            "command": "/Users/$(whoami)/bin/set_tmux_agent_status running",
             "type": "command"
           }
         ]
@@ -82,50 +45,11 @@
         "matcher": "Bash"
       }
     ],
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "command": "/Users/$(whoami)/bin/set_tmux_agent_status \"\"",
-            "type": "command"
-          }
-        ]
-      }
-    ],
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "command": "/Users/$(whoami)/bin/set_tmux_agent_status ready",
-            "type": "command"
-          },
-          {
-            "command": "/Users/$(whoami)/bin/clear_tmux_pane_title",
-            "type": "command"
-          }
-        ],
-        "matcher": "startup|clear"
-      }
-    ],
     "Stop": [
       {
         "hooks": [
           {
-            "command": "/Users/$(whoami)/bin/set_tmux_agent_status done",
-            "type": "command"
-          },
-          {
             "command": "afplay /System/Library/Sounds/Submarine.aiff",
-            "type": "command"
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "command": "/Users/$(whoami)/bin/set_tmux_agent_status running",
             "type": "command"
           }
         ]

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# pt — set the pane title ("pane title"): the herdr pane when running under
-# herdr, otherwise the tmux pane. Lets agents label their split while working.
+# pt — set the pane title ("pane title") in Herdr. Lets agents label their
+# split while working.
 #
 # Input splits into an optional short title and an optional body:
 #
@@ -52,7 +52,7 @@ usage() {
   echo "       echo <body> | pt             read body from stdin" >&2
 }
 
-# Collapse whitespace: herdr/tmux titles are single-line.
+# Collapse whitespace: Herdr titles are single-line.
 norm() {
   printf '%s' "$1" | tr '\r\n\t' '   ' | tr -s ' ' | sed 's/^ //; s/ $//'
 }
@@ -179,15 +179,5 @@ if [[ "${HERDR_ENV:-}" == "1" && -n "${HERDR_SOCKET_PATH:-}" && -n "${HERDR_PANE
   exit 0
 fi
 
-if [[ -n "${TMUX:-}" ]]; then
-  pane_id="${TMUX_PANE:-}"
-  helper="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/tmux-pane-for-process"
-  if [[ -x "$helper" ]]; then
-    pane_id="$("$helper")"
-  fi
-  [[ -n "$pane_id" ]] || { echo "pt: couldn't identify tmux pane" >&2; exit 1; }
-  exec tmux select-pane -t "$pane_id" -T "$full"
-fi
-
-echo "pt: not inside herdr or tmux" >&2
+echo "pt: not running inside Herdr" >&2
 exit 1

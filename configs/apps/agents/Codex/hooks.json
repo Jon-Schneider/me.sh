@@ -4,25 +4,10 @@
       {
         "hooks": [
           {
-            "command": "$HOME/bin/set_tmux_agent_status needs-input",
-            "type": "command"
-          },
-          {
             "command": "afplay /System/Library/Sounds/Funk.aiff",
             "type": "command"
           }
         ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "hooks": [
-          {
-            "command": "$HOME/bin/set_tmux_agent_status running",
-            "type": "command"
-          }
-        ],
-        "matcher": "Bash"
       }
     ],
     "PreToolUse": [
@@ -38,15 +23,6 @@
       {
         "hooks": [
           {
-            "command": "$HOME/bin/set_tmux_agent_status running-tool",
-            "type": "command"
-          }
-        ],
-        "matcher": "Bash"
-      },
-      {
-        "hooks": [
-          {
             "command": "$HOME/bin/xcsift-for-apple-build-tools",
             "type": "command"
           }
@@ -54,45 +30,11 @@
         "matcher": "Bash"
       }
     ],
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "command": "$HOME/bin/set_tmux_agent_status ready",
-            "type": "command"
-          }
-        ],
-        "matcher": "startup|resume"
-      },
-      {
-        "hooks": [
-          {
-            "command": "$HOME/bin/clear_tmux_pane_title",
-            "type": "command"
-          }
-        ],
-        "matcher": "startup|clear"
-      }
-    ],
     "Stop": [
       {
         "hooks": [
           {
-            "command": "$HOME/bin/set_tmux_agent_status done",
-            "type": "command"
-          },
-          {
             "command": "afplay /System/Library/Sounds/Submarine.aiff",
-            "type": "command"
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "command": "$HOME/bin/set_tmux_agent_status running",
             "type": "command"
           }
         ]

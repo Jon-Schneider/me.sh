@@ -7,10 +7,6 @@ Shift+Left / Shift+Right through [keys.command] in config.toml:
     herdr plugin action invoke move-left
     herdr plugin action invoke move-right
 
-Inside tmux those keys never reach Herdr (tmux consumes them), so
-configs/apps/tmux/tmux-app-key detects a Herdr-owned pane and invokes the
-same actions via the herdr CLI.
-
 The focused space swaps one slot sideways in the sidebar order. Spaces
 belonging to the same worktree repo (parent checkout + linked worktrees)
 form a contiguous block and move together, matching native drag behavior.

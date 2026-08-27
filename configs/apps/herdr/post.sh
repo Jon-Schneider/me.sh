@@ -4,16 +4,16 @@ set -euo pipefail
 # Plugins are linked in place from this repo; re-link to pick up changes.
 #
 # - me.even-panes: runs on pane created/closed/moved events and at startup,
-#   evening out split panes tmux-style.
+#   evening out split panes.
 # - me.active-cwd: event-driven handler that reports each space's
 #   focused-pane working directory as workspace metadata ($active_repo /
 #   $active_cwd), rendered by the [ui.sidebar.spaces] rows in config.toml
-#   like the tmux status bar. Herdr 0.7.x fires no plugin event when a
+#   as workspace metadata. Herdr 0.7.x fires no plugin event when a
 #   pane's cwd changes, so .zshrc also spawns this same handler from a
 #   chpwd hook to cover bare `cd`.
 # - me.space-mover: move-left / move-right actions that shift the focused
 #   space sideways in the sidebar. Bound to Shift+Left/Right via [keys.command]
-#   in config.toml; inside tmux, tmux-app-key invokes the same actions.
+#   in config.toml.
 # - me.active-tab-title: prefixes tabs with one monochrome status symbol per
 #   agent pane, and mirrors the focused pane's label.
 if command -v herdr > /dev/null; then

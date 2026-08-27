@@ -2,7 +2,7 @@
 # ~/.config/herdr/config.toml by configs/apps/herdr/config.yml.
 #
 # Split/close even-layout behavior is provided by the me.even-panes herdr
-# plugin (plugin/ in this directory): it evens out panes tmux-style whenever
+# plugin (plugin/ in this directory): it evens out panes whenever
 # a tab's pane count changes (split, close, or pane move), regardless of how
 # the change was made. Manual resizes and zoom are left untouched.
 #
@@ -11,8 +11,8 @@
 # daemon — that watches pane focus/create/exit events and reports workspace
 # metadata. Herdr 0.7.x fires no plugin event when a pane's cwd changes, so
 # a zsh chpwd hook (.zshrc) also spawns the handler on bare `cd`.
-# $active_cwd is the ~-substituted path, like the right side of the tmux
-# status bar; $active_repo adds "Repo (worktree)" for worktree-backed
+# $active_cwd is the ~-substituted path; $active_repo adds "Repo (worktree)"
+# for worktree-backed
 # spaces. Every space carries its own row once its panes have reported a
 # cwd; rows whose tokens are all missing disappear, so plain spaces show
 # only the path.
@@ -32,16 +32,14 @@ rows = [
 # (plugin-move-space/ in this directory). Its move-left/move-right actions
 # shift the focused space one slot sideways in the sidebar, keeping worktree
 # groups together. The [keys.command] entries below bind Shift+Left/Right to
-# those actions when Herdr runs standalone. Inside tmux, tmux consumes those
-# keys before Herdr sees them, so tmux-app-key detects Herdr-owned panes and
-# invokes the same actions instead.
+# those actions.
 
-# Prefix key: ctrl+space (replaces tmux's C-b muscle memory). All the
+# Prefix key: ctrl+space. All the
 # default prefix+... bindings below keep working; only the leader changes.
 
 [keys]
 prefix = "ctrl+space"
-# tmux muscle memory: prefix+, renames the focused space (default is
+# Prefix muscle memory: prefix+, renames the focused space (default is
 # prefix+shift+w).
 rename_workspace = "prefix+comma"
 new_tab = "prefix+shift+t"
@@ -53,16 +51,15 @@ open_worktree = "cmd+shift+x"
 # hit the focus_pane_* defaults below. (Direct ctrl+shift+arrow chords were
 # tried and not recognized by herdr at runtime.)
 
-# Cycle workspaces (tmux era: Shift+Up/Down ran HerdrPrevious/NextWorkspace).
+# Cycle workspaces with Shift+Up/Down.
 previous_workspace = "shift+up"
 next_workspace = "shift+down"
 
 # Cmd+W closes by preference: focused split pane, else active tab (no splits),
 # else the workspace when it holds the last tab. Ghostty sends raw Ctrl+W and
-# herdr intercepts it before panes see it (tmux did the same via bind -n C-w).
+# Herdr intercepts it before panes see it.
 # close-focused.sh first passes Ctrl+W through to foreground TUI apps that
-# own that key (micro = Quit, xlent = clear), matching tmux-app-key's old
-# process check.
+# own that key (micro = Quit, xlent = clear).
 
 # Built-in tab cycling moved off prefix+n/p so the [[keys.command]] walkers
 # below own those keys unambiguously (Ghostty sends ctrl+tab /
@@ -114,8 +111,8 @@ delivery = "system"
 
 # Cross-workspace tab walking via ~/bin/herdr-tab-step: steps through every
 # tab of every workspace in sidebar display order (including Herdr's grouped
-# worktree-tree projection) and wraps globally, restoring what ~/bin/tmux-app-key
-# did when herdr ran inside tmux. Ghostty ctrl+tab / ctrl+shift+tab send
+# worktree-tree projection) and wraps globally. Ghostty ctrl+tab /
+# ctrl+shift+tab send
 # prefix+n / prefix+p.
 [[keys.command]]
 key = "prefix+n"

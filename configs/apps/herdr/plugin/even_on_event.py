@@ -9,7 +9,7 @@ invocations can tell structural changes apart from manual resizes:
   as the baseline WITHOUT touching layouts, so restored sessions keep
   their saved geometry.
 - Every later run: any known tab whose pane membership changed gets its
-  split tree evened out tmux-style (equal shares per axis). Tabs seen for
+  split tree evened out (equal shares per axis). Tabs seen for
   the first time already holding >=2 panes are evened too — they were
   created and split within one event burst.
 
