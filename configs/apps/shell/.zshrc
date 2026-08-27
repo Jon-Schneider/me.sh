@@ -195,6 +195,7 @@ load_non_git_aliases() {
     alias fdr="open ."
     alias fl="bundle exec fastlane"
     alias fm="nnn" # Open 'nnn' file manager in current dir
+    alias hd="hunk diff"
     alias hm="cd ~/"
     alias hst="history"
     alias hstg="hst | grep"
