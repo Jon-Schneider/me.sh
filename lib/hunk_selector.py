@@ -78,7 +78,8 @@ def main():
         if prompt_out:
             prompt_out.close()
 
-    sys.stdout.write(header + "".join(keep))
+    if keep:
+        sys.stdout.write(header + "".join(keep))
     return 0
 
 
