@@ -1,3 +1,0 @@
-symlinks:
-  - src: .finicky.js
-    dest: $HOME/.finicky.js

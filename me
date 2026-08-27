@@ -829,7 +829,7 @@ Usage:
   me up [app|macos] [<name>|<path>...]
                               Review drift hunk by hunk, keep what you want
 
-A manifest unit is named by its directory (e.g. 'finicky' or 'karabiner'). A
+A manifest unit is named by its directory (e.g. 'yojam' or 'karabiner'). A
 legacy name matches either its config directory or its configure script. With
 no scope, names are looked up in app and macOS configs plus bootstrap units;
 collisions require an explicit scope. Bootstrap membership and order come from
@@ -864,7 +864,7 @@ Examples:
   me diff ghostty/config      Path filters match either side on '/' boundaries
   me up                       Review drift everywhere, keep what you want
   me doctor                   Validate the complete config registry
-  me plan finicky             Validate and preview one unit
+  me plan yojam               Validate and preview one unit
   me plan app                 Preview every app unit
 
 Deployment refuses destinations it does not already own: a symlink row whose

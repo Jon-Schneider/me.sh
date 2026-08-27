@@ -1,0 +1,3 @@
+copies:
+  - src: config.json
+    dest: $HOME/Library/Application Support/Yojam/config.json

@@ -42,7 +42,6 @@ cask "calibre"
 cask "coconutbattery"
 cask "cold-turkey-blocker"
 cask "cryptomator"
-cask "finicky"
 cask "font-symbols-only-nerd-font"
 cask "ghostty"
 cask "google-chrome"
@@ -69,6 +68,7 @@ cask "tunnelblick"
 cask "typora"
 cask "visual-studio-code"
 cask "vlc"
+cask "yojam"
 
 mas "Amazon Kindle", id: 302584613
 mas "Bitwarden", id: 1352778147

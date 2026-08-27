@@ -6,7 +6,8 @@ Status: implemented; repository file-deployment units are migrated.
 
 Config units are discovered by path (`configs/{apps,macos}/<unit>/`),
 but each unit's deployment topology lives inside imperative Bash. To learn that
-`configs/apps/finicky/.finicky.js` deploys to `$HOME/.finicky.js`, you must read
+`configs/apps/yojam/config.json` deploys to
+`$HOME/Library/Application Support/Yojam/config.json`, you must read
 or execute its configure script.
 
 Most of those scripts are largely `mkdir -p` and `ln` rows encoded as code.
@@ -24,9 +25,9 @@ A config-unit directory may replace its `configure_*.sh` scripts with a
 declarative `config.yml` and an optional conventional `post.sh` hook.
 
 ```text
-configs/apps/finicky/
+configs/apps/yojam/
   config.yml
-  .finicky.js
+  config.json
 
 configs/apps/example/
   config.yml
@@ -73,11 +74,11 @@ from path rather than duplicated in metadata.
 
 ```yaml
 symlinks:
-  - src: .finicky.js
-    dest: $HOME/.finicky.js
-  - src: themes/jon
-    dest: $HOME/.config/ghostty/themes/jon
+  - src: config
+    dest: $HOME/.config/ghostty/config
 copies:
+  - src: config.json
+    dest: $HOME/Library/Application Support/Yojam/config.json
   - src: Default.idekeybindings
     dest: $HOME/Library/Developer/Xcode/UserData/KeyBindings/Default.idekeybindings
 ```
