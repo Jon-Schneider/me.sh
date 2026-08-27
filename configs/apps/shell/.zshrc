@@ -1,5 +1,5 @@
 # ENV
-export PATH=$PATH:$HOME/.rbenv/bin:$HOME/bin:$HOME/.local/bin:$HOME/.mtplx/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/sbin:/opt/X11/bin:$HOME/Library/Android/sdk/platform-tools:/Users/jsc/.cargo/bin
+export PATH=$PATH:/opt/homebrew/bin:/opt/homebrew/sbin:$HOME/.rbenv/bin:$HOME/bin:$HOME/.local/bin:$HOME/.mtplx/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/sbin:/opt/X11/bin:$HOME/Library/Android/sdk/platform-tools:/Users/jsc/.cargo/bin
 export EDITOR="micro"
 export LESS="-R" # Enable mouse scrolling in less.
 export COLOR_RED='\033[0;31m'
