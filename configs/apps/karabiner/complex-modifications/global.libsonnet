@@ -27,7 +27,7 @@
             }
           ],
           "parameters": {
-            "basic.to_if_alone_timeout_milliseconds": 250
+            "basic.to_if_alone_timeout_milliseconds": 150
           },
           "to_if_alone": [
             {
