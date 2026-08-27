@@ -1,26 +1,16 @@
 #!/usr/bin/env python3
-"""Active-tab-title plugin handler: mirror the focused pane's title into its tab.
+"""Active-tab-title plugin handler: add agent status and mirror pane titles.
 
-Event-driven, no daemon — same shape as active_cwd_on_event.py. Herdr shows
-agent/pane labels only on split-pane borders, so a single-pane tab hides the
-title entirely; this renames tabs to their driving pane's label (pane.label,
-else the tab number, so a stale pane title never lingers).
+Event-driven, no daemon. Each agent pane contributes Herdr's monochrome symbol
+to its tab: blocked ×, working ●, done ✓, idle ○, unknown ·. Split tabs show
+one spaced symbol per agent in pane-list order.
 
-Driving pane per tab: the focused pane if the tab holds it, else the only
-pane of a single-pane tab, else skip (multi-pane background tabs are
-ambiguous). Every event re-syncs the focused tab plus every tab we already
-manage, which covers the close-the-focused-pane case: herdr may fire no
-pane.focused for the replacement, but the tab stays managed so its label
-still converges on pane.exited.
+The focused pane's label is mirrored into its tab title. Background single-pane
+tabs use their only pane; background split tabs retain their last base title.
+Manual tab renames become the new base title and retain the status symbol.
 
-Only the focused tab is taken over; background tabs are only corrected once
-managed. Manual tab renames win until the driving pane changes: state tracks
-the last label we set per tab, so "current != what we set and != what we
-want" means the user renamed it.
-
-Handlers must be short-lived (herdr caps concurrent plugin commands at 32):
-non-blocking lock, one reconcile pass, exit. All state diffs are idempotent,
-so dropped or duplicate spawns are harmless.
+Handlers take a non-blocking lock, reconcile every tab once, and exit. State
+diffs are idempotent, so dropped or duplicate spawns converge on the next event.
 """
 
 from __future__ import annotations
@@ -29,11 +19,18 @@ import fcntl
 import json
 import os
 import socket
-import sys
 import time
 
 SOURCE = "me.active-tab-title"
-STATE_VERSION = 2
+STATE_VERSION = 3
+STATUS_SYMBOLS = {
+    "blocked": "×",
+    "working": "●",
+    "done": "✓",
+    "idle": "○",
+    "unknown": "·",
+}
+STATUS_SYMBOL_SET = frozenset((*STATUS_SYMBOLS.values(), "◐", "◒", "•"))
 
 
 def log(message: str) -> None:
@@ -94,6 +91,26 @@ def pane_title(pane: dict | None) -> str | None:
     return pane.get("label") or None
 
 
+def strip_status_prefix(label: str) -> str:
+    index = 0
+    found_symbol = False
+    while index < len(label):
+        if label[index] in STATUS_SYMBOL_SET:
+            found_symbol = True
+        elif label[index] != " " or not found_symbol:
+            break
+        index += 1
+    return label[index:] if found_symbol else label
+
+
+def status_symbols(tab: dict, panes: list) -> str:
+    return "  ".join(
+        STATUS_SYMBOLS.get(pane.get("agent_status"), STATUS_SYMBOLS["unknown"])
+        for pane in panes
+        if pane.get("tab_id") == tab["tab_id"] and pane.get("agent")
+    )
+
+
 def driving_pane(panes: list, tab_id: str) -> dict | None:
     in_tab = [p for p in panes if p.get("tab_id") == tab_id]
     focused = next((p for p in in_tab if p.get("focused")), None)
@@ -104,58 +121,62 @@ def driving_pane(panes: list, tab_id: str) -> dict | None:
     return None
 
 
-def sync_tab(sock: str, state_file: str, state: dict, tab: dict, panes: list) -> bool:
+def sync_tab(sock: str, state: dict, tab: dict, panes: list) -> bool:
     """Converge one tab's label; returns True if state changed."""
     tab_id = tab["tab_id"]
     book = state["tabs"]
     entry = book.get(tab_id)
     driver = driving_pane(panes, tab_id)
+    current = tab.get("label") or str(tab.get("number") or "1")
+    symbols = status_symbols(tab, panes)
+    title = pane_title(driver)
 
-    if entry is not None and entry.get("manual"):
-        if driver and driver["pane_id"] != entry["manual"]:
-            entry["manual"] = None  # driving pane moved on; resume mirroring
-        else:
-            return False
-
-    current = tab.get("label")
-    desired = pane_title(driver)
-
-    if desired is None:
-        # No pane label: if we own the label, fall back to the tab number so a
-        # stale pane title never lingers. Unmanaged tabs (never taken over) are
-        # left alone — that covers user-named tabs with plain shells.
-        if entry is None:
-            return False
-        default = str(tab.get("number") or "1")
-        if current != default and current == entry.get("set"):
-            api(sock, "tab.rename", tab_id=tab_id, label=default)
-            log(f"{tab_id}: released ({current!r} -> {default!r})")
-        elif current != default:
-            log(f"{tab_id}: released ({current!r}; left as-is)")
-        del book[tab_id]
-        return True
-
-    if entry is None:
-        entry = book[tab_id] = {"set": None, "manual": None}
-
-    if current == desired:
-        if entry.get("set") != desired:
-            entry["set"] = desired
-            return True
+    if entry is None and not symbols and title is None:
         return False
+    if entry is None:
+        entry = book[tab_id] = {
+            "base": title or strip_status_prefix(current),
+            "driver": driver["pane_id"] if driver else None,
+            "manual": None,
+            "set": None,
+        }
 
-    if entry.get("set") is not None and current != entry.get("set"):
-        # We owned the label but it changed under us: manual rename.
-        entry["manual"] = driver["pane_id"] if driver else None
-        if entry["manual"] is None:
-            del book[tab_id]
-        log(f"{tab_id}: manual rename {current!r}; backing off")
-        return True
+    changed = False
+    if entry.get("set") is not None and current != entry["set"]:
+        entry["base"] = strip_status_prefix(current)
+        entry["manual"] = driver["pane_id"] if driver else True
+        log(f"{tab_id}: manual base title {entry['base']!r}")
+        changed = True
 
-    api(sock, "tab.rename", tab_id=tab_id, label=desired)
-    entry["set"] = desired
-    log(f"{tab_id}: {current!r} -> {desired!r}")
-    return True
+    previous_driver = entry.get("driver")
+    current_driver = driver["pane_id"] if driver else None
+    manual_driver = entry.get("manual")
+    if manual_driver is True and driver:
+        entry["manual"] = current_driver
+    elif manual_driver and driver and current_driver != manual_driver:
+        entry["manual"] = None
+
+    if entry.get("manual") is None:
+        if title is not None:
+            entry["base"] = title
+        elif driver and previous_driver and current_driver != previous_driver:
+            entry["base"] = str(tab.get("number") or "1")
+    entry["driver"] = current_driver
+
+    base = entry.get("base") or str(tab.get("number") or "1")
+    desired = f"{symbols} {base}" if symbols else base
+    if current != desired:
+        api(sock, "tab.rename", tab_id=tab_id, label=desired)
+        log(f"{tab_id}: {current!r} -> {desired!r}")
+        changed = True
+    if entry.get("set") != desired:
+        entry["set"] = desired
+        changed = True
+
+    if not symbols and title is None:
+        del book[tab_id]
+        changed = True
+    return changed
 
 
 def main() -> int:
@@ -174,36 +195,14 @@ def main() -> int:
             tabs = {t["tab_id"]: t for t in api(sock, "tab.list")["tabs"]}
             state = load_state(state_file)
 
-            focused = next((p for p in panes if p.get("focused")), None)
-            focused_tab_id = focused["tab_id"] if focused else None
             changed = False
 
-            if focused_tab_id in tabs:
-                changed |= sync_tab(sock, state_file, state, tabs[focused_tab_id], panes)
+            for tab in tabs.values():
+                changed |= sync_tab(sock, state, tab, panes)
 
-            # Keep every already-managed tab correct — covers the focused pane
-            # being closed (replacement may never get a pane.focused event)
-            # and background single-pane tabs driven by pane.exited.
-            for tab_id in list(state["tabs"]):
-                if tab_id == focused_tab_id:
-                    continue
-                tab = tabs.get(tab_id)
-                if tab is None:
-                    del state["tabs"][tab_id]  # tab is gone
-                    changed = True
-                    continue
-                changed |= sync_tab(sock, state_file, state, tab, panes)
-
-            # Direct trigger (pt <pane_id>): take over the reporting pane's
-            # background single-pane tab even if unmanaged — no ambiguity
-            # about which pane owns the title.
-            wanted = sys.argv[1] if len(sys.argv) > 1 else None
-            if wanted and wanted != (focused["pane_id"] if focused else None):
-                pane = next((p for p in panes if p["pane_id"] == wanted), None)
-                if pane:
-                    tab = tabs.get(pane["tab_id"])
-                    if tab and tab != tabs.get(focused_tab_id) and tab.get("pane_count") == 1:
-                        changed |= sync_tab(sock, state_file, state, tab, panes)
+            for tab_id in set(state["tabs"]) - set(tabs):
+                del state["tabs"][tab_id]
+                changed = True
 
             if changed:
                 save_state(state_file, state)

@@ -14,10 +14,8 @@ set -euo pipefail
 # - me.space-mover: move-left / move-right actions that shift the focused
 #   space sideways in the sidebar. Bound to Shift+Left/Right via [keys.command]
 #   in config.toml; inside tmux, tmux-app-key invokes the same actions.
-# - me.active-tab-title: renames the focused tab to the focused pane's
-#   label (else the tab number when the pane is untitled), so single-pane
-#   tabs show what split-pane borders would. Manual tab renames win until
-#   focus moves to another pane.
+# - me.active-tab-title: prefixes tabs with one monochrome status symbol per
+#   agent pane, and mirrors the focused pane's label.
 if command -v herdr > /dev/null; then
   # Plugin ids live in each manifest; extract them so the loop stays dumb.
   for plugin_dir in plugin plugin-move-space plugin-active-cwd plugin-active-tab-title; do

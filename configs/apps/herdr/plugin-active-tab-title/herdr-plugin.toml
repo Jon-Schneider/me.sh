@@ -1,14 +1,13 @@
 id = "me.active-tab-title"
 name = "Active Tab Title"
-version = "1.0.0"
-min_herdr_version = "0.8.0"
-description = "Mirror the focused pane's title (pane label, else agent name) into its tab title, updating on focus changes"
+version = "0.1.0"
+min_herdr_version = "0.8.2"
+description = "Prefix tab titles with one monochrome status symbol per agent pane and mirror the focused pane's label"
 platforms = ["macos"]
 
 # Event-driven, active-cwd style: herdr spawns this script on pane events
-# and once at startup. Only the focused tab is managed — background tabs
-# keep whatever label they had when last visible. A manual tab rename wins
-# until focus moves to a different pane.
+# and once at startup. Agent lifecycle events keep every pane's status symbol
+# current; focus events keep the active pane's label mirrored.
 
 [[startup]]
 command = ["/usr/bin/python3", "active_tab_title_on_event.py"]
@@ -22,7 +21,7 @@ on = "pane.created"
 command = ["/usr/bin/python3", "active_tab_title_on_event.py"]
 
 [[events]]
-on = "pane.updated"
+on = "pane.closed"
 command = ["/usr/bin/python3", "active_tab_title_on_event.py"]
 
 [[events]]
@@ -31,4 +30,24 @@ command = ["/usr/bin/python3", "active_tab_title_on_event.py"]
 
 [[events]]
 on = "pane.exited"
+command = ["/usr/bin/python3", "active_tab_title_on_event.py"]
+
+[[events]]
+on = "pane.agent_detected"
+command = ["/usr/bin/python3", "active_tab_title_on_event.py"]
+
+[[events]]
+on = "pane.agent_status_changed"
+command = ["/usr/bin/python3", "active_tab_title_on_event.py"]
+
+[[events]]
+on = "tab.focused"
+command = ["/usr/bin/python3", "active_tab_title_on_event.py"]
+
+[[events]]
+on = "tab.renamed"
+command = ["/usr/bin/python3", "active_tab_title_on_event.py"]
+
+[[events]]
+on = "tab.closed"
 command = ["/usr/bin/python3", "active_tab_title_on_event.py"]
