@@ -1,0 +1,60 @@
+#!/bin/bash
+# App-key router for Herdr custom keybindings (tmux-app-key successor).
+# Forwards Excel/editor keys to xlent or micro when one owns the focused pane;
+# otherwise performs the tmux-era fallback.
+#
+# Usage: herdr-app-key save|copy|up|down|left|right
+#
+# Keys.command commands run detached with HERDR_ACTIVE_PANE_ID set to the
+# focused pane.
+set -euo pipefail
+
+action="${1:?usage: herdr-app-key save|copy|up|down|left|right}"
+pane="${HERDR_ACTIVE_PANE_ID:?}"
+herdr_bin="${HERDR_BIN_PATH:-herdr}"
+
+foreground_apps=$("$herdr_bin" pane process-info --pane "$pane" |
+  jq -r '.result.process_info.foreground_processes[]?.name // empty')
+
+case "$action" in
+  save|copy)
+    # xlent consistently uses Windows-Excel-style Ctrl bindings; micro binds
+    # the same keys. Send nothing to shells: Ctrl+S freezes (XOFF) and Ctrl+C
+    # interrupts.
+    if grep -qx -e micro -e xlent <<<"$foreground_apps"; then
+      "$herdr_bin" pane send-keys "$pane" "ctrl+${action:0:1}"
+    elif [[ "$action" == save ]]; then
+      # Cmd+S sent a hunkdiff review back to the agent before the xlent
+      # router existed; keep that as the non-xlent/micro fallback.
+      "$herdr_bin" plugin action invoke jhochenbaum.hunkdiff.send-review \
+        --plugin jhochenbaum.hunkdiff
+    fi
+    ;;
+  up|down|left|right)
+    if grep -qx xlent <<<"$foreground_apps"; then
+      "$herdr_bin" pane send-keys "$pane" "shift+$action"
+    elif [[ "$action" == left || "$action" == right ]]; then
+      "$herdr_bin" plugin action invoke "move-$action" --plugin me.space-mover
+    else
+      # Shift+Up/Down cycled workspaces natively before this router took the
+      # keys; replicate it, wrapping in sidebar order.
+      target=$("$herdr_bin" workspace list | jq -r --arg dir "$action" '
+        .result.workspaces as $ws
+        | ([$ws[].workspace_id]) as $ids
+        | ([$ws[] | select(.focused) | .workspace_id][0]) as $cur
+        | if $cur == null then empty
+          else
+            ($ids | index($cur)) as $i
+            | if $dir == "up"
+              then $ids[((($i - 1) + ($ids | length)) % ($ids | length))]
+              else $ids[(($i + 1) % ($ids | length))]
+              end
+          end')
+      [[ -n "$target" ]] && "$herdr_bin" workspace focus "$target"
+    fi
+    ;;
+  *)
+    echo "unknown action: $action" >&2
+    exit 64
+    ;;
+esac

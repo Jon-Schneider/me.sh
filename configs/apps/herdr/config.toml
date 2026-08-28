@@ -31,8 +31,8 @@ rows = [
 # Space rearranging is provided by the me.space-mover plugin
 # (plugin-move-space/ in this directory). Its move-left/move-right actions
 # shift the focused space one slot sideways in the sidebar, keeping worktree
-# groups together. The [keys.command] entries below bind Shift+Left/Right to
-# those actions.
+# groups together. The herdr-app-key shift+left/right entries below invoke
+# those actions as their non-xlent fallback.
 
 # Prefix key: ctrl+space. All the
 # default prefix+... bindings below keep working; only the leader changes.
@@ -51,9 +51,9 @@ open_worktree = "cmd+shift+x"
 # hit the focus_pane_* defaults below. (Direct ctrl+shift+arrow chords were
 # tried and not recognized by herdr at runtime.)
 
-# Cycle workspaces with Shift+Up/Down.
-previous_workspace = "shift+up"
-next_workspace = "shift+down"
+# Shift+arrows no longer bind directly: they belong to the xlent-aware
+# ~/bin/herdr-app-key router below (xlent range selection when xlent owns the
+# focused pane; workspace cycling / space mover otherwise).
 
 # Cmd+W closes by preference: focused split pane, else active tab (no splits),
 # else the workspace when it holds the last tab. Ghostty sends raw Ctrl+W and
@@ -136,28 +136,56 @@ type = "shell"
 command = "$HOME/Developer/jsc/me.sh/configs/apps/herdr/tab-step.sh previous"
 description = "previous tab across workspaces"
 
-# Move the focused space left/right in the sidebar (me.space-mover plugin).
+# xlent/micro-aware chords. ~/bin/herdr-app-key forwards the Excel/editor key
+# to xlent or micro when one owns the focused pane; otherwise:
+#   save -> hunkdiff send-review (what Cmd+S did before the router)
+#   copy -> no-op (Ctrl+C would interrupt shells)
+#   shift+arrows -> xlent range selection when possible, else the tmux-era
+#     fallbacks: Shift+Left/Right move the focused space (me.space-mover),
+#     Shift+Up/Down cycle workspaces in sidebar order.
+# Cmd+X keeps its native new-worktree binding on prefix+shift+g (Ghostty sends
+# prefix+S/F for Cmd+S/Cmd+C; Cmd+V stays Ghostty's native paste).
+[[keys.command]]
+key = "prefix+shift+s"
+type = "shell"
+command = "$HOME/bin/herdr-app-key save"
+description = "save in xlent/micro"
+
+[[keys.command]]
+key = "prefix+shift+f"
+type = "shell"
+command = "$HOME/bin/herdr-app-key copy"
+description = "copy in xlent/micro"
+
+[[keys.command]]
+key = "shift+up"
+type = "shell"
+command = "$HOME/bin/herdr-app-key up"
+description = "xlent range up / previous workspace"
+
+[[keys.command]]
+key = "shift+down"
+type = "shell"
+command = "$HOME/bin/herdr-app-key down"
+description = "xlent range down / next workspace"
+
 [[keys.command]]
 key = "shift+left"
 type = "shell"
-command = "herdr plugin action invoke move-left --plugin me.space-mover"
+command = "$HOME/bin/herdr-app-key left"
+description = "xlent range left / move space left"
 
 [[keys.command]]
 key = "shift+right"
 type = "shell"
-command = "herdr plugin action invoke move-right --plugin me.space-mover"
+command = "$HOME/bin/herdr-app-key right"
+description = "xlent range right / move space right"
 
 [[keys.command]]
 key = "cmd+r"
 type = "plugin_action"
 command = "jhochenbaum.hunkdiff.review"
 description = "review changes in hunk"
-
-[[keys.command]]
-key = "prefix+shift+s"
-type = "plugin_action"
-command = "jhochenbaum.hunkdiff.send-review"
-description = "send hunk review to agent"
 
 [[keys.command]]
 key = "cmd+shift+f"

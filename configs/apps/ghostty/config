@@ -74,6 +74,12 @@ keybind = super+shift+up=text:\x00K
 keybind = super+shift+down=text:\x00J
 # Route macOS window-management chords through Herdr so it can manage spaces
 # and tabs while other panes retain their existing behavior.
+#   Cmd+S -> prefix+shift+s: ~/bin/herdr-app-key save (xlent/micro), else
+#           hunkdiff send-review (the pre-router Cmd+S behavior)
+#   Cmd+C -> prefix+shift+f: ~/bin/herdr-app-key copy (xlent/micro), else no-op
+#   Cmd+X -> prefix+shift+g: Herdr's native new-worktree binding (kept; cut in
+#           xlent is its native Ctrl+X)
+#   Cmd+V stays Ghostty's native paste (bracketed paste reaches xlent)
 keybind = super+w=text:\x17
 keybind = super+s=text:\x00S
 keybind = super+x=text:\x00G
