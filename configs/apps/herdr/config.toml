@@ -84,6 +84,7 @@ auto_switch = false
 agent_panel_sort = "priority"
 prompt_new_tab_name = false
 show_agent_labels_on_pane_borders = true
+right_click_passthrough_modifier = "option"
 
 # ☕ while the me.caffeinate plugin (plugin-caffeinate/ in this directory)
 # holds a `caffeinate -i` assertion, i.e. an agent is working or just finished
