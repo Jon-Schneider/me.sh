@@ -1,0 +1,48 @@
+id = "me.caffeinate"
+name = "Caffeinate"
+version = "0.1.0"
+min_herdr_version = "0.8.2"
+description = "Prevent macOS idle system sleep while Herdr agents are working"
+platforms = ["macos"]
+
+[[startup]]
+command = ["sh", "scripts/reconcile.sh"]
+
+[[events]]
+on = "pane.agent_status_changed"
+command = ["sh", "scripts/reconcile.sh"]
+
+[[events]]
+on = "pane.agent_detected"
+command = ["sh", "scripts/reconcile.sh"]
+
+[[events]]
+on = "pane.exited"
+command = ["sh", "scripts/reconcile.sh"]
+
+[[events]]
+on = "pane.closed"
+command = ["sh", "scripts/reconcile.sh"]
+
+# Cheap recovery trigger after a Herdr server restart or pane lifecycle change.
+[[events]]
+on = "pane.created"
+command = ["sh", "scripts/reconcile.sh"]
+
+[[actions]]
+id = "status"
+title = "Caffeinate: status"
+contexts = ["global", "workspace", "pane"]
+command = ["sh", "scripts/status.sh"]
+
+[[actions]]
+id = "reconcile"
+title = "Caffeinate: reconcile now"
+contexts = ["global", "workspace", "pane"]
+command = ["sh", "scripts/reconcile.sh"]
+
+[[actions]]
+id = "status-hook"
+title = "Caffeinate: show tab-bar status config"
+contexts = ["global", "workspace", "pane"]
+command = ["sh", "scripts/status-hook.sh"]

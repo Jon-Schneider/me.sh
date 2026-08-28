@@ -16,14 +16,21 @@ set -euo pipefail
 #   in config.toml.
 # - me.active-tab-title: prefixes tabs with one monochrome status symbol per
 #   agent pane, and mirrors the focused pane's label.
+# - me.caffeinate: holds a `caffeinate -i` assertion while any agent is
+#   working, released 30s after the last one stops. The ☕ it publishes is
+#   rendered by the tab_bar_right command entry in config.toml.
 if command -v herdr > /dev/null; then
   if ! herdr plugin list --plugin jhochenbaum.hunkdiff |
     grep -Fq -- '- jhochenbaum.hunkdiff ('; then
     herdr plugin install jhochenbaum/herdr-hunk-diff --yes
   fi
 
+  # The caffeinate plugin was briefly linked under its upstream id before being
+  # renamed to me.caffeinate; the loop below only unlinks current ids.
+  herdr plugin unlink herdr-caffeinate 2> /dev/null || true
+
   # Plugin ids live in each manifest; extract them so the loop stays dumb.
-  for plugin_dir in plugin plugin-move-space plugin-active-cwd plugin-active-tab-title; do
+  for plugin_dir in plugin plugin-move-space plugin-active-cwd plugin-active-tab-title plugin-caffeinate; do
     plugin_id="$(sed -n 's/^id *= *"\(.*\)"/\1/p' "$ME_UNIT_DIR/$plugin_dir/herdr-plugin.toml")"
     herdr plugin unlink "$plugin_id" 2> /dev/null || true
     herdr plugin link "$ME_UNIT_DIR/$plugin_dir"

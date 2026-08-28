@@ -85,6 +85,15 @@ agent_panel_sort = "priority"
 prompt_new_tab_name = false
 show_agent_labels_on_pane_borders = true
 
+# ☕ while the me.caffeinate plugin (plugin-caffeinate/ in this directory)
+# holds a `caffeinate -i` assertion, i.e. an agent is working or just finished
+# inside its 30-second grace period. Herdr plugins cannot register a tab-bar
+# segment themselves, so the plugin publishes a state file and this command
+# reads it — it never queries agents, so the 5s poll is nearly free.
+tab_bar_right = [
+  { type = "command", command = "$HOME/Developer/jsc/me.sh/configs/apps/herdr/plugin-caffeinate/bin/status-indicator $HOME/.local/state/herdr/plugins/me.caffeinate", interval_seconds = 5, timeout_seconds = 1 },
+]
+
 # Agent rows: state icon + workspace + short title (pt -t, typically a
 # ticket key) + agent name on one line; the body (pt -b, or bare `pt words`)
 # is word-wrapped onto up to two extra lines. Tokens are reported by ~/bin/pt
