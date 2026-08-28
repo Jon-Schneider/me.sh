@@ -157,3 +157,9 @@ key = "prefix+shift+s"
 type = "plugin_action"
 command = "jhochenbaum.hunkdiff.send-review"
 description = "send hunk review to agent"
+
+[[keys.command]]
+key = "cmd+shift+f"
+type = "plugin_action"
+command = "wilbeibi.catchup.fork"
+description = "fork session in a new pane"

@@ -20,10 +20,17 @@ set -euo pipefail
 #   working, released 30s after the last one stops. The ☕ it publishes is
 #   rendered by the tab_bar_right command entry in config.toml.
 if command -v herdr > /dev/null; then
-  if ! herdr plugin list --plugin jhochenbaum.hunkdiff |
-    grep -Fq -- '- jhochenbaum.hunkdiff ('; then
-    herdr plugin install jhochenbaum/herdr-hunk-diff --yes
-  fi
+  # Third-party plugins installed when missing.
+  third_party_plugins=(
+    jhochenbaum/herdr-hunk-diff
+    wilbeibi/herdr-catchup
+  )
+  for plugin_ref in "${third_party_plugins[@]}"; do
+    plugin_id="${plugin_ref##*/}"
+    if ! herdr plugin list --plugin "$plugin_id" 2>/dev/null | grep -Fq -- "- $plugin_id ("; then
+      herdr plugin install "$plugin_ref" --yes
+    fi
+  done
 
   # The caffeinate plugin was briefly linked under its upstream id before being
   # renamed to me.caffeinate; the loop below only unlinks current ids.
