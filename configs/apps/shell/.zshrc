@@ -197,6 +197,7 @@ load_non_git_aliases() {
     alias fm="nnn" # Open 'nnn' file manager in current dir
     alias hd="hunk diff"
     alias hm="cd ~/"
+    alias hr="herdr server reload-config" # herdr reload
     alias hst="history"
     alias hstg="hst | grep"
     alias hstr="fc -l -20" # Recent History
