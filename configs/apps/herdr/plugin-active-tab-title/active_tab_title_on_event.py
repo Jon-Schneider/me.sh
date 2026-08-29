@@ -5,9 +5,12 @@ Event-driven, no daemon. Each agent pane contributes Herdr's monochrome symbol
 to its tab: blocked ×, working ●, done ✓, idle ○, unknown ·. Split tabs show
 one spaced symbol per agent in pane-list order.
 
-The focused pane's label is mirrored into its tab title. Background single-pane
-tabs use their only pane; background split tabs retain their last base title.
-Manual tab renames become the new base title and retain the status symbol.
+The focused pane's label is mirrored into its tab title. A tab whose focused
+pane has no label falls back to its only pane, then to its only agent pane, so
+a split tab keeps showing its agent's label while a shell pane holds focus.
+Manual tab renames become the new base title and retain the status symbol; a
+tab herdr has reset to its bare number is not one, and a rename pinned to a
+pane that has since left the tab is released.
 
 Handlers take a non-blocking lock, reconcile every tab once, and exit. State
 diffs are idempotent, so dropped or duplicate spawns converge on the next event.
@@ -44,7 +47,15 @@ def socket_path() -> str:
 
 
 def state_path() -> str:
-    base = os.environ.get("HERDR_PLUGIN_STATE_DIR") or "/tmp"
+    """Herdr's own state dir for this plugin, so handlers it spawns and the ones
+    pt(1) spawns after a pane rename share one set of bookkeeping. Two state
+    files means each stream reads the other's renames as a manual rename."""
+    base = os.environ.get("HERDR_PLUGIN_STATE_DIR")
+    if not base:
+        state_home = os.environ.get("XDG_STATE_HOME") or os.path.expanduser(
+            "~/.local/state"
+        )
+        base = os.path.join(state_home, "herdr", "plugins", SOURCE)
     return os.path.join(base, "active-tab-title-state.json")
 
 
@@ -112,13 +123,17 @@ def status_symbols(tab: dict, panes: list) -> str:
 
 
 def driving_pane(panes: list, tab_id: str) -> dict | None:
+    """The pane the tab mirrors: focused-and-labelled, else its only agent."""
     in_tab = [p for p in panes if p.get("tab_id") == tab_id]
     focused = next((p for p in in_tab if p.get("focused")), None)
-    if focused:
+    if focused is not None and pane_title(focused):
         return focused
     if len(in_tab) == 1:
         return in_tab[0]
-    return None
+    agents = [p for p in in_tab if p.get("agent")]
+    if len(agents) == 1:
+        return agents[0]
+    return focused
 
 
 def sync_tab(sock: str, state: dict, tab: dict, panes: list) -> bool:
@@ -127,7 +142,8 @@ def sync_tab(sock: str, state: dict, tab: dict, panes: list) -> bool:
     book = state["tabs"]
     entry = book.get(tab_id)
     driver = driving_pane(panes, tab_id)
-    current = tab.get("label") or str(tab.get("number") or "1")
+    default_label = str(tab.get("number") or "1")
+    current = tab.get("label") or default_label
     symbols = status_symbols(tab, panes)
     title = pane_title(driver)
 
@@ -142,7 +158,13 @@ def sync_tab(sock: str, state: dict, tab: dict, panes: list) -> bool:
         }
 
     changed = False
-    if entry.get("set") is not None and current != entry["set"]:
+    # A label we did not write is a manual rename -- unless it is the bare tab
+    # number, which is herdr resetting the tab, not the user naming it.
+    if (
+        entry.get("set") is not None
+        and current != entry["set"]
+        and current != default_label
+    ):
         entry["base"] = strip_status_prefix(current)
         entry["manual"] = driver["pane_id"] if driver else True
         log(f"{tab_id}: manual base title {entry['base']!r}")
@@ -151,8 +173,12 @@ def sync_tab(sock: str, state: dict, tab: dict, panes: list) -> bool:
     previous_driver = entry.get("driver")
     current_driver = driver["pane_id"] if driver else None
     manual_driver = entry.get("manual")
+    tab_pane_ids = {p["pane_id"] for p in panes if p.get("tab_id") == tab_id}
     if manual_driver is True and driver:
         entry["manual"] = current_driver
+    elif isinstance(manual_driver, str) and manual_driver not in tab_pane_ids:
+        entry["manual"] = None
+        log(f"{tab_id}: released manual pin from departed {manual_driver}")
     elif manual_driver and driver and current_driver != manual_driver:
         entry["manual"] = None
 
@@ -160,10 +186,10 @@ def sync_tab(sock: str, state: dict, tab: dict, panes: list) -> bool:
         if title is not None:
             entry["base"] = title
         elif driver and previous_driver and current_driver != previous_driver:
-            entry["base"] = str(tab.get("number") or "1")
+            entry["base"] = default_label
     entry["driver"] = current_driver
 
-    base = entry.get("base") or str(tab.get("number") or "1")
+    base = entry.get("base") or default_label
     desired = f"{symbols} {base}" if symbols else base
     if current != desired:
         api(sock, "tab.rename", tab_id=tab_id, label=desired)
