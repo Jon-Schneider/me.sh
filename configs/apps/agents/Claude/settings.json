@@ -45,6 +45,17 @@
         "matcher": "Bash"
       }
     ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "command": "/Users/$(whoami)/bin/agent-issue-hook",
+            "timeout": 5,
+            "type": "command"
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [

@@ -17,7 +17,7 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 const HOOK = `${process.env.HOME}/bin/agent-issue-hook`;
 
 export default function (pi: ExtensionAPI) {
-	pi.on("before_agent_start", (event) => {
+	pi.on("before_agent_start", (event, ctx) => {
 		let child;
 		try {
 			child = spawn(HOOK, { stdio: ["pipe", "ignore", "ignore"], detached: true });
@@ -31,7 +31,8 @@ export default function (pi: ExtensionAPI) {
 			JSON.stringify({
 				hook_event_name: "UserPromptSubmit",
 				prompt: event.prompt,
-				cwd: event.systemPromptOptions.cwd,
+				session_id: ctx.sessionManager.getSessionId(),
+				cwd: ctx.cwd,
 			}),
 		);
 	});
