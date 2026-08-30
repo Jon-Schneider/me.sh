@@ -9,8 +9,6 @@ symlinks:
     dest: $HOME/.config/opencode/opencode-shared.json
   - src: AGENTS.md
     dest: $HOME/.pi/agent/AGENTS.md
-  - src: Pi/settings.json
-    dest: $HOME/.pi/agent/settings.json
   - src: Pi/extensions/dcg-guard.ts
     dest: $HOME/.pi/agent/extensions/dcg-guard.ts
   - src: Pi/extensions/issue-pane-title.ts
