@@ -641,6 +641,7 @@ export default function btwExtension(pi: ExtensionAPI) {
 
   pi.registerCommand("btw", {
     description: "Side conversation (btw) — full-pane Codex-style",
+    argumentHint: "[question]",
     handler: async (args, ctx) => {
       uiCtx = ctx;
       if (!guardStarted(ctx)) return;
@@ -654,6 +655,7 @@ export default function btwExtension(pi: ExtensionAPI) {
 
   pi.registerCommand("btw:new", {
     description: "Open a new btw side conversation",
+    argumentHint: "[question]",
     handler: async (args, ctx) => {
       uiCtx = ctx;
       if (!guardStarted(ctx)) return;
