@@ -13,5 +13,12 @@
     "npm:@eko24ive/pi-ask",
     "npm:pi-subagents"
   ],
-  "hideThinkingBlock": true
+  "hideThinkingBlock": true,
+  "enabledModels": [
+    "opencode-go/glm-5.3-flash",
+    "opencode-cli/opencode/muse-spark-1.2-contributor-free",
+    "opencode-go/muse-spark-1.2-contributor",
+    "openai-codex/gpt-5.6-sol",
+    "openai-codex/gpt-5.6-luna"
+  ]
 }
