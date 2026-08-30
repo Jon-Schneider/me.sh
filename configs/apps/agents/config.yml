@@ -17,6 +17,10 @@ symlinks:
     dest: $HOME/.pi/agent/extensions/statusline.ts
   - src: Pi/statusline.json
     dest: $HOME/.pi/agent/statusline.json
+  - src: Skills/use-pi-agents
+    dest: $HOME/.claude/skills/use-pi-agents
+  - src: Skills/use-pi-agents
+    dest: $HOME/.codex/skills/use-pi-agents
   - src: Skills/claude-review
     dest: $HOME/.agents/skills/claude-review
   - src: Skills/codex-review
