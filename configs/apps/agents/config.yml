@@ -33,6 +33,10 @@ symlinks:
     dest: $HOME/.agents/skills/hate-reviewer-cycle
   - src: Skills/hate-reviewer-cycle
     dest: $HOME/.claude/skills/hate-reviewer-cycle
+  - src: Skills/investigate
+    dest: $HOME/.agents/skills/investigate
+  - src: Skills/investigate
+    dest: $HOME/.claude/skills/investigate
   - src: Skills/patch-commit
     dest: $HOME/.agents/skills/patch-commit
   - src: Skills/patch-commit
