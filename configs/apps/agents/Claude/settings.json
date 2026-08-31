@@ -68,6 +68,7 @@
     ]
   },
   "model": "opus",
+  "outputStyle": "Concise",
   "permissions": {
     "allow": [
       "Bash(diff:*)",
