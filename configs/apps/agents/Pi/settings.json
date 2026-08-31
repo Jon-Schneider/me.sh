@@ -2,11 +2,7 @@
   "theme": "dark",
   "defaultThinkingLevel": "medium",
   "packages": [
-    "npm:pi-omlx-picker",
-    "npm:opencode-pi",
-    "npm:pi-nvidia-nim",
     "npm:pi-goal",
-    "npm:remote-pi",
     "npm:@eko24ive/pi-ask",
     "npm:pi-subagents",
     "npm:pi-paster"
