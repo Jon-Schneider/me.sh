@@ -8,7 +8,8 @@
     "npm:pi-goal",
     "npm:remote-pi",
     "npm:@eko24ive/pi-ask",
-    "npm:pi-subagents"
+    "npm:pi-subagents",
+    "npm:pi-paster"
   ],
   "hideThinkingBlock": true
 }
