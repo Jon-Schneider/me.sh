@@ -88,10 +88,31 @@ section is preserved. Symlinks deploy first, followed by copies. A manifest
 with no rows remains useful for a unit containing only managed files,
 `post.sh`, or both.
 
+`dest` is either one destination string or a non-empty list of them, which
+keeps one source that deploys to several tools on a single row:
+
+```yaml
+symlinks:
+  - src: Skills/patch-commit
+    dest:
+      - $HOME/.agents/skills/patch-commit
+      - $HOME/.claude/skills/patch-commit
+      - $HOME/.codex/skills/patch-commit
+```
+
+A list row is exactly equivalent to repeating the row once per destination:
+the parser fans it out before anything else sees it, so validation, collision
+detection, planning, deployment, drift review, `me add`, and `me remove` all
+keep operating on single-destination rows. Each destination is validated and
+claimed independently, including against the other destinations in its own
+list. `me add` grows an existing single row's `dest` into a list rather than
+duplicating the row; `me remove` drops one destination from a list, collapsing
+it back to a string when one remains and deleting the row when none do.
+
 The schema deliberately has no general interpolation and no embedded shell:
 
 - `src` is a path relative to the unit directory.
-- `dest` accepts only a literal `$HOME/` prefix.
+- every `dest` accepts only a literal `$HOME/` prefix.
 - Destinations name the final link path. A trailing directory used to request
   `ln`'s implicit-basename behavior is rejected.
 - Unknown sections and keys are errors rather than silently ignored.

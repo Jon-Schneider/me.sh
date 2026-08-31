@@ -220,7 +220,14 @@ function remove_edit_manifests {
 		section="${remove_section[i]}"
 		src="${remove_src[i]}"
 		dest="${remove_dest[i]}"
-		SRC="$src" DEST="$dest" yq -i "del(.${section}[] | select(.src == strenv(SRC) and .dest == strenv(DEST)))" "$manifest" \
+		# A row may fan one src out to several destinations, so drop just the
+		# planned destination, then the row itself once nothing is left. A list
+		# that ends up with one destination collapses back to a plain string.
+		SRC="$src" DEST="$dest" yq -i "
+			(.${section}[] | select(.src == strenv(SRC) and (.dest | type) == \"!!seq\")).dest |= map(select(. != strenv(DEST)))
+			| del(.${section}[] | select(.src == strenv(SRC) and ((.dest == strenv(DEST)) or ((.dest | type) == \"!!seq\" and (.dest | length) == 0))))
+			| (.${section}[] | select(.src == strenv(SRC) and (.dest | type) == \"!!seq\" and (.dest | length) == 1)).dest |= .[0]
+		" "$manifest" \
 			|| { error "Could not update $manifest"; exit 1; }
 	done
 remove_touched_units

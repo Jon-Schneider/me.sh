@@ -10,7 +10,18 @@ The repository is organized by lifecycle:
 - `configs/apps/` and `configs/macos/` contain convergent configuration units. A unit is either declarative (`config.yml`, plus optional `post.sh`) or legacy (`configure_*.sh`). These are the only units included in `me all`; an optional numeric directory prefix controls ordering without becoming part of the public name.
 - `lib/` contains implementation shared by the runner and configuration scripts.
 
-Config files live inside their unit directory. A declarative `config.yml` lists ordinary symlinks and static copies; managed files remain declared by their own `<file>.d/dest` markers and are deployed automatically. `configs/macos/00-homebrew/configure_homebrew.sh` runs first during `me all`, so the Brewfile (including the `yq` manifest parser) is reconciled before dependent units.
+Config files live inside their unit directory. A declarative `config.yml` lists ordinary symlinks and static copies; managed files remain declared by their own `<file>.d/dest` markers and are deployed automatically. A row's `dest` is either one path or a list of paths, so one source deploys to several destinations without repeating the row:
+
+```yaml
+symlinks:
+  - src: Skills/patch-commit
+    dest:
+      - $HOME/.agents/skills/patch-commit
+      - $HOME/.claude/skills/patch-commit
+      - $HOME/.codex/skills/patch-commit
+```
+
+`configs/macos/00-homebrew/configure_homebrew.sh` runs first during `me all`, so the Brewfile (including the `yq` manifest parser) is reconciled before dependent units.
 
 Most config files are symlinked into place, so editing either side edits both. Manifest `copies:` rows deploy ordinary materialized copies. Files marked **managed** -- a gitignored ```<file>.d/``` overlay directory next to them containing a tracked ```dest``` marker naming the deploy path -- are deployed as composed copies: the repo base file merged with machine-local fragments (```.json```/```.yaml```/```.yml```/```.toml``` deep-merge; executables act as stdin/stdout transformers). Apps that rewrite either kind of copy only touch the deployed file, so their changes never reach the repo implicitly. Run ```me diff <name>``` to preview copy drift and ```me up <name>``` (alias ```absorb```) to interactively pull chosen hunks back into the source file. Full managed-file manual: ```docs/merged-configs.md```.
 

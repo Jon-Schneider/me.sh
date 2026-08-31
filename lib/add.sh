@@ -95,6 +95,30 @@ function add_find_unit_dir {
 	return 0
 }
 
+# True when SECTION already maps SRC to DEST, whether DEST sits in a plain
+# string row or inside a fanned-out destination list.
+function add_row_exists {
+	local manifest="$1" section="$2" src="$3" dest="$4" row_src row_dest
+	while IFS=$'\t' read -r row_src row_dest; do
+		if [[ "$row_src" == "$src" && "$row_dest" == "$dest" ]]; then
+			return 0
+		fi
+	done < <(manifest_rows "$manifest" "$section")
+	return 1
+}
+
+# Record SRC -> DEST in SECTION. A single existing row for SRC grows a
+# destination list rather than being duplicated; anything else appends a row.
+function add_manifest_row {
+	local manifest="$1" section="$2" src="$3" dest="$4" existing
+	existing="$(SRC="$src" yq -r ".${section} // [] | map(select(.src == strenv(SRC))) | length" "$manifest")" || return 1
+	if [[ "$existing" == 1 ]]; then
+		SRC="$src" DEST="$dest" yq -i "(.${section}[] | select(.src == strenv(SRC))).dest |= (([.] | flatten(1)) + [strenv(DEST)])" "$manifest"
+	else
+		SRC="$src" DEST="$dest" yq -i ".${section} += [{\"src\": strenv(SRC), \"dest\": strenv(DEST)}]" "$manifest"
+	fi
+}
+
 # True when EXPANDED_DEST is already claimed by UNIT's manifest rows or managed
 # markers, so adding another row would make the unit invalid.
 function add_dest_claimed_in_unit {
@@ -238,12 +262,12 @@ function run_add {
 	if [[ "$new_unit" == 1 || ! -f "$manifest" ]]; then
 		printf '%s:\n  - src: %s\n    dest: %s\n' "$link_type" "$base" "$dest" > "$manifest"
 		message "Created $(manifest_relative "$manifest")"
-	elif [[ "$(SRC="$base" DEST="$dest" yq -r ".${link_type} // [] | map(select(.src == strenv(SRC) and .dest == strenv(DEST))) | length" "$manifest")" != 0 ]]; then
+	elif add_row_exists "$manifest" "$link_type" "$base" "$dest"; then
 		message "$(manifest_relative "$manifest") already maps $base -> $dest; nothing to change"
 	elif add_dest_claimed_in_unit "$unit_dir" "$expanded_dest"; then
 		error "$(manifest_relative "$unit_dir") already claims $dest; remove that row first" >&2
 		exit 1
-	elif SRC="$base" DEST="$dest" yq -i ".${link_type} += [{\"src\": strenv(SRC), \"dest\": strenv(DEST)}]" "$manifest"; then
+	elif add_manifest_row "$manifest" "$link_type" "$base" "$dest"; then
 		message "Updated $(manifest_relative "$manifest")"
 	else
 		error "Could not update $manifest"

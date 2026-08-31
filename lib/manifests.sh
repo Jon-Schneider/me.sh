@@ -23,11 +23,13 @@ function manifest_relative {
 	printf '%s' "${1#"$MANIFEST_REPO_ROOT"/}"
 }
 
-# Print src<TAB>literal-dest rows in manifest order. Callers must validate the
-# manifest first, so TSV is safe: tabs and newlines are rejected by validation.
+# Print src<TAB>literal-dest rows in manifest order. A row whose dest is a list
+# fans out into one row per destination, so every caller keeps seeing flat
+# single-destination rows. Callers must validate the manifest first, so TSV is
+# safe: tabs and newlines are rejected by validation.
 function manifest_rows {
 	# yq emits one newline even when an optional list has no rows.
-	yq -r "(.${2} // [])[] | [.src, .dest] | @tsv" "$1" | sed '/^$/d'
+	yq -r "(.${2} // [])[] | .src as \$src | ([.dest] | flatten(1) | .[]) | [\$src, .] | @tsv" "$1" | sed '/^$/d'
 }
 
 function manifest_symlink_rows {
@@ -88,12 +90,16 @@ function validate_manifest_schema {
 			(type == "!!map") and
 			(((keys - ["src", "dest"]) | length) == 0) and
 			((keys | length) == 2) and
-			(((.src | type) == "!!str") and ((.dest | type) == "!!str")) and
-			((.src != "") and (.dest != "")) and
-			(((.src | test("[\\t\\n]") | not)) and ((.dest | test("[\\t\\n]") | not)))
+			((.src | type) == "!!str") and
+			(.src != "") and
+			((.src | test("[\\t\\n]")) | not) and
+			(((.dest | type) == "!!str") or (((.dest | type) == "!!seq") and ((.dest | length) > 0))) and
+			([.dest] | flatten(1) | all_c(
+				(type == "!!str") and (. != "") and ((test("[\\t\\n]")) | not)
+			))
 		))
 	' "$manifest" &>/dev/null; then
-		error "$(manifest_relative "$manifest"): expected only 'symlinks' and 'copies', containing exact string src/dest rows"
+		error "$(manifest_relative "$manifest"): expected only 'symlinks' and 'copies', containing string src rows whose dest is a string or a non-empty list of strings"
 		return 1
 	fi
 }

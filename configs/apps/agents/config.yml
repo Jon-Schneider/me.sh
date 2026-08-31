@@ -1,14 +1,13 @@
 symlinks:
   - src: AGENTS.md
-    dest: $HOME/.agents/AGENTS.md
-  - src: AGENTS.md
-    dest: $HOME/.claude/CLAUDE.md
+    dest:
+      - $HOME/.agents/AGENTS.md
+      - $HOME/.claude/CLAUDE.md
+      - $HOME/.pi/agent/AGENTS.md
   - src: Claude/statusline-command.sh
     dest: $HOME/.claude/statusline-command.sh
   - src: Opencode/opencode.json
     dest: $HOME/.config/opencode/opencode-shared.json
-  - src: AGENTS.md
-    dest: $HOME/.pi/agent/AGENTS.md
   - src: Pi/extensions/dcg-guard.ts
     dest: $HOME/.pi/agent/extensions/dcg-guard.ts
   - src: Pi/extensions/issue-pane-title.ts
@@ -18,35 +17,34 @@ symlinks:
   - src: Pi/statusline.json
     dest: $HOME/.pi/agent/statusline.json
   - src: Skills/use-pi-agents
-    dest: $HOME/.claude/skills/use-pi-agents
-  - src: Skills/use-pi-agents
-    dest: $HOME/.codex/skills/use-pi-agents
+    dest:
+      - $HOME/.claude/skills/use-pi-agents
+      - $HOME/.codex/skills/use-pi-agents
   - src: Skills/claude-review
     dest: $HOME/.agents/skills/claude-review
   - src: Skills/codex-review
     dest: $HOME/.claude/skills/codex-review
   - src: Skills/hate-review
-    dest: $HOME/.agents/skills/hate-review
-  - src: Skills/hate-review
-    dest: $HOME/.claude/skills/hate-review
+    dest:
+      - $HOME/.agents/skills/hate-review
+      - $HOME/.claude/skills/hate-review
   - src: Skills/hate-reviewer-cycle
-    dest: $HOME/.agents/skills/hate-reviewer-cycle
-  - src: Skills/hate-reviewer-cycle
-    dest: $HOME/.claude/skills/hate-reviewer-cycle
+    dest:
+      - $HOME/.agents/skills/hate-reviewer-cycle
+      - $HOME/.claude/skills/hate-reviewer-cycle
   - src: Skills/investigate
-    dest: $HOME/.agents/skills/investigate
-  - src: Skills/investigate
-    dest: $HOME/.claude/skills/investigate
+    dest:
+      - $HOME/.agents/skills/investigate
+      - $HOME/.claude/skills/investigate
   - src: Skills/patch-commit
-    dest: $HOME/.agents/skills/patch-commit
-  - src: Skills/patch-commit
-    dest: $HOME/.claude/skills/patch-commit
-  - src: Skills/patch-commit
-    dest: $HOME/.codex/skills/patch-commit
+    dest:
+      - $HOME/.agents/skills/patch-commit
+      - $HOME/.claude/skills/patch-commit
+      - $HOME/.codex/skills/patch-commit
   - src: Skills/rewrite-pr-history
-    dest: $HOME/.agents/skills/rewrite-pr-history
-  - src: Skills/rewrite-pr-history
-    dest: $HOME/.claude/skills/rewrite-pr-history
+    dest:
+      - $HOME/.agents/skills/rewrite-pr-history
+      - $HOME/.claude/skills/rewrite-pr-history
   - src: bin/agent-issue-hook
     dest: $HOME/bin/agent-issue-hook
   - src: bin/agent-issue-hook-worker
