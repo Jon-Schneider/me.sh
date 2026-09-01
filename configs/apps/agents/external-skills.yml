@@ -1,0 +1,9 @@
+agents:
+  - claude-code
+  - codex
+  - opencode
+  - pi
+
+skills:
+  - source: mattpocock/skills
+    name: grilling
