@@ -6,6 +6,7 @@
     "npm:@eko24ive/pi-ask",
     "npm:pi-subagents",
     "npm:pi-paster"
+    "npm:@thunstack/pi-task-list"
   ],
   "hideThinkingBlock": true
 }
