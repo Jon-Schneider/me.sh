@@ -204,7 +204,9 @@ load_non_git_aliases() {
     alias jira="acli jira"
     alias jks="jekyll serve"
     alias jr="jira"
-    alias js="cd ~/Developer/jsc"
+    alias j="cd ~/Developer/jsc"
+    alias js="j"
+    alias jsc="j"
     alias kr="sudo killall Karabiner-Core-Service" # Karabiner Restart
     alias lib="open ~/Library"
     alias ls='ls -aG1 $@'
