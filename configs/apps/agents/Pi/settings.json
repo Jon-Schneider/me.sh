@@ -5,8 +5,10 @@
     "npm:pi-goal",
     "npm:@eko24ive/pi-ask",
     "npm:pi-subagents",
-    "npm:pi-paster"
-    "npm:@thunstack/pi-task-list"
+    "npm:pi-paster",
+    "npm:@thunstack/pi-task-list",
+    "npm:pi-msg-queue"
+
   ],
   "hideThinkingBlock": true
 }
