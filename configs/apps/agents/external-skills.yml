@@ -7,3 +7,5 @@ agents:
 skills:
   - source: mattpocock/skills
     name: grilling
+  - source: humanlayer/Skills
+    name: show-me
