@@ -367,7 +367,8 @@ function drift_files_under_unit {
 declare -a drift_filters=()
 
 # Sweep results shared by status / diff / up.
-declare -a drift_src=() drift_dst=() drift_base=() drift_kind=()
+declare -a drift_src=() drift_dst=() drift_base=() drift_kind=() drift_unit=()
+declare drift_scope=""
 declare -a drift_undeployed_src=() drift_undeployed_dst=()
 declare drift_tmp="" drift_clean_count=0
 
@@ -440,15 +441,17 @@ function parse_drift_args {
 	local scope="" arg
 	selected=()
 	drift_filters=()
+	drift_scope=""
 	if (( $# > 0 )); then
 		case "$1" in
-			all) select_drift_scripts ""; return ;;
+			all) select_drift_scripts ""; drift_scope="all"; return ;;
 			app|apps) scope="$APPS_SCOPE"; shift ;;
 			mac|macos|sys|system) scope="$MACOS_SCOPE"; shift ;;
 		esac
 	fi
 	if (( $# == 0 )); then
 		select_drift_scripts "$scope"
+		drift_scope="$scope"
 		return
 	fi
 	for arg in "$@"; do
@@ -457,6 +460,7 @@ function parse_drift_args {
 	if (( ${#selected[@]} == 0 )); then
 		select_drift_scripts "$scope"
 	fi
+	drift_scope="$scope"
 }
 
 # Prepare each unit's deployable baselines and fill the sweep arrays, applying
@@ -468,6 +472,7 @@ function collect_drift_files {
 	drift_dst=()
 	drift_base=()
 	drift_kind=()
+	drift_unit=()
 	drift_undeployed_src=()
 	drift_undeployed_dst=()
 	drift_clean_count=0
@@ -515,6 +520,7 @@ function collect_drift_files {
 			drift_dst+=("$dst")
 			drift_base+=("$baseline")
 			drift_kind+=("$kind")
+			drift_unit+=("$unit")
 		done < <(drift_files_under_unit "$unit")
 	done
 	if (( ${#drift_filters[@]} > 0 && considered == 0 )); then
