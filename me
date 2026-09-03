@@ -367,7 +367,7 @@ function drift_files_under_unit {
 declare -a drift_filters=()
 
 # Sweep results shared by status / diff / up.
-declare -a drift_src=() drift_dst=() drift_base=()
+declare -a drift_src=() drift_dst=() drift_base=() drift_kind=()
 declare -a drift_undeployed_src=() drift_undeployed_dst=()
 declare drift_tmp="" drift_clean_count=0
 
@@ -467,6 +467,7 @@ function collect_drift_files {
 	drift_src=()
 	drift_dst=()
 	drift_base=()
+	drift_kind=()
 	drift_undeployed_src=()
 	drift_undeployed_dst=()
 	drift_clean_count=0
@@ -513,6 +514,7 @@ function collect_drift_files {
 			drift_src+=("$src")
 			drift_dst+=("$dst")
 			drift_base+=("$baseline")
+			drift_kind+=("$kind")
 		done < <(drift_files_under_unit "$unit")
 	done
 	if (( ${#drift_filters[@]} > 0 && considered == 0 )); then
@@ -544,11 +546,168 @@ function run_status {
 	rm -rf "$drift_tmp"
 }
 
+# Config format for fragment extraction, derived from the managed base suffix.
+function absorb_format_for {
+	case "$1" in
+		*.yaml|*.yml) printf 'yaml' ;;
+		*.toml) printf 'toml' ;;
+		*) printf 'json' ;;
+	esac
+}
+
+# Print the repo-relative fragment path that should receive local hunks for
+# managed base SRC. Lists merge fragments (*.json/*.yaml/*.yml/*.toml) plus a
+# create-new option; ABSORB_FRAGMENT skips the prompt (path or 'new').
+function pick_absorb_fragment {
+	local src="$1" frag
+	local overlay_dir="$repo_root/${src}.d"
+	local -a fragments=()
+	if [[ -d "$overlay_dir" ]]; then
+		while IFS= read -r frag; do
+			case "$frag" in
+				*.json|*.yaml|*.yml|*.toml) fragments+=("$frag") ;;
+			esac
+		done < <(ls "$overlay_dir" 2>/dev/null | LC_ALL=C sort)
+	fi
+	if [[ -n "${ABSORB_FRAGMENT:-}" ]]; then
+		if [[ "$ABSORB_FRAGMENT" == new ]]; then
+			: # fall through to auto-name below
+		else
+			printf '%s\n' "$ABSORB_FRAGMENT"
+			return 0
+		fi
+	fi
+	local i=1 existing="${fragments[*]:-}"
+	local suggestion="20-local.json"
+	if [[ -n "$existing" ]]; then
+		local max=0 num
+		for frag in "${fragments[@]}"; do
+			if [[ "$frag" =~ ^([0-9]+)- ]]; then
+			num="${BASH_REMATCH[1]}"
+			(( num > max )) && max="$num"
+			fi
+		done
+		printf -v suggestion "%02d-local.json" "$(( max + 10 ))"
+	fi
+	if [[ ! -t 0 && -z "${ABSORB_FRAGMENT:-}" ]]; then
+		printf '%s\n' "${src}.d/$suggestion"
+		return 0
+	fi
+	if (( ${#fragments[@]} > 0 )); then
+		message "Local fragments for $src:"
+		for (( i=0; i<${#fragments[@]}; i++ )); do
+			printf '  %d) %s\n' "$(( i + 1 ))" "${fragments[i]}" >&2
+		done
+		printf '  n) new: %s\n' "$suggestion" >&2
+	fi
+	local answer
+	if [[ "${ABSORB_FRAGMENT:-}" == new ]]; then
+		answer=n
+	else
+		printf 'Fragment for local hunks [n]: ' >&2
+		IFS= read -r answer </dev/tty 2>/dev/null || answer=""
+		[[ -z "$answer" ]] && answer=n
+	fi
+	if [[ "$answer" == [Nn] || -z "$answer" ]]; then
+		local name="$suggestion"
+		if [[ -z "${ABSORB_FRAGMENT:-}" ]] && : </dev/tty 2>/dev/null; then
+			printf 'New fragment name [%s]: ' "$suggestion" >&2
+			IFS= read -r frag </dev/tty 2>/dev/null || frag=""
+			[[ -n "$frag" ]] && name="$frag"
+		fi
+		printf '%s\n' "${src}.d/$name"
+		return 0
+	fi
+	if [[ "$answer" =~ ^[0-9]+$ ]] && (( answer >= 1 && answer <= ${#fragments[@]} )); then
+		printf '%s\n' "${src}.d/${fragments[answer-1]}"
+		return 0
+	fi
+	case "$answer" in
+		*.json|*.yaml|*.yml|*.toml)
+			printf '%s\n' "${src}.d/$(basename "$answer")"
+			return 0
+			;;
+		?*)
+			printf '%s\n' "${src}.d/$answer.json"
+			return 0
+			;;
+	esac
+	printf '%s\n' "${src}.d/$suggestion"
+}
+
 # Diff every materialized file in 'selected' against its deployable repo state.
 # Managed files compare against a fresh composition; plain copies compare
 # directly against their manifest source. MODE 'show' renders one combined
 # colored git diff for the whole sweep; 'absorb' reviews each drifted file
-# separately and lets the user keep chosen hunks in the repo source.
+# separately, then routes each kept hunk per-hunk to the repo base (default)
+# or a machine-local overlay fragment (managed files only).
+function absorb_route_kept {
+	local idx="$1" src="$2" dst="$3" scratch="$4" picked="$5" difffile="$6" tmp="$7"
+	local kind="${drift_kind[idx]}"
+	if [[ "$kind" != managed ]]; then
+		if git apply "$picked"; then
+			return 0
+		fi
+		error "Some hunks could not be applied to $src; edit it manually (diff saved at $difffile)"
+		return 1
+	fi
+	local base_patch="$tmp/base-$idx" local_patch="$tmp/local-$idx"
+	if ! lib/absorb_destinations.py "$base_patch" "$local_patch" < "$picked"; then
+		error "Destination routing failed for $src (diff saved at $difffile)"
+		return 1
+	fi
+	local base_n=0 local_n=0
+	[[ -s "$base_patch" ]] && base_n=$(grep -c '^@@' "$base_patch" || true)
+	[[ -s "$local_patch" ]] && local_n=$(grep -c '^@@' "$local_patch" || true)
+	if [[ -s "$base_patch" ]] && ! git apply "$base_patch"; then
+		error "Some base hunks could not be applied to $src; edit it manually (diff saved at $difffile)"
+		return 1
+	fi
+	if [[ ! -s "$local_patch" ]]; then
+		return 0
+	fi
+	local desired="$tmp/desired-$idx" baseline2="$tmp/baseline2-$idx" needed="$tmp/needed-$idx.json"
+	git -C "$scratch" reset -q
+	git -C "$scratch" checkout -- "$src"
+	if ! git -C "$scratch" apply "$picked"; then
+		error "Could not reconstruct desired state for $src (diff saved at $difffile)"
+		return 1
+	fi
+	cp "$scratch/$src" "$desired"
+	local rc=0
+	compose_file "$repo_root/$src" "$baseline2" || rc=$?
+	if (( rc == 2 )); then
+		cp "$repo_root/$src" "$baseline2"
+	elif (( rc != 0 )); then
+		error "Compose failed for $src; local hunks left unapplied (diff saved at $difffile)"
+		return 1
+	fi
+	local fmt
+	fmt="$(absorb_format_for "$src")"
+	if ! lib/fragment_extract.py "$baseline2" "$desired" --format "$fmt" > "$needed"; then
+		error "Local hunks for $src delete or reorder content, which fragments cannot express; re-run and route them to base (diff saved at $difffile)"
+		return 1
+	fi
+	if [[ -z "$(tr -d '[:space:]' < "$needed")" || "$(tr -d '[:space:]' < "$needed")" == "{}" ]]; then
+		message "Local selection for $src is already covered; nothing to write"
+		return 0
+	fi
+	local frag_rel frag_abs
+	frag_rel="$(pick_absorb_fragment "$src")"
+	frag_abs="$repo_root/$frag_rel"
+	mkdir -p "$(dirname "$frag_abs")"
+	if [[ -f "$frag_abs" ]]; then
+		if ! lib/deep_merge.py "$frag_abs" "$needed"; then
+			error "Could not merge local hunks into $frag_rel (needed fragment saved at $needed)"
+			return 1
+		fi
+	else
+		cp "$needed" "$frag_abs"
+	fi
+	message "Absorbed $local_n hunk(s) into $frag_rel ($base_n to base)"
+	return 0
+}
+
 function run_drift {
 	local mode="$1" src dst tmp rc i applied=0 files=0 failed_apply=0
 
@@ -614,11 +773,10 @@ function run_drift {
 			lib/hunk_selector.py < "$difffile" > "$picked"
 		fi
 		if [[ -s "$picked" ]]; then
-			if git apply "$picked"; then
+			if absorb_route_kept "$i" "$src" "$dst" "$scratch" "$picked" "$difffile" "$tmp"; then
 				(( ++files ))
 				applied=$(( applied + $(grep -c '^@@' "$picked" || true) ))
 			else
-				error "Some hunks could not be applied to $src; edit it manually (diff saved at $difffile)"
 				failed_apply=1
 				continue
 			fi
@@ -827,7 +985,7 @@ Usage:
   me diff [app|macos] [<name>|<path>...]
                               Show one combined drift diff
   me up [app|macos] [<name>|<path>...]
-                              Review drift hunk by hunk, keep what you want
+                              Review drift hunk by hunk, route each to base or a local fragment
 
 A manifest unit is named by its directory (e.g. 'yojam' or 'karabiner'). A
 legacy name matches either its config directory or its configure script. With
@@ -862,7 +1020,7 @@ Examples:
   me status app               Same, restricted to app configs
   me diff ~/.gitconfig        Scope a diff by deployed path
   me diff ghostty/config      Path filters match either side on '/' boundaries
-  me up                       Review drift everywhere, keep what you want
+  me up                       Review drift everywhere, route hunks to base or local fragments
   me doctor                   Validate the complete config registry
   me plan yojam               Validate and preview one unit
   me plan app                 Preview every app unit

@@ -96,7 +96,7 @@ me absorb agents        # older name, same thing
 - **Drift** is everything the deployed copy contains beyond its deployable repo state: the manifest source for a static copy, or a fresh base-plus-overlays composition for a managed file. That includes app-written runtime state, formatting churn, and edits made directly to the live file.
 - `me status`, `me diff`, and `me up` accept unit names and/or path filters. A path filter matches on `/` boundaries against either side — repo source or deployed destination — so `ghostty/config`, `~/.gitconfig`, and `configs/apps/git` all work; arguments containing `/` are always paths, bare words resolve as config names first, and multiple filters union.
 - `me diff` renders one combined `git diff` covering every drifted static or managed copy (`a/` = repo side, `b/` = live side), so the whole sweep pages through your git config (delta, less, …) in a single session whenever stdout is a terminal; plain when piped. Read-only.
-- `me up` reviews hunks with native `git add -p`: `[y]` stage, `[n]` skip, `[a]` stage the rest of this file, `[d]` skip the rest, `[s]` split, `[e]` edit, `[?]` help. Staged hunks are applied to the **repo source** with `git apply`; declined hunks stay in the deployed copy only. Scripted or non-tty runs fall back to `lib/hunk_selector.py`: set `ABSORB_ANSWERS="y n q"` — answers are consumed in order but **restart for each deployed file**, since each file spawns a fresh picker.
+- `me up` reviews hunks with native `git add -p`: `[y]` stage, `[n]` skip, `[a]` stage the rest of this file, `[d]` skip the rest, `[s]` split, `[e]` edit, `[?]` help. Each kept hunk is then routed per-hunk: `[b]ase` (default, the repo source via `git apply`) or `[l]ocal` (a machine-local overlay fragment). Declined hunks stay in the deployed copy only. Static copies have no fragments, so they always go to the manifest source. Scripted or non-tty runs fall back to `lib/hunk_selector.py`: set `ABSORB_ANSWERS="y n q"` — answers are consumed in order but **restart for each deployed file**, since each file spawns a fresh picker. Destination answers work the same way via `ABSORB_DESTS="b l b"` (default `b`); `ABSORB_FRAGMENT` picks the fragment non-interactively (path or `new`).
 - After absorbing, re-run the normal sync (`me app agents`, for example) to redeploy clean copies.
 - If a hunk won't apply (its context overlaps fragment-added regions), nothing is lost: the diff is kept in a `/tmp/me-drift.*` directory and its path is printed — resolve by editing the base or fragment by hand.
 
@@ -106,7 +106,7 @@ me absorb agents        # older name, same thing
 |---|---|---|
 | Repo base or a committed file elsewhere | `me app <name>` | Recomposed into the deployed copy |
 | An overlay fragment | `me app <name>` | Same — fragments compose on every deploy |
-| A deployed static or managed copy | `me diff` to see it, `me up <name>` to keep some/all of it | Keeper hunks land in the manifest source or managed base |
+| A deployed static or managed copy | `me diff` to see it, `me up <name>` to keep some/all of it | Keeper hunks land in the manifest source, the managed base, or a `.d/` fragment you pick per hunk |
 
 Unlike symlinked files, static and managed copies have no live link back to the repo: deploying overwrites them from their repo source or fresh composition. That's the point — it's also what keeps junk out. Nothing is silently destroyed that `me diff` wouldn't have shown you first, though; make `diff` a habit before `up`.
 
