@@ -20,6 +20,9 @@
 #   me up [app|macos] [<name>|<path>...]
 #                               Pick local changes to pull back into the repo
 #                               (alias for the older name: absorb)
+#   me sync [app|macos] [<name>|<path>...]
+#                               Absorb drift like 'up', then redeploy the same
+#                               units (skipping units with absorb failures)
 #   me add <file> [--link symlink|copy] [--app name] [--dest \$HOME/...]
 #                               Adopt a file into a config unit: copy it into
 #                               configs/<scope>/<unit>/, wire it into that
@@ -655,11 +658,13 @@ function absorb_route_kept {
 			return 0
 		fi
 		error "Some hunks could not be applied to $src; edit it manually (diff saved at $difffile)"
+		failed_units+=("${drift_unit[idx]}")
 		return 1
 	fi
 	local base_patch="$tmp/base-$idx" local_patch="$tmp/local-$idx"
 	if ! lib/absorb_destinations.py "$base_patch" "$local_patch" < "$picked"; then
 		error "Destination routing failed for $src (diff saved at $difffile)"
+		failed_units+=("${drift_unit[idx]}")
 		return 1
 	fi
 	local base_n=0 local_n=0
@@ -667,6 +672,7 @@ function absorb_route_kept {
 	[[ -s "$local_patch" ]] && local_n=$(grep -c '^@@' "$local_patch" || true)
 	if [[ -s "$base_patch" ]] && ! git apply "$base_patch"; then
 		error "Some base hunks could not be applied to $src; edit it manually (diff saved at $difffile)"
+		failed_units+=("${drift_unit[idx]}")
 		return 1
 	fi
 	if [[ ! -s "$local_patch" ]]; then
@@ -677,6 +683,7 @@ function absorb_route_kept {
 	git -C "$scratch" checkout -- "$src"
 	if ! git -C "$scratch" apply "$picked"; then
 		error "Could not reconstruct desired state for $src (diff saved at $difffile)"
+		failed_units+=("${drift_unit[idx]}")
 		return 1
 	fi
 	cp "$scratch/$src" "$desired"
@@ -686,12 +693,14 @@ function absorb_route_kept {
 		cp "$repo_root/$src" "$baseline2"
 	elif (( rc != 0 )); then
 		error "Compose failed for $src; local hunks left unapplied (diff saved at $difffile)"
+		failed_units+=("${drift_unit[idx]}")
 		return 1
 	fi
 	local fmt
 	fmt="$(absorb_format_for "$src")"
 	if ! lib/fragment_extract.py "$baseline2" "$desired" --format "$fmt" > "$needed"; then
 		error "Local hunks for $src delete or reorder content, which fragments cannot express; re-run and route them to base (diff saved at $difffile)"
+		failed_units+=("${drift_unit[idx]}")
 		return 1
 	fi
 	if [[ -z "$(tr -d '[:space:]' < "$needed")" || "$(tr -d '[:space:]' < "$needed")" == "{}" ]]; then
@@ -705,6 +714,7 @@ function absorb_route_kept {
 	if [[ -f "$frag_abs" ]]; then
 		if ! lib/deep_merge.py "$frag_abs" "$needed"; then
 			error "Could not merge local hunks into $frag_rel (needed fragment saved at $needed)"
+			failed_units+=("${drift_unit[idx]}")
 			return 1
 		fi
 	else
@@ -784,6 +794,7 @@ function run_drift {
 				applied=$(( applied + $(grep -c '^@@' "$picked" || true) ))
 			else
 				failed_apply=1
+				failed_units+=("${drift_unit[i]}")
 				continue
 			fi
 		else
@@ -1027,6 +1038,10 @@ Examples:
   me diff ~/.gitconfig        Scope a diff by deployed path
   me diff ghostty/config      Path filters match either side on '/' boundaries
   me up                       Review drift everywhere, route hunks to base or local fragments
+  me sync [name]...           Absorb drift, then redeploy. Bare 'me sync' (or
+                              path-only args) sweeps every unit and requires a
+                              y/N prompt or --yes / -y
+  me sync agents              Absorb drift in agent configs, then redeploy clean copies
   me doctor                   Validate the complete config registry
   me plan yojam               Validate and preview one unit
   me plan app                 Preview every app unit
@@ -1078,12 +1093,14 @@ EOF
 
 # --- Main ------------------------------------------------------------------
 
-# --force is global: strip it wherever it appears so subcommand parsing is
-# unaffected. Only deployment reads it.
+# --force and --yes are global: strip them wherever they appear so subcommand
+# parsing is unaffected. --force affects deployment; --yes only matters for
+# 'me sync' when it would sweep every unit in the repo.
 declare -a passthrough_args=()
 for arg in "$@"; do
 	case "$arg" in
 		-f|--force) ME_FORCE=1 ;;
+		-y|--yes) ME_SYNC_YES=1 ;;
 		*) passthrough_args+=("$arg") ;;
 	esac
 done
@@ -1192,6 +1209,63 @@ case "$1" in
 		shift
 		parse_drift_args "$@"
 		run_drift absorb
+		finish
+		;;
+	sync)
+		shift
+		# parse_drift_args tolerantly falls back to sweeping every unit when
+		# no arg resolves; 'me sync' is destructive on redeploy, so we
+		# distinguish three cases here:
+		#   - user passed nothing             -> bare 'me sync', confirm or --yes
+		#   - user passed args, none resolved -> typo / unknown unit, error out
+		#   - user passed args, some resolved -> targeted, no prompt
+		local sync_user_args=$#
+		parse_drift_args "$@"
+		if (( sync_user_args > 0 && ${#selected[@]} == 0 && ${#drift_filters[@]} == 0 )); then
+			error "No config matched the given arguments; refusing to fall back to every unit."
+			error "Re-run with a known name (try 'me' to list) or pass --yes if you really mean it."
+			exit 1
+		fi
+		if (( sync_user_args == 0 )); then
+			if [[ "${ME_SYNC_YES:-0}" != "1" ]]; then
+				if ! : </dev/tty 2>/dev/null; then
+					error "'me sync' sweeping every unit needs --yes (or -y) when there is no controlling terminal"
+					exit 1
+				fi
+				printf 'About to absorb and redeploy EVERY config in this repo (%d unit(s)).\n' "${#selected[@]}" >&2
+				printf 'Continue? [y/N] ' >&2
+				local answer
+				IFS= read -r answer </dev/tty 2>/dev/null || answer=""
+				if [[ "$answer" != [yY] && "$answer" != [yY][eE][sS] ]]; then
+					error "Aborted"
+					exit 1
+				fi
+			fi
+		fi
+		declare -a sync_units=("${selected[@]}")
+		declare -a sync_failed=()
+		failed_units=()
+		run_drift absorb
+		# A failed absorb must not overwrite the user's surviving local drift
+		# on redeploy: skip those units and surface them at finish().
+		declare su f failed_marker
+		selected=()
+		for su in "${sync_units[@]}"; do
+			failed_marker="0"
+			for f in ${failed_units[@]+"${failed_units[@]}"}; do
+				[[ "$f" == "$su" ]] && failed_marker="1"
+			done
+			if [[ "$failed_marker" == "0" ]]; then
+				selected+=("$su")
+			else
+				sync_failed+=("$su")
+			fi
+		done
+		failed_units=(${sync_failed[@]+"${sync_failed[@]}"})
+		if (( ${#selected[@]} > 0 )); then
+			message "Redeploying ${#selected[@]} unit(s) after absorb..."
+			run_selected
+		fi
 		finish
 		;;
 	app|apps)
