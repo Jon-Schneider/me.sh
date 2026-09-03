@@ -24,6 +24,26 @@ if [[ -f "$skills_manifest" ]]; then
   done < <(yq -r '.skills[] | [.source, .name] | @tsv' "$skills_manifest")
 fi
 
+# Machine-local Pi extensions (*.local.ts) are never committed, so they cannot
+# be declared in config.yml. Link them here instead, stripping the `.local`
+# suffix so Pi loads them under their real names.
+local_extensions_dir="$ME_UNIT_DIR/Pi/extensions"
+pi_extensions_dir="$HOME/.pi/agent/extensions"
+if [[ -d "$local_extensions_dir" ]]; then
+  mkdir -p "$pi_extensions_dir"
+  shopt -s nullglob
+  for src in "$local_extensions_dir"/*.local.ts; do
+    base="$(basename "$src" .local.ts)"
+    dest="$pi_extensions_dir/$base.ts"
+    if [[ -e "$dest" && ! -L "$dest" ]]; then
+      echo "$dest exists and is not a symlink; leaving it untouched" >&2
+      continue
+    fi
+    ln -sfn "$src" "$dest"
+  done
+  shopt -u nullglob
+fi
+
 # Herdr owns its integration files and rewrites them on update, so install them
 # after managed agent configs have been materialized. Those edits then land in
 # deployed copies and stay out of the repository.
