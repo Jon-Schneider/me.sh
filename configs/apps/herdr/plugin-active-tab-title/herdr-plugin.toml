@@ -1,13 +1,18 @@
 id = "me.active-tab-title"
 name = "Active Tab Title"
-version = "0.1.0"
+version = "0.3.0"
 min_herdr_version = "0.8.2"
-description = "Prefix tab titles with one monochrome status symbol per agent pane and mirror the focused pane's label"
+description = "Prefix tab titles with one monochrome status symbol per agent pane, swap the focused pane's symbol for ⛶ when zoomed, and mirror the focused pane's label"
 platforms = ["macos"]
 
 # Event-driven, active-cwd style: herdr spawns this script on pane events
 # and once at startup. Agent lifecycle events keep every pane's status symbol
 # current; focus events keep the active pane's label mirrored.
+#
+# A `zoom-toggle` action wraps pane.zoom with an in-process resync, so the
+# ⛶ marker tracks Cmd+Z (Herdr's `pane.zoom --toggle` does not fire a
+# plugin event when the focused pane is unchanged, which would otherwise
+# leave the marker stale on a toggle-unzoom that didn't shift focus).
 
 [[startup]]
 command = ["/usr/bin/python3", "active_tab_title_on_event.py"]
@@ -51,3 +56,20 @@ command = ["/usr/bin/python3", "active_tab_title_on_event.py"]
 [[events]]
 on = "tab.closed"
 command = ["/usr/bin/python3", "active_tab_title_on_event.py"]
+
+# Subscribe to layout.updated so the zoom marker repaints within one
+# event of a pane.zoom toggle, rather than waiting for an unrelated event
+# to fire and resync via the inline check. Herdr 0.8.2 logs
+# `unknown event 'layout.updated'` for plugin subscribers (the schema
+# declares the event but the dispatcher doesn't yet deliver it), so this
+# subscription is a no-op today and is kept for forward-compat.
+[[events]]
+on = "layout.updated"
+command = ["/usr/bin/python3", "active_tab_title_on_event.py"]
+
+[[actions]]
+id = "zoom-toggle"
+title = "Zoom Toggle"
+description = "Toggle pane zoom on the focused pane and resync tab titles so the ⛶ marker updates immediately"
+command = ["/usr/bin/python3", "zoom_toggle.py"]
+contexts = ["global"]

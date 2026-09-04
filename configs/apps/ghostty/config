@@ -63,7 +63,10 @@ keybind = super+enter=text:\x00v
 keybind = super+alt+enter=text:\x00o
 keybind = super+shift+enter=text:\x00s
 keybind = super+shift+alt+enter=text:\x00e
-keybind = cmd+z=text:\x00z
+# Cmd+Z reaches Herdr directly: the me.active-tab-title plugin's zoom-toggle
+# action wraps pane.zoom with an in-process tab-title resync, so the ⛶
+# marker in the tab bar tracks every press (bare pane.zoom --toggle is
+# silent when the focused pane is unchanged).
 keybind = cmd+d=unbind
 # Focus pane left/right: send prefix+h / prefix+l (herdr focus_pane_* defaults).
 # NB raw ctrl+shift+arrow CSI sequences (\x1b[1;5D/C) were not recognized by

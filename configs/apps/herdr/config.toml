@@ -192,3 +192,9 @@ key = "cmd+shift+f"
 type = "plugin_action"
 command = "wilbeibi.catchup.fork"
 description = "fork session in a new pane"
+
+[[keys.command]]
+key = "cmd+z"
+type = "plugin_action"
+command = "me.active-tab-title.zoom-toggle"
+description = "toggle pane zoom and refresh tab title"

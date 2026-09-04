@@ -5,12 +5,18 @@ Event-driven, no daemon. Each agent pane contributes Herdr's monochrome symbol
 to its tab: blocked ×, working ●, done ✓, idle ○, unknown ·. Split tabs show
 one spaced symbol per agent in pane-list order.
 
+A zoomed tab swaps the focused pane's status symbol for ⛶ (U+26F6 SQUARE FOUR
+CORNERS) in place, so the per-pane status row is preserved (one glyph per
+agent pane) and the zoomed pane is visibly marked in its slot. The zoomed
+pane is always the layout's focused pane (Herdr's zoom is a focused-pane
+op, and the API shifts focus to the zoomed pane on toggle-on).
+
 The focused pane's label is mirrored into its tab title. A tab whose focused
 pane has no label falls back to its only pane, then to its only agent pane, so
 a split tab keeps showing its agent's label while a shell pane holds focus.
-Manual tab renames become the new base title and retain the status symbol; a
-tab herdr has reset to its bare number is not one, and a rename pinned to a
-pane that has since left the tab is released.
+Manual tab renames become the new base title and retain the leading symbol
+(status dots or ⛶); a tab herdr has reset to its bare number is not one, and
+a rename pinned to a pane that has since left the tab is released.
 
 Handlers take a non-blocking lock, reconcile every tab once, and exit. State
 diffs are idempotent, so dropped or duplicate spawns converge on the next event.
@@ -25,7 +31,7 @@ import socket
 import time
 
 SOURCE = "me.active-tab-title"
-STATE_VERSION = 3
+STATE_VERSION = 4
 STATUS_SYMBOLS = {
     "blocked": "×",
     "working": "●",
@@ -33,7 +39,11 @@ STATUS_SYMBOLS = {
     "idle": "○",
     "unknown": "·",
 }
-STATUS_SYMBOL_SET = frozenset((*STATUS_SYMBOLS.values(), "◐", "◒", "•"))
+# Square Four Corners (U+26F6). Substituted for the per-pane status dots on a
+# zoomed tab; added to STATUS_SYMBOL_SET so strip_status_prefix treats it the
+# same way when a user manually renames a zoomed tab.
+ZOOM_SYMBOL = "\u26f6"
+STATUS_SYMBOL_SET = frozenset((*STATUS_SYMBOLS.values(), "◐", "◒", "•", ZOOM_SYMBOL))
 
 
 def log(message: str) -> None:
@@ -114,9 +124,10 @@ def strip_status_prefix(label: str) -> str:
     return label[index:] if found_symbol else label
 
 
-def status_symbols(tab: dict, panes: list) -> str:
+def status_symbols(tab: dict, panes: list, zoomed_pane: str | None) -> str:
     return "  ".join(
-        STATUS_SYMBOLS.get(pane.get("agent_status"), STATUS_SYMBOLS["unknown"])
+        ZOOM_SYMBOL if zoomed_pane and pane["pane_id"] == zoomed_pane
+        else STATUS_SYMBOLS.get(pane.get("agent_status"), STATUS_SYMBOLS["unknown"])
         for pane in panes
         if pane.get("tab_id") == tab["tab_id"] and pane.get("agent")
     )
@@ -136,7 +147,7 @@ def driving_pane(panes: list, tab_id: str) -> dict | None:
     return focused
 
 
-def sync_tab(sock: str, state: dict, tab: dict, panes: list) -> bool:
+def sync_tab(sock: str, state: dict, tab: dict, panes: list, zoomed: dict) -> bool:
     """Converge one tab's label; returns True if state changed."""
     tab_id = tab["tab_id"]
     book = state["tabs"]
@@ -144,7 +155,7 @@ def sync_tab(sock: str, state: dict, tab: dict, panes: list) -> bool:
     driver = driving_pane(panes, tab_id)
     default_label = str(tab.get("number") or "1")
     current = tab.get("label") or default_label
-    symbols = status_symbols(tab, panes)
+    symbols = status_symbols(tab, panes, zoomed.get(tab_id))
     title = pane_title(driver)
 
     if entry is None and not symbols and title is None:
@@ -219,12 +230,24 @@ def main() -> int:
         try:
             panes = api(sock, "pane.list")["panes"]
             tabs = {t["tab_id"]: t for t in api(sock, "tab.list")["tabs"]}
+            # session.snapshot is the only API that exposes the per-tab
+            # `zoomed` flag and the zoomed pane id (always the layout's
+            # focused pane). Skip on transient failure rather than aborting
+            # the whole tab sync — the next event will retry.
+            zoomed: dict = {}
+            try:
+                snapshot = api(sock, "session.snapshot")["snapshot"]
+                for layout in snapshot.get("layouts", []):
+                    if layout.get("zoomed") and layout.get("focused_pane_id"):
+                        zoomed[layout["tab_id"]] = layout["focused_pane_id"]
+            except Exception as exc:
+                log(f"snapshot: {exc}")
             state = load_state(state_file)
 
             changed = False
 
             for tab in tabs.values():
-                changed |= sync_tab(sock, state, tab, panes)
+                changed |= sync_tab(sock, state, tab, panes, zoomed)
 
             for tab_id in set(state["tabs"]) - set(tabs):
                 del state["tabs"][tab_id]
