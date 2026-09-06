@@ -68,9 +68,17 @@ keybind = super+shift+alt+enter=text:\x00e
 # marker in the tab bar tracks every press (bare pane.zoom --toggle is
 # silent when the focused pane is unchanged).
 keybind = cmd+d=unbind
-# Focus pane left/right: send prefix+h / prefix+l (herdr focus_pane_* defaults).
-# NB raw ctrl+shift+arrow CSI sequences (\x1b[1;5D/C) were not recognized by
-# herdr at runtime, so chords route through the prefix instead.
+# Reorder (swap) the focused pane with its neighbor: routes through the
+# Herdr prefix because raw ctrl+shift+arrow CSI sequences (\x1b[1;10A/B/C/D)
+# are not recognized by herdr at runtime. Capital H/L/K/J = prefix+shift+h/l/k/j
+# = herdr's default swap_pane_{left,right,up,down}.
+keybind = ctrl+shift+left=text:\x00H
+keybind = ctrl+shift+right=text:\x00L
+keybind = ctrl+shift+up=text:\x00K
+keybind = ctrl+shift+down=text:\x00J
+# Focus pane left/right/up/down: send prefix+h / prefix+l / prefix+K / prefix+J
+# (herdr focus_pane_* defaults). Same prefix workaround as the swap bindings
+# above for the same reason.
 keybind = super+shift+left=text:\x00h
 keybind = super+shift+right=text:\x00l
 keybind = super+shift+up=text:\x00K
