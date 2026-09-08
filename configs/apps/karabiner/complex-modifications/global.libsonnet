@@ -364,7 +364,7 @@
           },
           "to": [
             {
-              "shell_command": "open -a 'Notes'"
+              "shell_command": "open -a 'Obsidian'"
             }
           ],
           "type": "basic"
