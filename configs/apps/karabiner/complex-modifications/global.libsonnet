@@ -268,7 +268,7 @@
           },
           "to": [
             {
-              "shell_command": "open -a Simulator"
+              "shell_command": "pgrep -x Simulator >/dev/null && open -a Simulator"
             }
           ],
           "type": "basic"
