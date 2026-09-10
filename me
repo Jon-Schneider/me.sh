@@ -568,19 +568,28 @@ function absorb_format_for {
 # managed base SRC. Lists merge fragments (*.json/*.yaml/*.yml/*.toml) plus a
 # create-new option; ABSORB_FRAGMENT skips the prompt (path or 'new').
 function pick_absorb_fragment {
-	local src="$1" frag
+	local src="$1" frag num max=0
 	local overlay_dir="$repo_root/${src}.d"
 	local -a fragments=()
 	if [[ -d "$overlay_dir" ]]; then
 		while IFS= read -r frag; do
 			case "$frag" in
 				*.json|*.yaml|*.yml|*.toml) fragments+=("$frag") ;;
+				*.jsonnet) ;;
+				*) continue ;;
 			esac
+			if [[ "$frag" =~ ^([0-9]+)- ]]; then
+				num="${BASH_REMATCH[1]}"
+				(( num > max )) && max="$num"
+			fi
 		done < <(ls "$overlay_dir" 2>/dev/null | LC_ALL=C sort)
 	fi
 	if [[ -n "${ABSORB_FRAGMENT:-}" ]]; then
 		if [[ "$ABSORB_FRAGMENT" == new ]]; then
 			: # fall through to auto-name below
+		elif [[ "$ABSORB_FRAGMENT" == *.jsonnet ]]; then
+			error "Jsonnet fragments are transformers and cannot receive automatically absorbed data" >&2
+			return 1
 		else
 			printf '%s\n' "$ABSORB_FRAGMENT"
 			return 0
@@ -588,14 +597,7 @@ function pick_absorb_fragment {
 	fi
 	local i=1 existing="${fragments[*]:-}"
 	local suggestion="20-local.json"
-	if [[ -n "$existing" ]]; then
-		local max=0 num
-		for frag in "${fragments[@]}"; do
-			if [[ "$frag" =~ ^([0-9]+)- ]]; then
-			num="${BASH_REMATCH[1]}"
-			(( num > max )) && max="$num"
-			fi
-		done
+	if (( max > 0 )); then
 		printf -v suggestion "%02d-local.json" "$(( max + 10 ))"
 	fi
 	if [[ ! -t 0 && -z "${ABSORB_FRAGMENT:-}" ]]; then
@@ -603,7 +605,7 @@ function pick_absorb_fragment {
 		return 0
 	fi
 	if (( ${#fragments[@]} > 0 )); then
-		message "Local fragments for $src:"
+		message "Local fragments for $src:" >&2
 		for (( i=0; i<${#fragments[@]}; i++ )); do
 			printf '  %d) %s\n' "$(( i + 1 ))" "${fragments[i]}" >&2
 		done
@@ -632,6 +634,10 @@ function pick_absorb_fragment {
 		return 0
 	fi
 	case "$answer" in
+		*.jsonnet)
+			error "Jsonnet fragments are transformers and cannot receive automatically absorbed data" >&2
+			return 1
+			;;
 		*.json|*.yaml|*.yml|*.toml)
 			printf '%s\n' "${src}.d/$(basename "$answer")"
 			return 0
@@ -708,8 +714,16 @@ function absorb_route_kept {
 		return 0
 	fi
 	local frag_rel frag_abs
-	frag_rel="$(pick_absorb_fragment "$src")"
+	if ! frag_rel="$(pick_absorb_fragment "$src")"; then
+		failed_units+=("${drift_unit[idx]}")
+		return 1
+	fi
 	frag_abs="$repo_root/$frag_rel"
+	if [[ "$frag_abs" == *.jsonnet ]]; then
+		error "Jsonnet fragments are transformers; edit $frag_rel manually or absorb into the base"
+		failed_units+=("${drift_unit[idx]}")
+		return 1
+	fi
 	mkdir -p "$(dirname "$frag_abs")"
 	if [[ -f "$frag_abs" ]]; then
 		if ! lib/deep_merge.py "$frag_abs" "$needed"; then
@@ -1079,7 +1093,8 @@ rows are kept unless you confirm deletion (--delete skips all prompts). Units
 left owning nothing after removal, including their config.yml, are pruned.
 Managed (<base>.d) files are out of scope.
 
-Requires yq for manifests and YAML/TOML fragments.
+Requires yq for manifests and YAML/TOML fragments, and jsonnet when a managed
+file has a .jsonnet transformer fragment.
 
 Config directories may replace their configure scripts with config.yml. Its
 'symlinks' and 'copies' rows are deployed safely, sibling managed files are

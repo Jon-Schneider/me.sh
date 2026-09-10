@@ -31,6 +31,7 @@ Manifest units deploy these markers automatically; legacy deployment scripts cal
 | `configs/apps/agents/Claude/settings.json` | `$HOME/.claude/settings.json` |
 | `configs/apps/agents/Codex/hooks.json` | `$HOME/.codex/hooks.json` |
 | `configs/apps/agents/Codex/config.toml` | `$HOME/.codex/config.toml` |
+| `configs/apps/karabiner/karabiner.json` | `$HOME/.config/karabiner/karabiner.json` |
 
 A `.d/` directory missing its marker, or a marker whose base file is gone, prints an error during deploy instead of being silently skipped.
 
@@ -68,9 +69,50 @@ Array concatenation is deliberate: hook groups append instead of clobbering. Exa
 }
 ```
 
-### 2. Executable fragments — transformed
+### 2. `.jsonnet` fragments — transformed declaratively
 
-Anything executable (no extension required) acts as a transformer: composed-so-far content on **stdin**, rewritten content on **stdout**. Run in lexical order after/between JSON merges, so a transformer sees everything before it.
+A Jsonnet fragment evaluates to a function that accepts the composed document and returns its replacement. This supports structural changes that ordinary deep merging cannot express, such as updating an object selected from an array:
+
+```jsonnet
+local localRules = [{ description: 'Local rule', manipulators: [] }];
+local localDescriptions = [rule.description for rule in localRules];
+
+function(document)
+  assert std.any([profile.name == 'Default profile' for profile in document.profiles]) :
+    'Karabiner profile not found: Default profile';
+  document {
+    profiles: [
+      if profile.name == 'Default profile' then
+        profile {
+          complex_modifications: profile.complex_modifications {
+            rules: localRules + [
+              rule
+              for rule in profile.complex_modifications.rules
+              if !std.objectHas(rule, 'description') || !std.member(localDescriptions, rule.description)
+            ],
+          },
+        }
+      else profile
+      for profile in document.profiles
+    ],
+  }
+```
+
+The current document is parsed as JSON data, while the transformer is evaluated as Jsonnet code and can use the full language. A fragment must return a non-null document with the same root type as its input. JSON bases are passed directly; YAML and TOML bases are converted to JSON for transformation and converted back afterward. `jsonnet` is required only when a composition includes one of these fragments.
+
+Jsonnet transformers participate in forward composition and drift detection, but `me up` cannot synthesize or update their code. Edit them manually; automatic local absorption continues to target data fragments.
+
+Jsonnet re-emits the complete document in its canonical JSON formatting, including sorted object keys and three-space indentation. Adding the first Jsonnet transformer to an existing JSON managed file can therefore produce one-time whole-file formatting drift even when its semantic change is small.
+
+Jsonnet represents numbers as IEEE-754 binary64 values. Transformation can normalize spellings such as `1.0` to `1` and can lose precision or use exponent notation for sufficiently large integers. Avoid Jsonnet fragments for documents where exact numeric representation matters.
+
+Transformers need not be idempotent. If a transformer injects content, do not absorb that generated content into the base without also removing it from the transformer; otherwise the next composition can inject a duplicate. This particularly matters for transforms that prepend array elements, such as the Karabiner example above.
+
+Karabiner migration note: the previous renderer read machine rules from `~/.config/me.sh/karabiner/local.libsonnet`. Existing machines must move those rules into `configs/apps/karabiner/karabiner.json.d/*.jsonnet`; the legacy file is no longer read.
+
+### 3. Executable fragments — transformed imperatively
+
+Anything executable (no extension required) acts as a transformer: composed-so-far content on **stdin**, rewritten content on **stdout**. All fragment kinds run in lexical order, so a transformer sees everything before it.
 
 ```sh
 #!/bin/sh
@@ -138,7 +180,7 @@ Unlike symlinked files, static and managed copies have no live link back to the 
 
 | Piece | Role |
 |---|---|
-| `lib/compose.sh` | Marker discovery (`managed_files_under`), `$HOME` expansion, overlay discovery, merge dispatch + transformer execution, `deploy_config` / `deploy_managed_under` |
+| `lib/compose.sh` | Marker discovery (`managed_files_under`), `$HOME` expansion, overlay discovery, data merge plus Jsonnet/executable transformation, `deploy_config` / `deploy_managed_under` |
 | `lib/deep_merge.py` | Format parsing/emission (JSON native; YAML/TOML via `yq`) and the shared deep-merge semantics |
 | `lib/hunk_selector.py` | Fallback hunk picker for scripted/no-tty `me up` runs; interactive runs use native `git add -p` |
 | `collect_drift_files` in `me` | Shared sweep engine behind `me status`, `me diff`, and `me up` / `absorb` for manifest copies and managed files |

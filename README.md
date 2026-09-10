@@ -23,7 +23,7 @@ symlinks:
 
 `configs/macos/00-homebrew/configure_homebrew.sh` runs first during `me all`, so the Brewfile (including the `yq` manifest parser) is reconciled before dependent units.
 
-Most config files are symlinked into place, so editing either side edits both. Manifest `copies:` rows deploy ordinary materialized copies. Files marked **managed** -- a gitignored ```<file>.d/``` overlay directory next to them containing a tracked ```dest``` marker naming the deploy path -- are deployed as composed copies: the repo base file merged with machine-local fragments (```.json```/```.yaml```/```.yml```/```.toml``` deep-merge; executables act as stdin/stdout transformers). Apps that rewrite either kind of copy only touch the deployed file, so their changes never reach the repo implicitly. Run ```me diff <name>``` to preview copy drift and ```me up <name>``` (alias ```absorb```) to interactively pull chosen hunks back into the source file. Full managed-file manual: ```docs/merged-configs.md```.
+Most config files are symlinked into place, so editing either side edits both. Manifest `copies:` rows deploy ordinary materialized copies. Files marked **managed** -- a gitignored ```<file>.d/``` overlay directory next to them containing a tracked ```dest``` marker naming the deploy path -- are deployed as composed copies: the repo base file merged with machine-local fragments (```.json```/```.yaml```/```.yml```/```.toml``` deep-merge; ```.jsonnet``` and executables transform). Apps that rewrite either kind of copy only touch the deployed file, so their changes never reach the repo implicitly. Run ```me diff <name>``` to preview copy drift and ```me up <name>``` (alias ```absorb```) to interactively pull chosen hunks back into the source file. Full managed-file manual: ```docs/merged-configs.md```.
 
 ## Use
 
@@ -44,3 +44,7 @@ Most config files are symlinked into place, so editing either side edits both. M
 - Run ```me add <file>``` to adopt an existing file into a config unit: it copies the file into ```configs/<scope>/<unit>/```, wires it into that unit's ```config.yml``` as a symlink (default) or static copy, and deploys the unit. Pass ```--link symlink|copy```, ```--app <name>``` (existing or new), ```--dest '$HOME/...'```, and ```--scope apps|macos``` to skip the interactive prompts; anything omitted is asked for. An existing unit's manifest is merged; a symlink adoption replaces a same-content file at the destination with the link.
 
 I find ```me app``` to be the one that I need to run most frequently because I'm constantly optimizing my app configurations, especially Karabiner-Elements.
+
+## Tests
+
+Run `tests/compose.sh` to exercise managed-file merging and Jsonnet transformation. It requires `jq`, `yq`, and `jsonnet`.

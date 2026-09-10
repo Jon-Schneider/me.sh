@@ -44,8 +44,8 @@ function managed_files_under {
 	done < <(cd "$COMPOSE_REPO_ROOT" && find "$dir" -type d -name '*.d' -print0 | LC_ALL=C sort -z)
 }
 
-# Print usable overlay fragments for FILE: .json/.yaml/.yml/.toml merge plus
-# executables (transformers), sorted so numeric prefixes control order.
+# Print usable overlay fragments for FILE: .json/.yaml/.yml/.toml merge,
+# .jsonnet and executable transformers, sorted so numeric prefixes control order.
 # Dotfiles are skipped silently.
 function overlay_fragments {
 	local overlay_dir="$1" frag
@@ -53,7 +53,7 @@ function overlay_fragments {
 	while IFS= read -r frag; do
 		frag="$overlay_dir/$frag"
 		case "$frag" in
-			*.json|*.yaml|*.yml|*.toml) printf '%s\n' "$frag" ;;
+			*.json|*.yaml|*.yml|*.toml|*.jsonnet) printf '%s\n' "$frag" ;;
 			.*) ;;
 			*) [[ -x "$frag" ]] && printf '%s\n' "$frag" ;;
 		esac
@@ -68,6 +68,57 @@ function merge_fragment {
 	"$DEEP_MERGE" "$target" "$fragment" "$fmt"
 }
 
+# Apply a Jsonnet fragment whose value is a function from the composed document
+# to its replacement. The document is parsed as JSON data; the transformer is
+# evaluated as Jsonnet code.
+function transform_jsonnet_fragment {
+	local fragment="$2" fmt="$3" input="$1" input_json="" result_json="" rc=0
+	local expression='
+local document = std.parseJson(std.extVar("document"));
+local transformed = std.extVar("transform")(document);
+if transformed == null then
+  error "Jsonnet transformer returned null"
+else if std.type(transformed) != std.type(document) then
+  error "Jsonnet transformer changed root type from " + std.type(document) + " to " + std.type(transformed)
+else
+  transformed
+'
+	if ! command -v jsonnet &>/dev/null; then
+		error "Jsonnet fragment requires jsonnet: $fragment" >&2
+		return 1
+	fi
+	if [[ "$fmt" != json ]]; then
+		if ! command -v yq &>/dev/null; then
+			error "Jsonnet fragment on a $fmt base requires yq: $fragment" >&2
+			return 1
+		fi
+		input_json="$(mktemp "${TMPDIR:-/tmp}/me-jsonnet-input.XXXXXX")"
+		if ! yq --input-format="$fmt" -o=json . "$input" > "$input_json"; then
+			rm -f "$input_json"
+			error "Could not convert $fmt document for Jsonnet fragment: $fragment" >&2
+			return 1
+		fi
+		input="$input_json"
+	fi
+	local -a jsonnet_command=(jsonnet \
+		--ext-str-file document="$input" \
+		--ext-code-file transform="$fragment" \
+		-e "$expression")
+	if [[ "$fmt" == json ]]; then
+		"${jsonnet_command[@]}" || rc=1
+	else
+		result_json="$(mktemp "${TMPDIR:-/tmp}/me-jsonnet-output.XXXXXX")"
+		if ! "${jsonnet_command[@]}" > "$result_json"; then
+			rc=1
+		elif ! yq --input-format=json --output-format="$fmt" . "$result_json"; then
+			rc=1
+		fi
+	fi
+	[[ -z "$input_json" ]] || rm -f "$input_json"
+	[[ -z "$result_json" ]] || rm -f "$result_json"
+	return "$rc"
+}
+
 # Compose BASE plus its <BASE>.d/ fragments into OUT. Exit status: 0 composed,
 # 2 no usable fragments (caller may fall back to symlinking/copying), 1 hard
 # failure (a fragment broke -- callers must NOT silently fall back).
@@ -76,7 +127,7 @@ function merge_fragment {
 function compose_file {
 	local base="$1" out="$2" fmt frag tmp
 	fmt="${base##*.}"
-	case "$fmt" in json|yaml|yml|toml) ;; *) fmt="json" ;; esac
+	case "$fmt" in json|yaml|toml) ;; yml) fmt="yaml" ;; *) fmt="json" ;; esac
 	local -a fragments=()
 	while IFS= read -r frag; do
 		fragments+=("$frag")
@@ -91,6 +142,15 @@ function compose_file {
 					error "Fragment merge failed: $frag"
 					return 1
 				}
+				;;
+			*.jsonnet)
+				tmp="$(mktemp "${TMPDIR:-/tmp}/me-compose.XXXXXX")"
+				if ! transform_jsonnet_fragment "$out" "$frag" "$fmt" > "$tmp"; then
+					rm -f "$tmp"
+					error "Jsonnet fragment failed: $frag"
+					return 1
+				fi
+				mv "$tmp" "$out"
 				;;
 			*)
 				tmp="$(mktemp "${TMPDIR:-/tmp}/me-compose.XXXXXX")"

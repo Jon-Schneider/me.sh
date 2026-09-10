@@ -4,3 +4,6 @@
 # middle slash anchors patterns to the repo root, where * cannot cross /.)
 **/*.d/*
 !**/*.d/dest
+
+# Scratch managed files created by tests/compose.sh.
+tests/.compose-test.*
