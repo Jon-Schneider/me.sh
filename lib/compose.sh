@@ -166,27 +166,6 @@ function compose_file {
 	return 0
 }
 
-# Deploy SRC to DEST: a composed materialized copy when SRC has overlay
-# fragments, otherwise a symlink. Never writes through an existing symlink.
-function deploy_config {
-	local src="$1" dest="$2" tmp mode rc=0
-	mkdir -p "$(dirname "$dest")"
-	compose_file "$src" "$tmp" || rc=$?
-	if (( rc == 0 )); then
-		mode="$(stat -f '%Lp' "$src")"
-		rm -f "$dest"
-		mv "$tmp" "$dest"
-		chmod "$mode" "$dest"
-		message "Composed ${src#$COMPOSE_REPO_ROOT/} + overlays -> $dest"
-	elif (( rc == 2 )); then
-		ln -sfn "$src" "$dest"
-		message "Linked ${src#$COMPOSE_REPO_ROOT/} -> $dest"
-	else
-		error "Compose failed for ${src#$COMPOSE_REPO_ROOT/}; leaving $dest untouched"
-		return 1
-	fi
-}
-
 # Deploy every managed file under DIR (see managed_files_under). Managed files
 # are always materialized -- even without fragments yet -- so app-written
 # runtime state lands in the deployed copy instead of the repo. A broken

@@ -155,7 +155,7 @@ Unlike symlinked files, static and managed copies have no live link back to the 
 ## Adding a new managed file
 
 1. Add a sibling `<file>.d/` directory containing a `dest` marker with the deploy path.
-2. If the owning unit has `config.yml`, nothing else is required: managed markers are discovered and deployed automatically. For a legacy unit, make sure its `configure_*.sh` calls `deploy_managed_under` (or use `deploy_config <src> <dst>` when that behavior is specifically wanted).
+2. If the owning unit has `config.yml`, nothing else is required: managed markers are discovered and deployed automatically. For a legacy unit, make sure its `configure_*.sh` calls `deploy_managed_under`.
 3. Optionally add fragments to the `.d/` directory.
 4. `me <scope> <name>`.
 
@@ -180,7 +180,7 @@ Unlike symlinked files, static and managed copies have no live link back to the 
 
 | Piece | Role |
 |---|---|
-| `lib/compose.sh` | Marker discovery (`managed_files_under`), `$HOME` expansion, overlay discovery, data merge plus Jsonnet/executable transformation, `deploy_config` / `deploy_managed_under` |
+| `lib/compose.sh` | Marker discovery (`managed_files_under`), `$HOME` expansion, overlay discovery, data merge plus Jsonnet/executable transformation, `deploy_managed_under` |
 | `lib/deep_merge.py` | Format parsing/emission (JSON native; YAML/TOML via `yq`) and the shared deep-merge semantics |
 | `lib/hunk_selector.py` | Fallback hunk picker for scripted/no-tty `me up` runs; interactive runs use native `git add -p` |
 | `collect_drift_files` in `me` | Shared sweep engine behind `me status`, `me diff`, and `me up` / `absorb` for manifest copies and managed files |
