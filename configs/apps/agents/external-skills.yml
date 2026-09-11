@@ -5,6 +5,8 @@ agents:
   - pi
 
 skills:
+  - source: https://github.com/cameroncooke/AXe/tree/main/Skills/CLI/axe
+    name: axe
   - source: mattpocock/skills
     name: grilling
   - source: humanlayer/Skills
