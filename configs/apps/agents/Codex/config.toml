@@ -7,6 +7,9 @@ computer_use = false
 hooks = true
 plugins = false
 
+[agents]
+max_concurrent_threads_per_session = 32
+
 [tui]
 status_line = [
     "model-with-reasoning",
