@@ -16,11 +16,13 @@ if [[ -f "$skills_manifest" ]]; then
 
   while IFS=$'\t' read -r source skill; do
     echo "Installing agent skill $skill from $source..."
+    # The installer reads stdin; keep it from consuming the manifest pipe.
     npx -y skills@latest add "$source" \
       --global \
       --yes \
       --skill "$skill" \
-      --agent "${skill_agents[@]}"
+      --agent "${skill_agents[@]}" \
+      </dev/null
   done < <(yq -r '.skills[] | [.source, .name] | @tsv' "$skills_manifest")
 fi
 
