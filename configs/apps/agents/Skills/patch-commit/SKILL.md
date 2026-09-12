@@ -5,6 +5,8 @@ description: Commit only your own changes by staging individual hunks via patch,
 
 # Patch Commit
 
+When invoked by the user treat this as an instruction to commit your changes.
+
 You are almost never the only actor making changes in the active repository. Other
 agents, parallel sessions, background tooling, and the user may all be editing files
 at the same time. The working tree you see is shared. Treat every uncommitted change
