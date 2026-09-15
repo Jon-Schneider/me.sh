@@ -271,7 +271,7 @@
                         },
                         "to": [
                            {
-                              "shell_command": "pgrep -x Simulator >/dev/null && open -a Simulator"
+                              "shell_command": "pgrep -x DeviceHub >/dev/null && open \"$(dirname \"$(xcode-select -p)\")/Applications/DeviceHub.app\""
                            }
                         ],
                         "type": "basic"
