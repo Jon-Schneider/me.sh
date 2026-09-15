@@ -2,6 +2,139 @@
 hs.loadSpoon("ReloadConfiguration")
 spoon.ReloadConfiguration:start()
 
+-- Restore shortcuts that Device Hub dropped when it replaced Simulator.
+-- Device Hub's device windows are missing from the macOS Accessibility window
+-- list. Its Dock menu still lists every device across Spaces and marks the
+-- active one, so use that as the source of truth.
+local function deviceHubDockWindow(action)
+    local ok, result = hs.osascript.applescript([[
+        tell application "System Events"
+            -- AXShowMenu toggles an existing menu closed, so always dismiss first.
+            key code 53
+            delay 0.1
+
+            tell process "Dock"
+                set dockItem to first UI element of list 1 whose name is "Device Hub"
+                perform action "AXShowMenu" of dockItem
+
+                repeat 20 times
+                    if exists menu 1 of dockItem then exit repeat
+                    delay 0.05
+                end repeat
+                if not (exists menu 1 of dockItem) then error "Device Hub Dock menu did not appear"
+
+                set deviceItems to {}
+                repeat with menuItem in menu items of menu 1 of dockItem
+                    if name of menuItem is missing value then exit repeat
+                    set end of deviceItems to menuItem
+                end repeat
+
+                set activeIndex to 0
+                repeat with itemIndex from 1 to count of deviceItems
+                    try
+                        if value of attribute "AXMenuItemMarkChar" of item itemIndex of deviceItems is "✓" then
+                            set activeIndex to itemIndex
+                            exit repeat
+                        end if
+                    end try
+                end repeat
+
+                if "]] .. action .. [[" is "cycle" then
+                    if (count of deviceItems) > 1 then
+                        set nextIndex to activeIndex + 1
+                        if nextIndex > count of deviceItems then set nextIndex to 1
+                        -- Retain the menu-item reference, dismiss the visible
+                        -- menu, then invoke it while hidden.
+                        set nextItem to item nextIndex of deviceItems
+                        key code 53
+                        delay 0.01
+                        perform action "AXPress" of nextItem
+                        return true
+                    end if
+                else if activeIndex > 0 then
+                    set activeName to name of item activeIndex of deviceItems
+                    key code 53
+                    return activeName
+                end if
+
+                key code 53
+                return missing value
+            end tell
+        end tell
+    ]])
+
+    if not ok then
+        hs.alert.show("Could not read Device Hub windows from the Dock")
+        return nil
+    end
+    return result
+end
+
+local function cycleDeviceHubWindow()
+    deviceHubDockWindow("cycle")
+end
+
+local function toggleFocusedSimulatorAppearance()
+    local dockTitle = deviceHubDockWindow("title")
+    if not dockTitle then return end
+    local deviceName = dockTitle:match("^(.-) %([^()]+%)$") or dockTitle
+
+    hs.task.new("/usr/bin/xcrun", function(exitCode, stdout)
+        if exitCode ~= 0 then
+            hs.alert.show("Could not list booted simulators")
+            return
+        end
+
+        local decoded = hs.json.decode(stdout)
+        local matches = {}
+        for _, devices in pairs(decoded.devices or {}) do
+            for _, device in ipairs(devices) do
+                if device.state == "Booted" and device.name == deviceName then
+                    table.insert(matches, device.udid)
+                end
+            end
+        end
+
+        if #matches ~= 1 then
+            hs.alert.show(#matches == 0
+                and "Could not match focused Device Hub window to a simulator"
+                or "More than one booted simulator is named " .. deviceName)
+            return
+        end
+
+        local udid = matches[1]
+        hs.task.new("/usr/bin/xcrun", function(status, appearance)
+            if status ~= 0 then
+                hs.alert.show("Could not read simulator appearance")
+                return
+            end
+
+            local current = appearance:match("^%s*(.-)%s*$")
+            local target = current == "dark" and "light" or "dark"
+            hs.task.new("/usr/bin/xcrun", function(setStatus)
+                if setStatus ~= 0 then hs.alert.show("Could not change simulator appearance") end
+            end, {"simctl", "ui", udid, "appearance", target}):start()
+        end, {"simctl", "ui", udid, "appearance"}):start()
+    end, {"simctl", "list", "devices", "booted", "--json"}):start()
+end
+
+local function afterShortcutReleased(action)
+    hs.timer.waitUntil(function()
+        local modifiers = hs.eventtap.checkKeyboardModifiers()
+        return not (modifiers.cmd or modifiers.shift or modifiers.alt
+            or modifiers.ctrl or modifiers.fn)
+    end, action, 0.01)
+end
+
+hs.hotkey.bind({}, "F17", function()
+    afterShortcutReleased(toggleFocusedSimulatorAppearance)
+end)
+hs.hotkey.bind({}, "F18", function()
+    -- Device Hub can leave Hammerspoon's modifier snapshot stale until the
+    -- next application event, so don't use afterShortcutReleased here.
+    hs.timer.doAfter(0.12, cycleDeviceHubWindow)
+end)
+
 -- Defeat Pasteblocking and paste without retaining formatting
 hs.hotkey.bind({"ctrl", "option", "cmd"}, "V", function() hs.eventtap.keyStrokes(hs.pasteboard.getContents()) end)
 
