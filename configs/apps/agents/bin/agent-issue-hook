@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # agent-issue-hook — UserPromptSubmit hook for Claude Code, Codex, and Pi.
+# Devin gets it for free by importing ~/.claude/settings.json hooks.
 #
 # Spots a Jira-style issue key in what the user just typed, decides whether the
 # key names the work being asked for (rather than one merely being consulted),

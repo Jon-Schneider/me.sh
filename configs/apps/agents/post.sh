@@ -50,7 +50,7 @@ fi
 # after managed agent configs have been materialized. Those edits then land in
 # deployed copies and stay out of the repository.
 if command -v herdr > /dev/null; then
-  for agent in pi claude codex opencode; do
+  for agent in pi claude codex devin opencode; do
     herdr integration install "$agent"
   done
 else
