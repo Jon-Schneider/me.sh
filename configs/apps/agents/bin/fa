@@ -376,8 +376,21 @@ if [[ $agent == devin && $command[2] == --devin-attach ]]; then
     exit 0
 fi
 
-exec herdr agent start "fa-${agent}-$$" \
-    --kind "$agent" \
-    --pane "$new_pane" \
-    --timeout 60000 \
-    -- "${command[@]}"
+# `pane split` returns before the new pane's shell registers as available,
+# so agent start can fail fast with agent_pane_busy ("not an available
+# shell").  That check is pre-flight — nothing is typed into the pane — so
+# retry it for a few seconds.  Any other failure is terminal.
+start_out=''
+for _ in {1..120}; do
+    start_out=$(herdr agent start "fa-${agent}-$$" \
+        --kind "$agent" \
+        --pane "$new_pane" \
+        --timeout 60000 \
+        -- "${command[@]}" 2>&1)
+    start_status=$?
+    (( start_status == 0 )) && break
+    print -r -- "$start_out" | grep -q agent_pane_busy || break
+    sleep 0.25
+done
+print -r -- "$start_out"
+exit $start_status
