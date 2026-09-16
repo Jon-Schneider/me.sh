@@ -1,6 +1,6 @@
 ---
 name: hate-reviewer-cycle
-description: Coordinate an ordered, user-selected roster of AI reviewers in adversarial code-review loops, fixing valid findings between reviewers until each converges. Use when the user asks for a hate-review cycle, hate-review loop, or sequential hostile reviews. Reviewer identities, order, and optional models are required user inputs; ask for them if omitted. Supports native subagents and external agents reached through Codex, Claude Code, Pi, apps, or connectors.
+description: Coordinate an ordered, user-selected roster of AI reviewers in adversarial code-review loops, fixing valid findings between reviewers until each converges. Use when the user asks for a hate-review cycle, hate-review loop, or sequential hostile reviews. Reviewer identities, order, and optional models are required user inputs; ask for them if omitted. Supports native subagents and external agents reached through Codex, Claude Code, Pi, Devin, apps, or connectors.
 ---
 
 # Modular Hate Reviewer Cycle
@@ -14,7 +14,7 @@ The reviewer identities are inputs, not policy. Never silently add, replace, reo
 Extract an ordered roster from the request. Each entry has:
 
 - reviewer identity and model, when specified
-- route: native subagent, Codex CLI, Claude Code CLI, Pi CLI, app/connector, or another available mechanism
+- route: native subagent, Codex CLI, Claude Code CLI, Pi CLI, Devin CLI, app/connector, or another available mechanism
 - any reviewer-specific constraints from the user
 
 Examples include `Sol subagent, then Claude Opus` and `Claude Opus subagent, then Codex Sol`. Prefer a native subagent when the user says “subagent.” Otherwise use the named agent's available app or CLI from the current host.
@@ -29,6 +29,7 @@ Read [templates/hate-review-request.md](templates/hate-review-request.md) for ev
 - Codex CLI: [templates/codex-cli.md](templates/codex-cli.md)
 - Claude Code CLI: [templates/claude-code-cli.md](templates/claude-code-cli.md)
 - Pi CLI: [templates/pi-cli.md](templates/pi-cli.md)
+- Devin CLI: [templates/devin-cli.md](templates/devin-cli.md)
 - App, connector, or other external agent: [templates/external-agent.md](templates/external-agent.md)
 
 These adapters are transport guidance, not a fixed stage list. A reviewer can use any adapter that actually reaches the user-selected agent from the current host.
