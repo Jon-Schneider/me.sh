@@ -235,9 +235,11 @@ load_non_git_aliases() {
     alias tr="tree -C -L 2"
     # Use ~ not "$HOME" here: zsh-syntax-highlighting can't resolve parameter
     # expansion in command position and would paint the whole alias red.
-    alias tud='npx ccusage@latest daily --json --by-agent --since "$(date +%F)" | ~/bin/ccusage-window "Today"'
-    alias tum='npx ccusage@latest daily --json --by-agent --since "$(date -v-1m +%F)" | ~/bin/ccusage-window "Last Month"'
-    alias tuw='npx ccusage@latest daily --json --by-agent --since "$(date -v-6d +%F)" | ~/bin/ccusage-window "Last 7 Days"'
+    # The trailing since date tells ccusage-window to also fold in Devin CLI
+    # transcripts whose last activity falls inside the window.
+    alias tud='npx ccusage@latest daily --json --by-agent --since "$(date +%F)" | ~/bin/ccusage-window "Today" "$(date +%F)"'
+    alias tum='npx ccusage@latest daily --json --by-agent --since "$(date -v-1m +%F)" | ~/bin/ccusage-window "Last Month" "$(date -v-1m +%F)"'
+    alias tuw='npx ccusage@latest daily --json --by-agent --since "$(date -v-6d +%F)" | ~/bin/ccusage-window "Last 7 Days" "$(date -v-6d +%F)"'
 
     # Unquarantine files
     uq() {

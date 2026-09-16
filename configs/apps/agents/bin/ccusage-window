@@ -3,12 +3,19 @@
 ccusage-style table summed over the whole window instead of one row per day,
 with per-model breakdown rows inside each agent group.
 
-usage: npx ccusage@latest daily --json --by-agent --since YYYY-MM-DD | ccusage-window "Last 7 Days"
+usage: npx ccusage@latest daily --json --by-agent --since YYYY-MM-DD | ccusage-window "Last 7 Days" [YYYY-MM-DD]
+
+An optional second argument is the window's --since date; when given, Devin
+CLI sessions (~/.local/share/devin/cli/transcripts) whose last activity falls
+in the window are merged into the report as a "devin" agent. Devin emits no
+cost data, so its rows always show $0.00.
 """
+import glob
 import json
 import os
 import shutil
 import sys
+from datetime import datetime
 
 COLOR = (sys.stdout.isatty() or os.environ.get("FORCE_COLOR")) and \
     "NO_COLOR" not in os.environ
@@ -23,12 +30,58 @@ def comma(n):
     return f"{int(n):,}"
 
 
+def blank_slot():
+    return dict.fromkeys(NUM_KEYS, 0) | {"models": {}}
+
+
+def collect_devin(since):
+    """Sum Devin CLI transcript token metrics into one agent slot.
+
+    Transcripts only carry session-level totals, so each session is attributed
+    to the local date of its last step. Cached tokens are treated as a subset
+    of prompt tokens (Devin reports prompt inclusive of cache reads).
+    """
+    root = os.path.expanduser("~/.local/share/devin/cli/transcripts")
+    slot = blank_slot()
+    for path in sorted(glob.glob(os.path.join(root, "*.json"))):
+        try:
+            with open(path) as f:
+                transcript = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            continue
+        steps = transcript.get("steps") or []
+        if since:
+            stamps = [s["timestamp"] for s in steps if s.get("timestamp")]
+            if not stamps:
+                continue
+            last = max(datetime.fromisoformat(t).astimezone() for t in stamps)
+            if last.strftime("%Y-%m-%d") < since:
+                continue
+        metrics = transcript.get("final_metrics") or {}
+        prompt = metrics.get("total_prompt_tokens", 0)
+        output = metrics.get("total_completion_tokens", 0)
+        cached = min(metrics.get("total_cached_tokens", 0), prompt)
+        uncached = prompt - cached
+        slot["inputTokens"] += uncached
+        slot["outputTokens"] += output
+        slot["cacheReadTokens"] += cached
+        slot["totalTokens"] += prompt + output
+        model = (transcript.get("agent") or {}).get("model_name") or "unknown"
+        breakdown = slot["models"].setdefault(model, blank_slot())
+        breakdown["inputTokens"] += uncached
+        breakdown["outputTokens"] += output
+        breakdown["cacheReadTokens"] += cached
+        breakdown["totalTokens"] += prompt + output
+    return slot if slot["totalTokens"] else None
+
+
 def main():
     label = sys.argv[1] if len(sys.argv) > 1 else "Window"
+    since = sys.argv[2] if len(sys.argv) > 2 else None
     data = json.load(sys.stdin)
 
     def blank():
-        return dict.fromkeys(NUM_KEYS, 0) | {"models": {}}
+        return blank_slot()
 
     def add_into(slot, entry):
         for k in NUM_KEYS:
@@ -46,6 +99,9 @@ def main():
     for day in data.get("daily", []):
         for a in day.get("agents") or [day]:
             add_into(agents.setdefault(a["agent"], blank()), a)
+    devin = collect_devin(since)
+    if devin:
+        agents["devin"] = devin
 
     all_slot = blank()
     for a in agents.values():
@@ -109,7 +165,8 @@ def main():
 
     detected = ", ".join(sorted(
         {a for d in data.get("daily", [])
-          for a in d.get("metadata", {}).get("agents", [])} or set(agents),
+          for a in d.get("metadata", {}).get("agents", [])}
+        | ({"devin"} if devin else set()),
         key=str.capitalize))
     title = f"Coding (Agent) CLI Usage Report - {label}"
     subtitle = f"Detected: {detected}" if detected else ""
