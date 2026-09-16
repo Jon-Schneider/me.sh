@@ -1,5 +1,6 @@
 {
   "agentPushNotifEnabled": true,
+  "alwaysCopyFullResponse": true,
   "effortLevel": "medium",
   "enabledPlugins": {
     "clangd-lsp@claude-plugins-official": true,
