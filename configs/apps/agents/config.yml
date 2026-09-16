@@ -47,6 +47,8 @@ symlinks:
       - $HOME/.claude/skills/rewrite-pr-history
   - src: bin/agent-issue-hook
     dest: $HOME/bin/agent-issue-hook
+  - src: bin/ccusage-window
+    dest: $HOME/bin/ccusage-window
   - src: bin/agent-issue-hook-worker
     dest: $HOME/bin/agent-issue-hook-worker
   - src: bin/fa

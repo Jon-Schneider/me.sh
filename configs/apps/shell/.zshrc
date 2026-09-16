@@ -233,6 +233,9 @@ load_non_git_aliases() {
     alias tmp="cd ~/Tmp"
     alias tokencount="npx tiktoken-cli"
     alias tr="tree -C -L 2"
+    alias tud='npx ccusage@latest daily --json --by-agent --since "$(date +%F)" | "$HOME/bin/ccusage-window" "Today"'
+    alias tum='npx ccusage@latest daily --json --by-agent --since "$(date -v-1m +%F)" | "$HOME/bin/ccusage-window" "Last Month"'
+    alias tuw='npx ccusage@latest daily --json --by-agent --since "$(date -v-6d +%F)" | "$HOME/bin/ccusage-window" "Last 7 Days"'
 
     # Unquarantine files
     uq() {
