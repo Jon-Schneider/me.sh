@@ -1,10 +1,10 @@
 #!/bin/zsh
 
 # fa - Fork Agent
-# Forks a running Codex CLI, Claude CLI, or pi-agent session into a new split pane.
-# Splits inside Herdr when run from a Herdr pane.
+# Forks a running Codex CLI, Claude CLI, pi-agent, or Devin session into a new
+# split pane.  Splits inside Herdr when run from a Herdr pane.
 #
-# Usage: fa [pi-session-id]
+# Usage: fa [session-id]
 #
 # pi session resolution order:
 #   1. explicit argument              fa <session-id>
@@ -19,6 +19,26 @@
 # We deliberately NEVER guess by mtime: with parallel pi sessions sharing a cwd,
 # the most recently written file usually belongs to a *different* pane/session
 # than the one you ran this from.
+#
+# devin session resolution order:
+#   1. explicit argument              fa <session-id>   (id must exist in devin's
+#                                      session store; otherwise treated as pi)
+#   2. inside devin                   (exec tool sets $CHISEL_SESSION_DB; `!fa`
+#                                      bang commands just inherit the pane env —
+#                                      either way the session comes from this
+#                                      pane's herdr agent record, or by matching
+#                                      ancestor PIDs against session_locks/*.lock)
+#   3. the lone devin agent in the current tab, but only when no pi session
+#      files exist for $PWD
+#
+# Devin has no CLI fork; `/fork` is a TUI-only slash command.  A prompt sent
+# via `herdr agent prompt` queues behind a running turn and executes as a
+# slash command once the queue drains — so `fa` doesn't need the source to be
+# idle.  `/fork` leaves the source TUI on the ORIGINAL session (which stays
+# locked) and creates the fork unlocked, so a second pane can `devin -r` it.
+# For a live session the new pane runs `fa --devin-attach`, which queues /fork
+# on the source agent (or claims an existing unclaimed fork) and resumes the
+# result.  For an ended session (no live pane) it just resumes it directly.
 
 # --- pi session helpers -----------------------------------------------------
 
@@ -100,12 +120,149 @@ resolve_pi_session() {
     done
 }
 
+# --- devin session helpers --------------------------------------------------
+
+devin_db="${CHISEL_SESSION_DB:-$HOME/.local/share/devin/cli/sessions.db}"
+
+# One herdr agent-list row ("pane\tsession\tstatus\tcwd") per devin agent
+# matching the jq select predicate in $1.
+devin_agent_rows() {
+    herdr agent list 2>/dev/null | jq -r \
+        '.result.agents[] | select(.agent == "devin" and ('"$1"')) |
+         [.pane_id, .agent_session.value, .agent_status, .cwd] | @tsv'
+}
+
+# True if $1 is an existing devin session id.
+devin_session_exists() {
+    [[ $1 =~ ^[a-zA-Z0-9_-]+$ && -f $devin_db ]] || return 1
+    sqlite3 "$devin_db" \
+        "SELECT 1 FROM sessions WHERE id = '$1' LIMIT 1" 2>/dev/null |
+        grep -q 1
+}
+
+# Prints "<pane>\t<session>" for the devin agent hosting session $1, if live.
+devin_live_pane() {
+    devin_agent_rows ".agent_session.value == \"$1\"" | head -1
+}
+
+# Prints the devin session id owning an ancestor of this process.  Devin's
+# session_locks/<id>.lock files hold the pid of that session's `devin acp`
+# process, which the exec tool runs under.
+devin_session_from_ancestors() {
+    local lockdir=$HOME/.local/share/devin/cli/session_locks f pid
+    local -A locks
+    for f in "$lockdir"/*.lock(N); do
+        locks[$(<"$f")]=${f:t:r}
+    done
+    pid=$PPID
+    while [[ -n $pid && $pid -gt 1 ]]; do
+        [[ -n ${locks[$pid]-} ]] && { print -r -- ${locks[$pid]}; return 0 }
+        pid=$(ps -o ppid= -p $pid 2>/dev/null | tr -d ' ')
+    done
+    return 1
+}
+
+# Internal entry point: `fa --devin-attach <src-pane> <orig-session> <cwd>`
+# runs in the NEW pane.  Devin has no CLI fork; `/fork` is TUI-only — but a
+# prompt submitted via `herdr agent prompt` queues behind a running turn and
+# DOES execute as a slash command once the queue drains.  So this queues
+# /fork on the source agent, then resumes the unlocked fork it creates.  An
+# already-existing unclaimed fork (a previous /fork nobody resumed) is taken
+# instead of making another.  If the source agent exits instead, the original
+# session unlocks and we resume that.  Never invoked by hand.
+if [[ ${1:-} == --devin-attach ]]; then
+    src_pane=$2 orig_session=$3 session_cwd=$4
+    [[ -n $orig_session ]] || { print -u2 "usage: fa --devin-attach <pane> <session> [cwd]"; exit 2 }
+    cd "${session_cwd:-$PWD}" 2>/dev/null
+    command -v devin >/dev/null || { print -u2 "fa: devin not on PATH"; exit 1 }
+
+    orig_title=$(sqlite3 "$devin_db" \
+        "SELECT coalesce(title, '') FROM sessions WHERE id = '$orig_session'" 2>/dev/null)
+
+    # True if session $1 has no live devin process holding its lock.
+    devin_session_free() {
+        local f=$HOME/.local/share/devin/cli/session_locks/$1.lock pid
+        [[ -f $f ]] || return 0
+        pid=$(<"$f")
+        [[ -z $pid ]] && return 0
+        kill -0 $pid 2>/dev/null || return 0
+        [[ $(ps -o command= -p $pid 2>/dev/null) != *devin* ]]
+    }
+
+    # Fork candidates, best first: "* (fork)"-titled sessions in this cwd —
+    # exact title match on the original, then any fork appearing after we
+    # started watching.
+    watch_started=$(date +%s)
+    find_forks() {
+        devin list --format json 2>/dev/null | jq -r \
+            --arg orig "$orig_session" --arg t "$orig_title" --argjson t0 "$watch_started" '
+            . as $s |
+            ([ $s[] | select(.id != $orig) |
+               select((.title // "") == ($t + " (fork)")) ] +
+             [ $s[] | select(.id != $orig) |
+               select((.title // "") | endswith("(fork)")) |
+               select(.last_activity_at >= $t0) ]) | .[].id'
+    }
+
+    fork_id=""
+    for id in ${(f)"$(find_forks)"}; do
+        devin_session_free "$id" && { fork_id=$id; break }
+    done
+
+    if [[ -n $fork_id ]]; then
+        print "fa: attaching to existing fork $fork_id"
+    else
+        print "fa: forking '$orig_session'${src_pane:+ ($src_pane)}"
+        if [[ -n $src_pane ]]; then
+            out=$(herdr agent prompt "$src_pane" "/fork" 2>&1) && queued=1
+            (( ${queued:-0} )) || print "fa: couldn't queue /fork ($out) — will retry; or run /fork yourself"
+            (( ${queued:-0} )) && print "fa: /fork queued behind the source turn; it runs once the queue drains."
+        else
+            print "fa: source agent not in a pane; run /fork in it manually."
+        fi
+        print "fa: (closing the source pane resumes the original session here instead)"
+    fi
+
+    for (( i = 0; i < 600; i++ )); do
+        if [[ -z $fork_id ]]; then
+            for id in ${(f)"$(find_forks)"}; do
+                devin_session_free "$id" && { fork_id=$id; break }
+            done
+            # One retry if the initial /fork submission failed (e.g. the pane
+            # was blocked on an approval prompt at the time).
+            if [[ -z $fork_id && -z ${queued:-} && -n $src_pane && $i -eq 30 ]]; then
+                herdr agent prompt "$src_pane" "/fork" >/dev/null 2>&1 && queued=1
+            fi
+        fi
+        if [[ -n $fork_id ]]; then
+            print "fa: forked -> $fork_id; resuming"
+            exec devin -r "$fork_id"
+        fi
+
+        # Source agent gone → original session is unlocked; resume it.
+        if [[ -n $src_pane ]] && herdr agent list >/dev/null 2>&1 &&
+            [[ -z $(devin_agent_rows ".pane_id == \"$src_pane\"") ]]; then
+            print "fa: source pane closed; resuming '$orig_session'"
+            exec devin -r "$orig_session"
+        fi
+        sleep 2
+    done
+    print -u2 "fa: timed out after 20m; run /fork in the source pane, then 'devin -r <fork-id>' here"
+    exit 1
+fi
+
 # --- agent detection ---------------------------------------------------------
 
 if [[ -n "${1:-}" ]]; then
-    # Explicit session id wins over everything (documented as pi-only).
-    agent=pi
-    command=(pi --fork "$1")
+    # Explicit session id: a devin session if the id exists in its store,
+    # otherwise pi (preserves the historical pi-only meaning of the arg).
+    if devin_session_exists "$1"; then
+        agent=devin
+        devin_session=$1
+    else
+        agent=pi
+        command=(pi --fork "$1")
+    fi
 
 elif [[ -n "$CODEX_THREAD_ID" ]]; then
     agent=codex
@@ -119,25 +276,75 @@ elif [[ -n "$PI_SESSION_ID" ]]; then
     agent=pi
     command=(pi --fork "$PI_SESSION_ID")
 
-else
-    pi_session_id=$(resolve_pi_session) || {
-        echo "fa: couldn't detect Codex, Claude Code, or a unique pi-agent session"
+elif [[ -n "$CHISEL_SESSION_DB" ]] || \
+     [[ -n "$(devin_agent_rows ".pane_id == \"${HERDR_PANE_ID:-__none__}\"")" ]]; then
+    # Inside devin's exec-tool env ($CHISEL_SESSION_DB) or a `!fa` bang command
+    # in a devin pane — either way this pane itself hosts the agent.
+    agent=devin
+    devin_src_pane=$HERDR_PANE_ID
+    devin_session=$(devin_agent_rows ".pane_id == \"$HERDR_PANE_ID\"" | cut -f2)
+    [[ -n $devin_session ]] || devin_session=$(devin_session_from_ancestors)
+    if [[ -z $devin_session ]]; then
+        echo "fa: inside a devin session but couldn't resolve its id" >&2
         exit 1
-    }
-    agent=pi
-    command=(pi --fork "$pi_session_id")
+    fi
+
+else
+    devin_rows=()
+    if [[ -z "$(list_pi_sessions)" ]]; then
+        # No pi candidates for $PWD: fall back to devin agents in this tab.
+        devin_rows=("${(@f)$(devin_agent_rows ".tab_id == \"${HERDR_TAB_ID:-__none__}\"")}")
+    fi
+    if (( ${#devin_rows} == 1 )); then
+        IFS=$'\t' read -r devin_src_pane devin_session _ <<< "${devin_rows[1]}"
+        agent=devin
+    elif (( ${#devin_rows} > 1 )); then
+        print -u2 "fa: ${#devin_rows} devin agents in this tab; re-run as: fa <session-id>"
+        for r in $devin_rows; do print -u2 "  fa ${${(ps.\t.)r}[2]}   (${${(ps.\t.)r}[1]})"; done
+        exit 1
+    elif [[ -z "$(list_pi_sessions)" ]]; then
+        echo "fa: couldn't detect Codex, Claude Code, Devin, or a unique pi-agent session"
+        exit 1
+    else
+        pi_session_id=$(resolve_pi_session) || {
+            echo "fa: couldn't detect Codex, Claude Code, Devin, or a unique pi-agent session"
+            exit 1
+        }
+        agent=pi
+        command=(pi --fork "$pi_session_id")
+    fi
+fi
+
+# Devin: translate the resolved session into either a direct resume (ended
+# session, no live pane) or the deferred /fork dance in the new pane.
+if [[ $agent == devin ]]; then
+    [[ $devin_session =~ ^[a-zA-Z0-9_-]+$ ]] || { echo "fa: bad devin session id: $devin_session"; exit 1 }
+    if [[ -z ${devin_src_pane:-} ]]; then
+        IFS=$'\t' read -r devin_src_pane _ <<< "$(devin_live_pane "$devin_session")"
+    fi
+    if [[ -n ${devin_src_pane:-} ]]; then
+        devin_cwd=$(devin_agent_rows ".pane_id == \"$devin_src_pane\"" | cut -f4)
+        fa_path=$(whence -p fa 2>/dev/null || print -r -- "$0")
+        command=("$fa_path" --devin-attach "$devin_src_pane" "$devin_session" "${devin_cwd:-$PWD}")
+    else
+        devin_cwd=$(sqlite3 "$devin_db" \
+            "SELECT working_directory FROM sessions WHERE id = '$devin_session'" 2>/dev/null)
+        command=(devin -r "$devin_session")
+    fi
+    fa_target_cwd=${devin_cwd:-$PWD}
 fi
 
 # Debug escape hatch: resolve only, don't fork.  FA_DEBUG=1 fa
 if [[ -n "${FA_DEBUG:-}" ]]; then
     print "fa(debug): agent=$agent cwd=$PWD"
+    [[ $agent == devin ]] && print "fa(debug): devin_session=${devin_session:-?} src_pane=${devin_src_pane:-none}"
     print -r -- "fa(debug): command: ${(qq)command}"
     exit 0
 fi
 
 # The new pane does not inherit this process's environment, so forward the
 # session variables explicitly.
-forwarded_vars=(CODEX_THREAD_ID CLAUDE_CODE_SESSION_ID PI_SESSION_ID PI_SESSION_FILE PI_PROVIDER PI_MODEL PI_REASONING_LEVEL)
+forwarded_vars=(CODEX_THREAD_ID CLAUDE_CODE_SESSION_ID PI_SESSION_ID PI_SESSION_FILE PI_PROVIDER PI_MODEL PI_REASONING_LEVEL DEVIN_MODEL DEVIN_PERMISSION_MODE DEVIN_SANDBOX CHISEL_SESSION_DB)
 
 if [[ -z "$HERDR_PANE_ID" ]]; then
     echo "fa: not running inside Herdr"
@@ -153,13 +360,21 @@ done
 
 # herdr >= 0.8: agent start only launches into an existing shell pane;
 # split first (with cwd/env/focus), then start the agent in the new pane.
-local split_json new_pane
 split_json=$(herdr pane split "$HERDR_PANE_ID" \
     --direction right \
-    --cwd "$PWD" \
+    --cwd "${fa_target_cwd:-$PWD}" \
     --focus \
     "${env_args[@]}") || exit 1
 new_pane=$(print -r -- "$split_json" | jq -r '.result.pane.pane_id')
+
+if [[ $agent == devin && $command[2] == --devin-attach ]]; then
+    # `agent start` can't wait for readiness here — nothing is running in the
+    # pane until the queued /fork executes.  Run the watcher as a plain pane
+    # command; herdr detects the agent itself once `devin -r` starts.
+    herdr pane run "$new_pane" "${(j: :)${(@q)command}}" || exit 1
+    print "fa: forking '$devin_session' into $new_pane — /fork runs in the source pane once its queue drains"
+    exit 0
+fi
 
 exec herdr agent start "fa-${agent}-$$" \
     --kind "$agent" \
