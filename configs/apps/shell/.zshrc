@@ -198,6 +198,7 @@ load_non_git_aliases() {
     alias hd="hunk diff"
     alias hm="cd ~/"
     alias hr="herdr server reload-config" # herdr reload
+    alias hdwr='herdr workspace rename "$HERDR_WORKSPACE_ID"' # herdr workspace rename
     alias hst="history"
     alias hstg="hst | grep"
     alias hstr="fc -l -20" # Recent History
