@@ -41,7 +41,7 @@ rows = [
 prefix = "ctrl+space"
 # Prefix muscle memory: prefix+, renames the focused space (default is
 # prefix+shift+w).
-rename_workspace = "prefix+comma"
+rename_workspace = "cmd+shift+r"
 new_tab = "prefix+shift+t"
 rename_tab = "prefix+t"
 # Open an existing Git worktree as a nested space in its repository group.
