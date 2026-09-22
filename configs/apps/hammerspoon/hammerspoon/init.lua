@@ -2,6 +2,31 @@
 hs.loadSpoon("ReloadConfiguration")
 spoon.ReloadConfiguration:start()
 
+-- Ghostty cannot pass Command through terminal mouse reporting. Translate
+-- Cmd-click to Ctrl-click so Herdr opens pane links for every TUI.
+local ghosttyLinkClick = false
+ghosttyLinkClickTap = hs.eventtap.new({
+    hs.eventtap.event.types.leftMouseDown,
+    hs.eventtap.event.types.leftMouseDragged,
+    hs.eventtap.event.types.leftMouseUp,
+}, function(event)
+    local kind = event:getType()
+    local app = hs.application.frontmostApplication()
+    local inGhostty = app and app:bundleID() == "com.mitchellh.ghostty"
+    if kind == hs.eventtap.event.types.leftMouseDown then
+        local flags = event:getFlags()
+        ghosttyLinkClick = inGhostty and flags.cmd and not (flags.ctrl or flags.alt or flags.shift)
+    end
+    if ghosttyLinkClick and inGhostty then
+        local flags = event:getFlags()
+        flags.cmd = false
+        flags.ctrl = true
+        event:setFlags(flags)
+    end
+    if kind == hs.eventtap.event.types.leftMouseUp then ghosttyLinkClick = false end
+end)
+ghosttyLinkClickTap:start()
+
 -- Restore shortcuts that Device Hub dropped when it replaced Simulator.
 -- Device Hub's device windows are missing from the macOS Accessibility window
 -- list. Its Dock menu still lists every device across Spaces and marks the
