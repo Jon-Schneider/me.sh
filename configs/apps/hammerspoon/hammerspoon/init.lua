@@ -160,6 +160,84 @@ hs.hotkey.bind({}, "F18", function()
     hs.timer.doAfter(0.12, cycleDeviceHubWindow)
 end)
 
+-- Karabiner sends F19 for Cmd-` only while Xcode is frontmost. Keep one
+-- snapshot for the whole cycle: focusing a window changes stacking order,
+-- which would otherwise make the next press bounce between two windows.
+local xcodeWindowCycle = nil
+
+local function xcodeWindows()
+    local windows = {}
+    local identities = {}
+    for _, window in ipairs(hs.window.orderedWindows()) do
+        local app = window:application()
+        local id = window:id()
+        if app and app:bundleID() == "com.apple.dt.Xcode"
+            and id and window:isStandard() then
+            table.insert(windows, {window = window, pid = app:pid(), id = id})
+            table.insert(identities, app:pid() .. ":" .. id)
+        end
+    end
+    table.sort(identities)
+    return windows, table.concat(identities, ",")
+end
+
+local function startXcodeWindowCycle(windows, signature, current)
+    local currentPid = current:application():pid()
+    local currentId = current:id()
+    local localWindows = {}
+    local otherWindows = {}
+    for _, entry in ipairs(windows) do
+        if entry.pid == currentPid then
+            table.insert(localWindows, entry)
+        else
+            table.insert(otherWindows, entry)
+        end
+    end
+    table.sort(otherWindows, function(a, b)
+        if a.pid ~= b.pid then return a.pid < b.pid end
+        return a.id < b.id
+    end)
+
+    local startIndex = 1
+    for index, entry in ipairs(localWindows) do
+        if entry.id == currentId then startIndex = index; break end
+    end
+    local cycle = {}
+    for offset = 0, #localWindows - 1 do
+        table.insert(cycle, localWindows[(startIndex + offset - 1) % #localWindows + 1])
+    end
+    for _, entry in ipairs(otherWindows) do table.insert(cycle, entry) end
+    return {windows = cycle, signature = signature, index = 1}
+end
+
+local function cycleXcodeWindow()
+    local current = hs.window.frontmostWindow()
+    local app = current and current:application()
+    if not app or app:bundleID() ~= "com.apple.dt.Xcode" then return end
+
+    local windows, signature = xcodeWindows()
+    if #windows < 2 then return end
+    local currentIsStandard = false
+    for _, entry in ipairs(windows) do
+        if entry.id == current:id() and entry.pid == app:pid() then
+            currentIsStandard = true
+            break
+        end
+    end
+    if not currentIsStandard then return end
+    if not xcodeWindowCycle or xcodeWindowCycle.signature ~= signature
+        or xcodeWindowCycle.windows[xcodeWindowCycle.index].id ~= current:id() then
+        xcodeWindowCycle = startXcodeWindowCycle(windows, signature, current)
+    end
+
+    local nextIndex = xcodeWindowCycle.index % #xcodeWindowCycle.windows + 1
+    local target = xcodeWindowCycle.windows[nextIndex].window
+    xcodeWindowCycle.index = nextIndex
+    target:focus()
+end
+
+hs.hotkey.bind({}, "F19", cycleXcodeWindow)
+
 -- Defeat Pasteblocking and paste without retaining formatting
 hs.hotkey.bind({"ctrl", "option", "cmd"}, "V", function() hs.eventtap.keyStrokes(hs.pasteboard.getContents()) end)
 
