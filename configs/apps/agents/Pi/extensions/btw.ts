@@ -20,6 +20,7 @@ import {
   type AgentSessionEvent,
   type ExtensionAPI,
   type ExtensionContext,
+  type ModelRuntime,
   type ResourceLoader,
 } from "@earendil-works/pi-coding-agent";
 import {
@@ -80,6 +81,7 @@ const pink = (text: string): string => `${PINK}${text}${RESET}`;
 // UserMessageComponent embeds shell-integration zone markers for the main chat
 // scrollback; they are meaningless inside an overlay, so strip them.
 const OSC133_ZONE = /\x1b\]133;[A-C]\x07/g;
+const TERMINAL_IMAGE_LINE = /\x1b_G|\x1b\]1337;File=/;
 
 interface BtwTheme {
   fg(color: string, text: string): string;
@@ -269,6 +271,10 @@ class BtwPane implements Component {
     this.footers.clear();
   }
 
+  invalidateTranscript(): void {
+    this.invalidateBody();
+  }
+
   private invalidateBody(): void {
     this.cacheSig = "";
   }
@@ -317,15 +323,13 @@ class BtwPane implements Component {
   }
 
   private bodyLines(width: number, rt: BtwSession | null, mainBusy: boolean): string[] {
-    const isBoundary = (m: unknown): boolean =>
-      m === rt?.boundaryMessage ||
-      ((m as { role?: string }).role === "user" &&
-        textOf(m).startsWith("Side conversation boundary."));
     const allMessages = rt ? (rt.session.agent.state.messages as unknown[]) : [];
     // Inherited main-thread history is reference-only context (like Codex):
     // render only messages after the boundary.
-    const boundaryIdx = allMessages.findIndex((m) => isBoundary(m));
-    const visible = boundaryIdx === -1 ? allMessages : allMessages.slice(boundaryIdx + 1);
+    const boundaryIdx = rt ? allMessages.lastIndexOf(rt.boundaryMessage) : -1;
+    const visible = boundaryIdx !== -1
+      ? allMessages.slice(boundaryIdx + 1)
+      : rt?.session.sessionManager.buildSessionProjection().messages ?? [];
     const last = visible.at(-1);
     const sig = `${rt?.id ?? 0}|${visible.length}|${last ? textOf(last).length : 0}|${width}|${rt?.busy ? 1 : 0}|${rt?.error ?? ""}|${mainBusy ? 1 : 0}`;
     if (this.cacheSig === sig) return this.cacheLines;
@@ -423,6 +427,8 @@ export default function btwExtension(pi: ExtensionAPI) {
     handle?: OverlayHandle;
     finish?: () => void;
     tui?: TUI;
+    component?: BtwPane;
+    restoreOverlayComposer?: () => void;
     gitBranch: string | null;
     providerCount: number;
   } = { open: false, gitBranch: null, providerCount: 1 };
@@ -443,6 +449,7 @@ export default function btwExtension(pi: ExtensionAPI) {
   function onSessionEvent(rt: BtwSession, event: AgentSessionEvent): void {
     if (event.type === "agent_start") rt.busy = true;
     if (event.type === "agent_end") rt.busy = false;
+    pane.component?.invalidateTranscript();
     refresh();
   }
 
@@ -461,8 +468,12 @@ export default function btwExtension(pi: ExtensionAPI) {
       return null;
     }
     try {
+      // A fresh runtime lacks extension providers such as Devin Local.
+      const modelRuntime = Reflect.get(ctx.modelRegistry, "runtime") as ModelRuntime | undefined;
+      if (!modelRuntime) throw new Error("current model runtime unavailable");
       const { session } = await createAgentSession({
         sessionManager: SessionManager.inMemory(),
+        modelRuntime,
         model: ctx.model,
         thinkingLevel: pi.getThinkingLevel(),
         tools: BTW_TOOLS,
@@ -492,6 +503,7 @@ export default function btwExtension(pi: ExtensionAPI) {
       sessions.push(rt);
       activeSessionId = rt.id;
       updateSideHint();
+      refresh();
       return rt;
     } catch (err) {
       ctx.ui.notify(`btw: failed to start side conversation: ${err instanceof Error ? err.message : err}`, "error");
@@ -508,13 +520,40 @@ export default function btwExtension(pi: ExtensionAPI) {
   }
 
   function closePane(): void {
+    pane.restoreOverlayComposer?.();
     pane.handle?.unfocus();
     pane.handle?.hide();
     pane.finish?.();
     pane.handle = undefined;
     pane.finish = undefined;
     pane.tui = undefined;
+    pane.component = undefined;
+    pane.restoreOverlayComposer = undefined;
     pane.open = false;
+  }
+
+  function maskMainImages(tui: TUI): () => void {
+    // Pi's overlay compositor passes terminal image lines through unchanged.
+    const composer = tui as TUI & {
+      compositeOverlays(lines: string[], width: number, height: number): string[];
+    };
+    const original = composer.compositeOverlays;
+    if (typeof original !== "function") return () => {};
+    const masked = function (this: typeof composer, lines: string[], width: number, height: number) {
+      let source = lines;
+      if (pane.open && !pane.handle?.isHidden()) {
+        for (let index = Math.max(0, lines.length - height); index < lines.length; index++) {
+          if (!TERMINAL_IMAGE_LINE.test(lines[index])) continue;
+          if (source === lines) source = lines.slice();
+          source[index] = "";
+        }
+      }
+      return original.call(this, source, width, height);
+    };
+    composer.compositeOverlays = masked;
+    return () => {
+      if (composer.compositeOverlays === masked) composer.compositeOverlays = original;
+    };
   }
 
   async function refreshPaneContext(ctx: ExtensionContext): Promise<void> {
@@ -542,6 +581,7 @@ export default function btwExtension(pi: ExtensionAPI) {
         (tui, theme, _keybindings, done) => {
           pane.finish = done;
           pane.tui = tui;
+          pane.restoreOverlayComposer = maskMainImages(tui);
           const component = new BtwPane(tui, theme as BtwTheme, {
             getActive,
             getSessionCount: () => sessions.length,
@@ -572,11 +612,13 @@ export default function btwExtension(pi: ExtensionAPI) {
               if (sessions.length < 2) return;
               const idx = sessions.findIndex((s) => s.id === activeSessionId);
               activeSessionId = sessions[(idx + 1) % sessions.length].id;
+              refresh();
             },
             onCreateSession: () => {
               void createSession(ctx);
             },
           });
+          pane.component = component;
           component.focused = true;
           return component;
         },
@@ -590,10 +632,13 @@ export default function btwExtension(pi: ExtensionAPI) {
       )
       .catch(() => {})
       .finally(() => {
+        pane.restoreOverlayComposer?.();
         pane.open = false;
         pane.handle = undefined;
         pane.finish = undefined;
         pane.tui = undefined;
+        pane.component = undefined;
+        pane.restoreOverlayComposer = undefined;
       });
   }
 
