@@ -1,0 +1,6 @@
+interface:
+  display_name: "Investigate"
+  short_description: "Investigate a question with cited evidence"
+  default_prompt: "Use $investigate to investigate my question and provide links to evidence with your results."
+policy:
+  allow_implicit_invocation: false
