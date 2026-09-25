@@ -1234,7 +1234,7 @@ case "$1" in
 		#   - user passed nothing             -> bare 'me sync', confirm or --yes
 		#   - user passed args, none resolved -> typo / unknown unit, error out
 		#   - user passed args, some resolved -> targeted, no prompt
-		local sync_user_args=$#
+		sync_user_args=$#
 		parse_drift_args "$@"
 		if (( sync_user_args > 0 && ${#selected[@]} == 0 && ${#drift_filters[@]} == 0 )); then
 			error "No config matched the given arguments; refusing to fall back to every unit."
@@ -1249,7 +1249,7 @@ case "$1" in
 				fi
 				printf 'About to absorb and redeploy EVERY config in this repo (%d unit(s)).\n' "${#selected[@]}" >&2
 				printf 'Continue? [y/N] ' >&2
-				local answer
+				answer=""
 				IFS= read -r answer </dev/tty 2>/dev/null || answer=""
 				if [[ "$answer" != [yY] && "$answer" != [yY][eE][sS] ]]; then
 					error "Aborted"
