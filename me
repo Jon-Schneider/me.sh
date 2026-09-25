@@ -20,7 +20,7 @@
 #   me up [app|macos] [<name>|<path>...]
 #                               Pick local changes to pull back into the repo
 #                               (alias for the older name: absorb)
-#   me sync [app|macos] [<name>|<path>...]
+#   me sync [app|macos] [<name>...]
 #                               Absorb drift like 'up', then redeploy the same
 #                               units (skipping units with absorb failures)
 #   me add <file> [--link symlink|copy] [--app name] [--dest \$HOME/...]
@@ -414,17 +414,21 @@ function drift_row_matches_filters {
 # Resolve one drift argument: arguments containing '/' are always path filters;
 # bare words resolve as config names first and fall back to path filters.
 function resolve_drift_arg {
-	local scope="$1" arg="$2" m app_total
+	local scope="$1" arg="$2" m
+	local -a app_matches=()
 	if [[ "$arg" != */* ]]; then
 		if [[ "$scope" == "$APPS_SCOPE" || "$scope" == "$MACOS_SCOPE" ]]; then
 			collect_matches "$scope" "$arg"
 		else
 			collect_matches "$APPS_SCOPE" "$arg"
-			app_total=${#matches[@]}
+			app_matches=(${matches[@]+"${matches[@]}"})
 			collect_matches "$MACOS_SCOPE" "$arg"
-			if (( app_total > 0 && ${#matches[@]} > 0 )); then
+			if (( ${#app_matches[@]} > 0 && ${#matches[@]} > 0 )); then
 				error "'$arg' is ambiguous across app and macOS configs; re-run with an explicit scope: app or macos"
 				exit 1
+			fi
+			if (( ${#app_matches[@]} > 0 )); then
+				matches=("${app_matches[@]}")
 			fi
 		fi
 		if (( ${#matches[@]} > 0 )); then
@@ -1052,9 +1056,9 @@ Examples:
   me diff ~/.gitconfig        Scope a diff by deployed path
   me diff ghostty/config      Path filters match either side on '/' boundaries
   me up                       Review drift everywhere, route hunks to base or local fragments
-  me sync [name]...           Absorb drift, then redeploy. Bare 'me sync' (or
-                              path-only args) sweeps every unit and requires a
-                              y/N prompt or --yes / -y
+  me sync [app|macos] [name]... Absorb drift, then redeploy named configs.
+                              Paths are rejected. Without names, confirm the
+                              whole scope with a y/N prompt or --yes / -y
   me sync agents              Absorb drift in agent configs, then redeploy clean copies
   me doctor                   Validate the complete config registry
   me plan yojam               Validate and preview one unit
@@ -1228,26 +1232,38 @@ case "$1" in
 		;;
 	sync)
 		shift
-		# parse_drift_args tolerantly falls back to sweeping every unit when
-		# no arg resolves; 'me sync' is destructive on redeploy, so we
-		# distinguish three cases here:
-		#   - user passed nothing             -> bare 'me sync', confirm or --yes
-		#   - user passed args, none resolved -> typo / unknown unit, error out
-		#   - user passed args, some resolved -> targeted, no prompt
-		sync_user_args=$#
-		parse_drift_args "$@"
-		if (( sync_user_args > 0 && ${#selected[@]} == 0 && ${#drift_filters[@]} == 0 )); then
-			error "No config matched the given arguments; refusing to fall back to every unit."
-			error "Re-run with a known name (try 'me' to list) or pass --yes if you really mean it."
-			exit 1
-		fi
-		if (( sync_user_args == 0 )); then
-			if [[ "${ME_SYNC_YES:-0}" != "1" ]]; then
-				if ! : </dev/tty 2>/dev/null; then
-					error "'me sync' sweeping every unit needs --yes (or -y) when there is no controlling terminal"
+		sync_scope="$CONFIG_SCOPE"
+		case "${1:-}" in
+			all)
+				shift
+				if (( $# > 0 )); then
+					error "'me sync all' takes no config names"
 					exit 1
 				fi
-				printf 'About to absorb and redeploy EVERY config in this repo (%d unit(s)).\n' "${#selected[@]}" >&2
+				;;
+			app|apps) sync_scope="$APPS_SCOPE"; shift ;;
+			mac|macos|sys|system) sync_scope="$MACOS_SCOPE"; shift ;;
+		esac
+		if (( $# > 0 )); then
+			for arg in "$@"; do
+				if [[ "$arg" == */* ]]; then
+					error "'me sync' requires config names, not paths; use 'me up' for path-filtered absorb"
+					exit 1
+				fi
+			done
+			resolve_args "$sync_scope" "$@"
+		else
+			if [[ "$sync_scope" == "$CONFIG_SCOPE" ]]; then
+				select_all_config_units
+			else
+				select_units_in_scope "$sync_scope"
+			fi
+			if [[ "${ME_SYNC_YES:-0}" != "1" ]]; then
+				if ! : </dev/tty 2>/dev/null; then
+					error "'me sync' without config names needs --yes (or -y) when there is no controlling terminal"
+					exit 1
+				fi
+				printf 'About to absorb and redeploy every config in the selected scope (%d unit(s)).\n' "${#selected[@]}" >&2
 				printf 'Continue? [y/N] ' >&2
 				answer=""
 				IFS= read -r answer </dev/tty 2>/dev/null || answer=""
