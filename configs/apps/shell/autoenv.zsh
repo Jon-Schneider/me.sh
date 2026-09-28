@@ -1,10 +1,10 @@
-# autoenv.zsh — per-directory .env loader for zsh
+# autoenv.zsh — per-directory .dirrc loader for zsh
 #
-# Sources ./.env as real shell (env vars, aliases, functions all work) when you
+# Sources ./.dirrc as real shell (env vars, aliases, functions all work) when you
 # cd into a directory, then on leaving removes exactly what it ADDED and restores
 # what it CHANGED (including tied vars like PATH/MANPATH).
 #
-# Approval is content-hashed like `direnv allow`: a .env is sourced only after you
+# Approval is content-hashed like `direnv allow`: a .dirrc is sourced only after you
 # approve it, and any edit to the file voids the approval and re-prompts.
 #
 # Sourced from ~/.zshrc. State lives in $AUTOENV_STATE_DIR (default ~/.config/autoenv).
@@ -15,7 +15,7 @@ typeset -g  _AUTOENV_ALLOW="$AUTOENV_STATE_DIR/allowed"   # lines: <sha256>\t<ab
 typeset -g  _AUTOENV_DENY="$AUTOENV_STATE_DIR/denied"     # lines: <abs-path>
 typeset -g  _AUTOENV_DIR=''
 typeset -ga _AUTOENV_UNDO=()
-typeset -ga AUTOENV_IGNORE_DIRS=("$HOME")   # dirs whose .env the auto-loader ignores
+typeset -ga AUTOENV_IGNORE_DIRS=("$HOME")   # dirs whose .dirrc the auto-loader ignores
 
 # ---- approval (content-hashed, like `direnv allow`) ----
 _autoenv_hash() { print -r -- "${$(shasum -a 256 -- "$1" 2>/dev/null)%% *}"; }
@@ -52,7 +52,7 @@ _autoenv_load() {
   for n in ${(k)parameters}; do _autoenv_is_env_var $n && pre_var[$n]=${(P)n}; done
   for n in ${(k)aliases};   do pre_alias[$n]=${aliases[$n]}; done
   for n in ${(k)functions}; do pre_func[$n]=1; done
-  source ./.env
+  source ./.dirrc
   _AUTOENV_UNDO=()
   for n in ${(k)parameters}; do
     _autoenv_is_env_var $n || continue
@@ -77,7 +77,7 @@ _autoenv_hook() {
   [[ $PWD == $_AUTOENV_DIR ]] && return
   [[ -n $_AUTOENV_DIR ]] && _autoenv_unload
   (( ${AUTOENV_IGNORE_DIRS[(I)$PWD]} )) && return     # leave ignored dirs (e.g. $HOME) alone
-  if [[ -f ./.env ]] && _autoenv_approve ./.env; then
+  if [[ -f ./.dirrc ]] && _autoenv_approve ./.dirrc; then
     _autoenv_load; _AUTOENV_DIR=$PWD
   fi
 }
@@ -88,7 +88,7 @@ _autoenv_hook
 # ---- CLI: pre-approve / revoke without the cd prompt ----
 autoenv-allow() {
   emulate -L zsh
-  local f=${1:-./.env} envpath tmp
+  local f=${1:-./.dirrc} envpath tmp
   [[ -f $f ]] || { print "autoenv: no such file: $f" >&2; return 1; }
   envpath=${f:A}; mkdir -p -- "$AUTOENV_STATE_DIR"; touch -- "$_AUTOENV_ALLOW" "$_AUTOENV_DENY"
   tmp=$(mktemp); command grep -Fv  -- "	${envpath}" "$_AUTOENV_ALLOW" >"$tmp" 2>/dev/null
@@ -98,7 +98,7 @@ autoenv-allow() {
 }
 autoenv-revoke() {
   emulate -L zsh
-  local envpath=${1:-./.env}:A list tmp
+  local envpath=${1:-./.dirrc}:A list tmp
   for list in "$_AUTOENV_ALLOW" "$_AUTOENV_DENY"; do
     [[ -f $list ]] || continue
     tmp=$(mktemp); command grep -Fv -- "$envpath" "$list" >"$tmp" 2>/dev/null; mv -- "$tmp" "$list"

@@ -362,8 +362,8 @@ load_worktree_functions() {
 	  dated_branch="jsc/$(date +%F)--$name"
 	  worktree_path="$main_root/.worktrees/${name}"
 	  git -C "$main_root" worktree add -b "$dated_branch" "$worktree_path" "$base_branch" || return 1
-	  if [ -f "$main_root/.env" ]; then
-		cp "$main_root/.env" "$worktree_path/.env" || return 1
+	  if [ -f "$main_root/.dirrc" ]; then
+		cp "$main_root/.dirrc" "$worktree_path/.dirrc" || return 1
 	  fi
 	  cd "$worktree_path" || return 1
 	}
@@ -376,7 +376,7 @@ load_worktree_functions() {
 source $(brew --prefix)/opt/antidote/share/antidote/antidote.zsh
 antidote load ${ZDOTDIR:-~}/.zsh_plugins
 
-# Per-directory .env loader (replaces the ohmyzsh dotenv plugin). See ~/bin/autoenv.zsh
+# Per-directory .dirrc loader (replaces the ohmyzsh dotenv plugin). See ~/bin/autoenv.zsh
 source ~/bin/autoenv.zsh
 
 # LOAD ALIASES AND FUNCTIONS

@@ -62,8 +62,9 @@ xcuserdata/
 venv/*
 __pycache__
 
-# dotenv
+# env
 .env
+.dirrc
 
 .worktrees
 
