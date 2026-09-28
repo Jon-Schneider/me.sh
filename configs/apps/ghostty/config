@@ -87,7 +87,8 @@ keybind = super+shift+down=text:\x00J
 # and tabs while other panes retain their existing behavior.
 #   Cmd+S -> prefix+shift+s: ~/bin/herdr-app-key save (xlent/micro), else
 #           hunkdiff send-review (the pre-router Cmd+S behavior)
-#   Cmd+C -> prefix+shift+f: ~/bin/herdr-app-key copy (xlent/micro), else no-op
+#   Cmd+C -> prefix+shift+f: ~/bin/herdr-app-key copy (xlent/micro/Codex),
+#            else no-op in shells
 #   Cmd+X -> prefix+shift+g: Herdr's native new-worktree binding (kept; cut in
 #           xlent is its native Ctrl+X)
 #   Cmd+V stays Ghostty's native paste (bracketed paste reaches xlent)

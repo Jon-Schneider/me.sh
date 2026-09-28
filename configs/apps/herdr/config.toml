@@ -136,10 +136,10 @@ type = "shell"
 command = "$HOME/Developer/jsc/me.sh/configs/apps/herdr/tab-step.sh previous"
 description = "previous tab across workspaces"
 
-# xlent/micro-aware chords. ~/bin/herdr-app-key forwards the Excel/editor key
-# to xlent or micro when one owns the focused pane; otherwise:
+# App-aware chords. ~/bin/herdr-app-key forwards copy to xlent, micro, or Codex
+# when one owns the focused pane; otherwise:
 #   save -> hunkdiff send-review (what Cmd+S did before the router)
-#   copy -> no-op (Ctrl+C would interrupt shells)
+#   copy -> no-op in shells (Ctrl+C would interrupt them)
 #   shift+arrows -> xlent range selection when possible, else the tmux-era
 #     fallbacks: Shift+Left/Right move the focused space (me.space-mover),
 #     Shift+Up/Down cycle workspaces in sidebar order.
@@ -155,7 +155,7 @@ description = "save in xlent/micro"
 key = "prefix+shift+f"
 type = "shell"
 command = "$HOME/bin/herdr-app-key copy"
-description = "copy in xlent/micro"
+description = "copy in xlent/micro/Codex"
 
 [[keys.command]]
 key = "shift+up"

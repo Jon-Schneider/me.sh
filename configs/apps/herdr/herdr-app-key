@@ -19,10 +19,12 @@ foreground_apps=$("$herdr_bin" pane process-info --pane "$pane" |
 case "$action" in
   save|copy)
     # xlent consistently uses Windows-Excel-style Ctrl bindings; micro binds
-    # the same keys. Send nothing to shells: Ctrl+S freezes (XOFF) and Ctrl+C
-    # interrupts.
+    # the same keys. Codex uses Ctrl+C to copy its selected text. Send nothing
+    # to shells: Ctrl+S freezes (XOFF) and Ctrl+C interrupts.
     if grep -qx -e micro -e xlent <<<"$foreground_apps"; then
       "$herdr_bin" pane send-keys "$pane" "ctrl+${action:0:1}"
+    elif [[ "$action" == copy ]] && grep -qx codex <<<"$foreground_apps"; then
+      "$herdr_bin" pane send-keys "$pane" "ctrl+c"
     elif [[ "$action" == save ]]; then
       # Cmd+S sent a hunkdiff review back to the agent before the xlent
       # router existed; keep that as the non-xlent/micro fallback.
