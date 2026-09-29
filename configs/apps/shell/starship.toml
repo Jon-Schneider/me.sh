@@ -2,7 +2,7 @@
 add_newline = true
 
 format = """
-╭─$directory$git_branch$git_status
+╭─$directory${env_var.STARSHIP_GIT_BRANCH} (${env_var.STARSHIP_GIT_MODIFIED}${env_var.STARSHIP_GIT_STAGED}${env_var.STARSHIP_GIT_UNTRACKED}${env_var.STARSHIP_GIT_DELETED} )
 ╰──$character"""
 
 # Right-aligned elements (rbenv + time)
@@ -23,23 +23,21 @@ format = " [](white) [$time](yellow)"
 success_symbol = '[\$](bold green)'
 error_symbol = '[\$](bold red)'
 
-[git_branch]
-symbol = "" # U+F126, a branch symbol
-format = " [$symbol $branch](purple)"
-only_attached = false
+# Git segments are computed asynchronously by ~/bin/git-prompt-async.zsh, which exports these vars
+[env_var.STARSHIP_GIT_BRANCH]
+format = " [ $env_value](purple)" # U+F126, a branch symbol
 
-[git_commit]
-tag_symbol = " tag "
+[env_var.STARSHIP_GIT_STAGED]
+format = "[+$env_value](green) "
 
-[git_status]
-# Symbols for types of changes
-staged = '[+${count}](green) ' # staged changes
-modified = '[!${count}](yellow) ' # unstaged changes (modified but not staged)
-untracked = '[?${count}](yellow) ' # untracked files
-deleted = '[-${count}](red) '
+[env_var.STARSHIP_GIT_MODIFIED]
+format = "[!$env_value](yellow) " # unstaged changes
 
-# Format the status with counts for each
-format = ' ($modified$staged$untracked$deleted )'
+[env_var.STARSHIP_GIT_UNTRACKED]
+format = "[?$env_value](yellow) "
+
+[env_var.STARSHIP_GIT_DELETED]
+format = "[-$env_value](red) "
 
 [ruby]
 symbol = " " # U+F219, Unicode Ruby

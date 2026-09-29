@@ -387,6 +387,7 @@ source ~/.zshrc_local 2> /dev/null # Load local .zshrc if available. Fail silent
 source ~/.env 2> /dev/null # Load local .env if available. Fail silently
 
 eval "$(starship init zsh)"
+source ~/bin/git-prompt-async.zsh # Git prompt segments, computed in the background
 
 # Customize config file location for apps that support it (including ghostty)
 export XDG_CONFIG_HOME="$HOME/.config"

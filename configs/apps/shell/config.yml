@@ -7,5 +7,7 @@ symlinks:
     dest: $HOME/.config/starship.toml
   - src: autoenv.zsh
     dest: $HOME/bin/autoenv.zsh
+  - src: git-prompt-async.zsh
+    dest: $HOME/bin/git-prompt-async.zsh
   - src: ../../../lib/completion/_me
     dest: $HOME/.zsh/completions/_me
