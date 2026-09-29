@@ -1,0 +1,3 @@
+symlinks:
+  - src: config.toml
+    dest: $HOME/.config/hunk/config.toml
