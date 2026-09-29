@@ -27,6 +27,8 @@ _autoenv_approve() {
   mkdir -p -- "$AUTOENV_STATE_DIR"; touch -- "$_AUTOENV_ALLOW" "$_AUTOENV_DENY"
   command grep -Fxq -- "$envpath" "$_AUTOENV_DENY" && return 1
   command grep -Fxq -- "${sum}	${envpath}" "$_AUTOENV_ALLOW" && return 0
+  print "autoenv: contents of '${envpath/#$HOME/~}':"
+  command cat -- "$1"
   print -n "autoenv: source '${envpath/#$HOME/~}'? ([y]es once / [a]lways / [N]o / n[e]ver) "
   ans=$(_autoenv_ask); print
   case $ans in
