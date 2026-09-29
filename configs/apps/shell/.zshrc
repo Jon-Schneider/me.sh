@@ -5,17 +5,13 @@ export LESS="-R" # Enable mouse scrolling in less.
 export COLOR_RED='\033[0;31m'
 export COLOR_RESET='\033[0m' # No Color
 
-# Load rbenv
-# 'rbenv init' would not work for me, so set it up manually
-eval "$(rbenv init -)"
+[[ -n "$HOMEBREW_PREFIX" ]] || eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# Must follow brew shellenv so rbenv shims precede Homebrew's ruby. Run `rbenv rehash` after installing gem executables.
+eval "$(rbenv init - --no-rehash zsh)"
 
 # Add local + Brew autocompletions
-fpath=("$HOME/.zsh/completions" $fpath)
-
-if type brew &>/dev/null; then
-  fpath=("$(brew --prefix)/share/zsh/site-functions"
-$fpath)
-fi
+fpath=("$HOME/.zsh/completions" "$HOMEBREW_PREFIX/share/zsh/site-functions" $fpath)
 
 setopt completealiases # Enable autocompletions for aliases
 
@@ -373,7 +369,7 @@ load_worktree_functions() {
 
 # Antidote
 
-source $(brew --prefix)/opt/antidote/share/antidote/antidote.zsh
+source $HOMEBREW_PREFIX/opt/antidote/share/antidote/antidote.zsh
 antidote load ${ZDOTDIR:-~}/.zsh_plugins
 
 # Per-directory .dirrc loader (replaces the ohmyzsh dotenv plugin). See ~/bin/autoenv.zsh
