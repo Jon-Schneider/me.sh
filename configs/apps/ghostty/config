@@ -68,10 +68,12 @@ keybind = super+shift+alt+enter=text:\x00e
 # marker in the tab bar tracks every press (bare pane.zoom --toggle is
 # silent when the focused pane is unchanged).
 keybind = cmd+d=unbind
-# Reorder (swap) the focused pane with its neighbor: routes through the
+# Move the focused pane sideways through its project's tabs and spaces;
+# crossing the project's first/last edge creates a space before/after.
+# Up/Down still swap with the neighboring pane. Routes through the
 # Herdr prefix because raw ctrl+shift+arrow CSI sequences (\x1b[1;10A/B/C/D)
-# are not recognized by herdr at runtime. Capital H/L/K/J = prefix+shift+h/l/k/j
-# = herdr's default swap_pane_{left,right,up,down}.
+# are not recognized by herdr at runtime. Capital H/L invoke pane-step.py;
+# K/J keep Herdr's vertical pane swaps.
 keybind = ctrl+shift+left=text:\x00H
 keybind = ctrl+shift+right=text:\x00L
 keybind = ctrl+shift+up=text:\x00K

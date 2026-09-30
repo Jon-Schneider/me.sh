@@ -70,6 +70,22 @@ open_worktree = "cmd+shift+x"
 next_tab = "prefix+alt+n"
 previous_tab = "prefix+alt+p"
 
+# Ghostty Ctrl+Shift+Left/Right sends prefix+H/L. Move through panes, then
+# tabs and workspaces of the same project; past either end creates a space.
+# Live focus and a session lock let repeated presses follow the moved pane,
+# including tabs that contain only one pane.
+[[keys.command]]
+key = "prefix+shift+h"
+type = "shell"
+command = "/usr/bin/python3 $HOME/Developer/jsc/me.sh/configs/apps/herdr/pane-step.py left"
+description = "move pane left across project tabs and spaces"
+
+[[keys.command]]
+key = "prefix+shift+l"
+type = "shell"
+command = "/usr/bin/python3 $HOME/Developer/jsc/me.sh/configs/apps/herdr/pane-step.py right"
+description = "move pane right across project tabs and spaces"
+
 [[keys.command]]
 key = "ctrl+w"
 type = "shell"
