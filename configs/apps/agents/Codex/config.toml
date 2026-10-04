@@ -6,6 +6,7 @@ approvals_reviewer = "user"
 computer_use = false
 hooks = true
 plugins = false
+worktrees = false
 
 [agents]
 max_concurrent_threads_per_session = 32
