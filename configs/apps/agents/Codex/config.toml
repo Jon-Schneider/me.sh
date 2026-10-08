@@ -1,6 +1,8 @@
 model = "gpt-5.6-sol"
 model_reasoning_effort = "high"
-approvals_reviewer = "user"
+approval_policy = "on-request"
+approvals_reviewer = "auto_review"
+sandbox_mode = "workspace-write"
 
 [features]
 computer_use = false
