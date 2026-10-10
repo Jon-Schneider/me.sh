@@ -103,6 +103,8 @@ keybind = super+t=text:\x00T
 keybind = super+q=text:\x00Q
 keybind = ctrl+tab=text:\x00n
 keybind = ctrl+shift+tab=text:\x00p
+# Cmd+Shift+L toggles Herdr's sidebar via its Ctrl-Space prefix.
+keybind = super+shift+l=text:\x00b
 
 # xlent bold/italic: Cmd+B sends Ctrl+B straight through to the pane. Cmd+I
 # sends Ctrl+I, which in terminal byte encoding is identical to Tab.

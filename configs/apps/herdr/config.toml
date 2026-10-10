@@ -39,6 +39,8 @@ rows = [
 
 [keys]
 prefix = "ctrl+space"
+# Ghostty sends prefix+b for Cmd+Shift+L to show/hide the sidebar.
+toggle_sidebar = "prefix+b"
 # Prefix muscle memory: prefix+, renames the focused space (default is
 # prefix+shift+w).
 rename_workspace = "cmd+shift+r"
