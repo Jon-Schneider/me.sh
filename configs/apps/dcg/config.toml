@@ -1,0 +1,30 @@
+[packs]
+enabled = [
+    "core.filesystem",
+    "core.git",
+    "strict_git",
+    "system.disk",
+    "system.permissions",
+    "system.services",
+    "platform.github",
+]
+
+# Requires dcg 0.15.3+. Literal descendants only; the zone roots stay protected.
+# Relative paths, variables, globs, and --recursive --force remain blocked.
+[rules."core.filesystem:rm-rf-general"]
+exempt_target_globs = ["~/Developer/**", "/var/folders/*/*/T/**", "/private/var/folders/*/*/T/**"]
+
+[rules."core.filesystem:rm-rf-root-home"]
+exempt_target_globs = ["~/Developer/**", "/var/folders/*/*/T/**", "/private/var/folders/*/*/T/**"]
+
+[rules."core.filesystem:rm-r-f-separate"]
+exempt_target_globs = ["~/Developer/**", "/var/folders/*/*/T/**", "/private/var/folders/*/*/T/**"]
+
+[rules."core.filesystem:rm-r-f-separate-root-home"]
+exempt_target_globs = ["~/Developer/**", "/var/folders/*/*/T/**", "/private/var/folders/*/*/T/**"]
+
+[rules."core.filesystem:rm-recursive-general"]
+exempt_target_globs = ["~/Developer/**", "/var/folders/*/*/T/**", "/private/var/folders/*/*/T/**"]
+
+[rules."core.filesystem:rm-recursive-root-home"]
+exempt_target_globs = ["~/Developer/**", "/var/folders/*/*/T/**", "/private/var/folders/*/*/T/**"]
