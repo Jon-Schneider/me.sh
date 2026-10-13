@@ -3,27 +3,8 @@
 
 from __future__ import annotations
 
-import json
 import os
-import shutil
-import subprocess
 import sys
-
-
-def run(argv: list[str]) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(argv, capture_output=True, text=True, check=False)
-
-
-def herdr_result(herdr: str, *args: str) -> dict:
-    result = run([herdr, *args])
-    if result.returncode != 0:
-        print(result.stderr.strip() or result.stdout.strip(), file=sys.stderr)
-        sys.exit(1)
-    try:
-        return json.loads(result.stdout)["result"]
-    except (json.JSONDecodeError, KeyError) as error:
-        print(f"herdr-tab-step: invalid Herdr response: {error}", file=sys.stderr)
-        sys.exit(1)
 
 
 def workspace_display_order(workspaces: list[dict]) -> list[dict]:
@@ -114,19 +95,16 @@ def focused_tab(workspaces: list[dict], tabs: list[dict]) -> str | None:
 
 
 def main() -> int:
+    from herdr_api import api
+
     if len(sys.argv) < 2 or sys.argv[1] not in {"next", "previous"}:
         print("usage: herdr-tab-step next|previous [--dry-run]", file=sys.stderr)
         return 64
     operation = sys.argv[1]
     dry_run = "--dry-run" in sys.argv[2:]
 
-    herdr = shutil.which("herdr")
-    if not herdr:
-        print("herdr-tab-step: herdr not found", file=sys.stderr)
-        return 127
-
-    workspaces = herdr_result(herdr, "workspace", "list").get("workspaces", [])
-    tabs = herdr_result(herdr, "tab", "list").get("tabs", [])
+    workspaces = api("workspace.list").get("workspaces", [])
+    tabs = api("tab.list").get("tabs", [])
     sequence = tab_sequence(workspaces, tabs)
     current = focused_tab(workspaces, tabs)
     if not current:
@@ -144,10 +122,8 @@ def main() -> int:
         print(target)
         return 0
 
-    result = run([herdr, "tab", "focus", target])
-    if result.returncode != 0:
-        print(result.stderr.strip() or result.stdout.strip(), file=sys.stderr)
-    return result.returncode
+    api("tab.focus", tab_id=target)
+    return 0
 
 
 if __name__ == "__main__":
