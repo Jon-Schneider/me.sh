@@ -4,7 +4,7 @@
 - Always explain the rationale behind non-obvious fixes, not just what changed
 - Be concise in all written comments, commit messages, pull request descriptions, and other writing.
 - Be direct and to the point. I have 15 years of software engineering experience, and don't need over-explanation.
-- Don't ever hard wrap markdown documents, I HATE that.
+- Don't ever use hard line breaks markdown documents, I HATE that.
 
 ## Coding Standards
 
