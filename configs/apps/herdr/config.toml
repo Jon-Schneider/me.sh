@@ -39,19 +39,30 @@ rows = [
 
 [keys]
 prefix = "ctrl+space"
-# Ghostty sends prefix+b for Cmd+Shift+L to show/hide the sidebar.
-toggle_sidebar = "prefix+b"
-# Prefix muscle memory: prefix+, renames the focused space (default is
-# prefix+shift+w).
+toggle_sidebar = ["prefix+b", "cmd+shift+l"]
+# Cmd+Shift+R renames the focused space.
 rename_workspace = "cmd+shift+r"
-new_tab = "prefix+shift+t"
+new_workspace = ["prefix+shift+n", "cmd+n"]
+new_tab = ["prefix+shift+t", "cmd+t"]
 rename_tab = "prefix+t"
+new_worktree = ["prefix+shift+g", "cmd+x"]
+detach = ["prefix+q", "cmd+q"]
 # Open an existing Git worktree as a nested space in its repository group.
 open_worktree = "cmd+shift+x"
 
-# Cmd+Shift+Left/Right focus panes: Ghostty sends prefix+h / prefix+l, which
-# hit the focus_pane_* defaults below. (Direct ctrl+shift+arrow chords were
-# tried and not recognized by herdr at runtime.)
+# Ghostty forwards these chords using its negotiated keyboard protocol.
+# Keep the prefix bindings available for other terminals.
+focus_pane_left = ["prefix+h", "cmd+shift+left"]
+focus_pane_right = ["prefix+l", "cmd+shift+right"]
+focus_pane_up = ["prefix+k", "cmd+shift+up"]
+focus_pane_down = ["prefix+j", "cmd+shift+down"]
+swap_pane_up = ["prefix+shift+k", "ctrl+shift+up"]
+swap_pane_down = ["prefix+shift+j", "ctrl+shift+down"]
+split_vertical = ["prefix+v", "cmd+enter"]
+split_horizontal = ["prefix+minus", "cmd+shift+enter"]
+# Karabiner turns Cmd+Ctrl+arrows into F13–F16 to avoid AppKit NSBeep.
+previous_workspace = "f15"
+next_workspace = "f16"
 
 # Shift+arrows no longer bind directly: they belong to the xlent-aware
 # ~/bin/herdr-app-key router below (xlent range selection when xlent owns the
@@ -64,26 +75,25 @@ open_worktree = "cmd+shift+x"
 # own that key (micro = Quit, xlent = clear).
 
 # Built-in tab cycling moved off prefix+n/p so the [[keys.command]] walkers
-# below own those keys unambiguously (Ghostty sends ctrl+tab /
-# ctrl+shift+tab as \x00n / \x00p = prefix+n / prefix+p). The native
-# per-workspace cycling stays reachable on these alt chords.
+# below own those keys unambiguously. Native per-workspace cycling also
+# handles Cmd+Ctrl+Left/Right via Karabiner's F13/F14.
 # NB: keep these above any [[keys.command]] header — bare keys after one are
 # absorbed into that array element instead of [keys].
-next_tab = "prefix+alt+n"
-previous_tab = "prefix+alt+p"
+next_tab = ["prefix+alt+n", "f14"]
+previous_tab = ["prefix+alt+p", "f13"]
 
-# Ghostty Ctrl+Shift+Left/Right sends prefix+H/L. Move through panes, then
+# Ctrl+Shift+Left/Right moves through panes, then
 # tabs and workspaces of the same project; past either end creates a space.
 # Live focus and a session lock let repeated presses follow the moved pane,
 # including tabs that contain only one pane.
 [[keys.command]]
-key = "prefix+shift+h"
+key = ["prefix+shift+h", "ctrl+shift+left"]
 type = "shell"
 command = "/usr/bin/python3 $HOME/Developer/jsc/me.sh/configs/apps/herdr/pane-step.py left"
 description = "move pane left across project tabs and spaces"
 
 [[keys.command]]
-key = "prefix+shift+l"
+key = ["prefix+shift+l", "ctrl+shift+right"]
 type = "shell"
 command = "/usr/bin/python3 $HOME/Developer/jsc/me.sh/configs/apps/herdr/pane-step.py right"
 description = "move pane right across project tabs and spaces"
@@ -93,6 +103,19 @@ key = "ctrl+w"
 type = "shell"
 command = "$HOME/Developer/jsc/me.sh/configs/apps/herdr/close-focused.sh"
 description = "close pane / tab / workspace"
+
+# Option-splits keep focus on the original pane; use an explicit API target.
+[[keys.command]]
+key = "cmd+alt+enter"
+type = "shell"
+command = "/usr/bin/python3 $HOME/Developer/jsc/me.sh/configs/apps/herdr/split-focused.py right"
+description = "split right without changing focus"
+
+[[keys.command]]
+key = "cmd+shift+alt+enter"
+type = "shell"
+command = "/usr/bin/python3 $HOME/Developer/jsc/me.sh/configs/apps/herdr/split-focused.py down"
+description = "split down without changing focus"
 
 [theme]
 name = "catppuccin"
@@ -139,17 +162,16 @@ delivery = "system"
 
 # Cross-workspace tab walking via ~/bin/herdr-tab-step: steps through every
 # tab of every workspace in sidebar display order (including Herdr's grouped
-# worktree-tree projection) and wraps globally. Ghostty ctrl+tab /
-# ctrl+shift+tab send
-# prefix+n / prefix+p.
+# worktree-tree projection) and wraps globally. Direct chords avoid injected
+# prefix sequences being mistaken for committed text by Kitty keyboard mode.
 [[keys.command]]
-key = "prefix+n"
+key = ["prefix+n", "ctrl+tab"]
 type = "shell"
 command = "$HOME/Developer/jsc/me.sh/configs/apps/herdr/tab-step.sh next"
 description = "next tab across workspaces"
 
 [[keys.command]]
-key = "prefix+p"
+key = ["prefix+p", "ctrl+shift+tab"]
 type = "shell"
 command = "$HOME/Developer/jsc/me.sh/configs/apps/herdr/tab-step.sh previous"
 description = "previous tab across workspaces"
@@ -161,16 +183,15 @@ description = "previous tab across workspaces"
 #   shift+arrows -> xlent range selection when possible, else the tmux-era
 #     fallbacks: Shift+Left/Right move the focused space (me.space-mover),
 #     Shift+Up/Down cycle workspaces in sidebar order.
-# Cmd+X keeps its native new-worktree binding on prefix+shift+g (Ghostty sends
-# prefix+S/F for Cmd+S/Cmd+C; Cmd+V stays Ghostty's native paste).
+# Cmd+X creates a worktree; Cmd+V stays Ghostty's native paste.
 [[keys.command]]
-key = "prefix+shift+s"
+key = ["prefix+shift+s", "cmd+s"]
 type = "shell"
 command = "$HOME/bin/herdr-app-key save"
 description = "save in xlent/micro"
 
 [[keys.command]]
-key = "prefix+shift+f"
+key = ["prefix+shift+f", "cmd+c"]
 type = "shell"
 command = "$HOME/bin/herdr-app-key copy"
 description = "copy in xlent/micro/Codex"

@@ -106,6 +106,19 @@ class ShortcutsTests(unittest.TestCase):
         self.successful("herdr-app-key", "copy")
         self.assertEqual([method for method, _ in self.calls], ["pane.process_info"])
 
+    def test_option_splits_target_the_original_pane_and_keep_focus(self):
+        for direction in ["right", "down"]:
+            with self.subTest(direction=direction):
+                self.successful("split-focused.py", direction)
+                self.assertEqual(self.calls[-1], ("pane.split", {
+                    "target_pane_id": "w1:p1", "direction": direction, "focus": False,
+                }))
+
+    def test_invalid_split_does_not_create_a_pane(self):
+        result = self.run_shortcut("split-focused.py", "left")
+        self.assertEqual(result.returncode, 64)
+        self.assertEqual(self.calls, [])
+
     def test_deployed_symlink_finds_socket_helper(self):
         link = Path(self.directory.name) / "herdr-app-key"
         link.symlink_to(ROOT / "herdr-app-key")

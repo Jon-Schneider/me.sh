@@ -51,60 +51,59 @@
 theme = jon
 copy-on-select = clipboard
 
-# Split keybindings. Each Cmd combo sends the Herdr prefix (Ctrl-Space) + a
-# Herdr command. Option = "stay" (keep focus on original pane).
-#   Cmd+Enter            -> prefix+v -> split right, focus NEW pane
-#   Cmd+Opt+Enter        -> prefix+o -> split right, stay on original (-d)
-#   Cmd+Shift+Enter      -> prefix+s -> split down,  focus NEW pane
-#   Cmd+Shift+Opt+Enter  -> prefix+e -> split down,  stay on original (-d)
-# NB: super+shift+enter must be explicitly bound here to override Ghostty's
-# built-in toggle_split_zoom ("Zoom Split"), which otherwise eats the key.
-keybind = super+enter=text:\x00v
-keybind = super+alt+enter=text:\x00o
-keybind = super+shift+enter=text:\x00s
-keybind = super+shift+alt+enter=text:\x00e
+# Herdr owns these chords directly. Unbind Ghostty's actions so the negotiated
+# keyboard protocol forwards actual key events, including their modifiers.
+# Injecting Ctrl-Space + a printable letter can strand Herdr in prefix mode
+# when the pane enables Kitty report-all keyboard input.
+# Option-splits keep focus on the original pane.
+keybind = super+enter=unbind
+keybind = super+alt+enter=unbind
+keybind = super+shift+enter=unbind
+keybind = super+shift+alt+enter=unbind
 # Cmd+Z reaches Herdr directly: the me.active-tab-title plugin's zoom-toggle
 # action wraps pane.zoom with an in-process tab-title resync, so the ⛶
 # marker in the tab bar tracks every press (bare pane.zoom --toggle is
 # silent when the focused pane is unchanged).
 keybind = cmd+d=unbind
+keybind = cmd+z=unbind
+keybind = cmd+r=unbind
+keybind = cmd+shift+r=unbind
+keybind = cmd+shift+x=unbind
+keybind = cmd+shift+f=unbind
 # Move the focused pane sideways through its project's tabs and spaces;
 # crossing the project's first/last edge creates a space before/after.
-# Up/Down still swap with the neighboring pane. Routes through the
-# Herdr prefix because raw ctrl+shift+arrow CSI sequences (\x1b[1;10A/B/C/D)
-# are not recognized by herdr at runtime. Capital H/L invoke pane-step.py;
-# K/J keep Herdr's vertical pane swaps.
-keybind = ctrl+shift+left=text:\x00H
-keybind = ctrl+shift+right=text:\x00L
-keybind = ctrl+shift+up=text:\x00K
-keybind = ctrl+shift+down=text:\x00J
-# Focus pane left/right/up/down: send prefix+h / prefix+l / prefix+K / prefix+J
-# (herdr focus_pane_* defaults). Same prefix workaround as the swap bindings
-# above for the same reason.
-keybind = super+shift+left=text:\x00h
-keybind = super+shift+right=text:\x00l
-keybind = super+shift+up=text:\x00K
-keybind = super+shift+down=text:\x00J
+# Up/Down still swap with the neighboring pane.
+keybind = ctrl+shift+left=unbind
+keybind = ctrl+shift+right=unbind
+keybind = ctrl+shift+up=unbind
+keybind = ctrl+shift+down=unbind
+# Cmd+Shift+arrows focus the neighboring pane.
+keybind = super+shift+left=unbind
+keybind = super+shift+right=unbind
+keybind = super+shift+up=unbind
+keybind = super+shift+down=unbind
 # Route macOS window-management chords through Herdr so it can manage spaces
 # and tabs while other panes retain their existing behavior.
-#   Cmd+S -> prefix+shift+s: ~/bin/herdr-app-key save (xlent/micro), else
+#   Cmd+S -> ~/bin/herdr-app-key save (xlent/micro), else
 #           hunkdiff send-review (the pre-router Cmd+S behavior)
-#   Cmd+C -> prefix+shift+f: ~/bin/herdr-app-key copy (xlent/micro/Codex),
+#   Cmd+C -> ~/bin/herdr-app-key copy (xlent/micro/Codex),
 #            else no-op in shells
-#   Cmd+X -> prefix+shift+g: Herdr's native new-worktree binding (kept; cut in
+#   Cmd+X -> Herdr's native new-worktree binding (kept; cut in
 #           xlent is its native Ctrl+X)
 #   Cmd+V stays Ghostty's native paste (bracketed paste reaches xlent)
 keybind = super+w=text:\x17
-keybind = super+s=text:\x00S
-keybind = super+x=text:\x00G
-keybind = super+c=text:\x00F
-keybind = super+n=text:\x00N
-keybind = super+t=text:\x00T
-keybind = super+q=text:\x00Q
-keybind = ctrl+tab=text:\x00n
-keybind = ctrl+shift+tab=text:\x00p
-# Cmd+Shift+L toggles Herdr's sidebar via its Ctrl-Space prefix.
-keybind = super+shift+l=text:\x00b
+keybind = super+s=unbind
+keybind = super+x=unbind
+keybind = super+c=unbind
+keybind = super+n=unbind
+keybind = super+t=unbind
+keybind = super+q=unbind
+# Modified Tab did not reach Herdr reliably when its Ghostty action was unbound.
+# Send one explicit Kitty key report for each direct Herdr chord.
+keybind = ctrl+tab=csi:9;5u
+keybind = ctrl+shift+tab=csi:9;6u
+# Cmd+Shift+L toggles Herdr's sidebar directly.
+keybind = super+shift+l=unbind
 
 # xlent bold/italic: Cmd+B sends Ctrl+B straight through to the pane. Cmd+I
 # sends Ctrl+I, which in terminal byte encoding is identical to Tab.
@@ -120,10 +119,10 @@ keybind = cmd+left=text:\x1b[H
 keybind = cmd+right=text:\x1b[F
 # Karabiner consumes Cmd+Ctrl+Arrow before AppKit can emit NSBeep and sends
 # these otherwise-unused function keys instead.
-keybind = f13=text:\x00\x1b[D
-keybind = f14=text:\x00\x1b[C
-keybind = f15=text:\x00\x1b[A
-keybind = f16=text:\x00\x1b[B
+keybind = f13=unbind
+keybind = f14=unbind
+keybind = f15=unbind
+keybind = f16=unbind
 # Cmd+Backspace clears the line: send Ctrl+U straight through so shells get
 # kill-whole-line. Sending Ctrl-Space+D here would invoke Herdr's
 # close_workspace command.
