@@ -151,6 +151,19 @@ local function afterShortcutReleased(action)
     end, action, 0.01)
 end
 
+hs.hotkey.bind({}, "F20", function()
+    local app = hs.application.frontmostApplication()
+    if not app or app:bundleID() ~= "com.google.Chrome" then return end
+    -- Chrome's native action inherits the current tab's group at its boundary.
+    if not app:mainWindow() then
+        app:selectMenuItem({"File", "New Tab"})
+        return
+    end
+    local title = app:findMenuItem({"Tab", "New Tab Below"})
+        and "New Tab Below" or "New Tab to the Right"
+    app:selectMenuItem({"Tab", title})
+end)
+
 hs.hotkey.bind({}, "F17", function()
     afterShortcutReleased(toggleFocusedSimulatorAppearance)
 end)
