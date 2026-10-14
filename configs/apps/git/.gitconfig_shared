@@ -1,5 +1,7 @@
 [user]
 	name = Jon Schneider
+[init]
+	defaultBranch = main
 [include]
     path = ~/.gitconfig_local
 [includeIf "gitdir:jsc/"]
