@@ -135,6 +135,7 @@ load_git_aliases() {
     alias glfp="git lfs pull"
     alias glm='git pull --rebase=false' # git pull docs say merge strategy (default) used if --rebase=false
     alias glr='git pull --rebase'
+    alias glst='gsta && glr && gstp'
     alias gmv="g mv" # Spaces are for plebians
     alias gpff="gp --force" # 'gpf' is mapped to 'git push --force-with-lease --force-if-includes'
     alias gptg="g push --tags"
