@@ -14,15 +14,6 @@
       {
         "hooks": [
           {
-            "command": "dcg",
-            "type": "command"
-          }
-        ],
-        "matcher": "Bash"
-      },
-      {
-        "hooks": [
-          {
             "command": "$HOME/bin/xcsift-for-apple-build-tools",
             "type": "command"
           }
