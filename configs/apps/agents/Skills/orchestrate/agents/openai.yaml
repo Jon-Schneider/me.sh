@@ -1,0 +1,5 @@
+interface:
+  display_name: "Orchestrate"
+  short_description: "Orchestrate complex work, possibly with a team of subagents"
+policy:
+  allow_implicit_invocation: false

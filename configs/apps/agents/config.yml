@@ -36,6 +36,10 @@ symlinks:
     dest:
       - $HOME/.agents/skills/investigate
       - $HOME/.claude/skills/investigate
+  - src: Skills/orchestrate
+    dest:
+      - $HOME/.agents/skills/orchestrate
+      - $HOME/.claude/skills/orchestrate
   - src: Skills/patch-commit
     dest:
       - $HOME/.agents/skills/patch-commit
