@@ -130,3 +130,7 @@ keybind = cmd+backspace=text:\x15
 
 # Enable Shift + Enter going to new line in 'git commit -m "..."'
 keybind = shift+enter=text:\n
+
+# Play Codex approval notifications emitted as terminal bells.
+bell-features = audio
+bell-audio-path = /System/Library/Sounds/Funk.aiff
