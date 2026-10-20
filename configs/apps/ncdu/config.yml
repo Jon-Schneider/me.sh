@@ -1,0 +1,5 @@
+symlinks:
+  - src: config
+    dest: $HOME/.config/ncdu/config
+  - src: delete-background.py
+    dest: $HOME/.config/ncdu/delete-background

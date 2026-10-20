@@ -1,0 +1,3 @@
+# Requires ncdu 2.9+. The command is evaluated by a shell, which expands HOME.
+--no-confirm-delete
+--delete-command "$HOME/.config/ncdu/delete-background"
