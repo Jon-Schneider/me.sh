@@ -71,8 +71,11 @@ next_workspace = "f16"
 # Cmd+W closes by preference: focused split pane, else active tab (no splits),
 # else the workspace when it holds the last tab. Ghostty sends raw Ctrl+W and
 # Herdr intercepts it before panes see it.
-# close-focused.sh first passes Ctrl+W through to foreground TUI apps that
-# own that key (micro = Quit, xlent = clear).
+# The local me.confirm-close plugin passes Ctrl+W through to foreground
+# editors (micro = Quit, xlent = clear), closes idle shells immediately, and
+# asks before stopping an agent or foreground job in a Herdr popup
+# (Left/Right selects Confirm/Cancel, Enter chooses; y closes, n/Esc keeps).
+# Mouse-menu closing is unchanged.
 
 # Built-in tab cycling moved off prefix+n/p so the [[keys.command]] walkers
 # below own those keys unambiguously. Native per-workspace cycling also
@@ -100,9 +103,9 @@ description = "move pane right across project tabs and spaces"
 
 [[keys.command]]
 key = "ctrl+w"
-type = "shell"
-command = "$HOME/Developer/jsc/me.sh/configs/apps/herdr/close-focused.sh"
-description = "close pane / tab / workspace"
+type = "plugin_action"
+command = "me.confirm-close.close"
+description = "close pane / tab / workspace (confirm running jobs)"
 
 # Option-splits keep focus on the original pane; use an explicit API target.
 [[keys.command]]

@@ -1,0 +1,21 @@
+id = "me.confirm-close"
+name = "Confirm Close"
+version = "1.0.0"
+min_herdr_version = "0.9.4"
+description = "Confirm keyboard closes of running agents and jobs in a Herdr popup"
+platforms = ["macos"]
+
+[[actions]]
+id = "close"
+title = "Close focused pane"
+description = "Pass through editor keys, confirm running jobs, then close pane/tab/workspace"
+contexts = ["global"]
+command = ["/usr/bin/python3", "close.py"]
+
+[[panes]]
+id = "confirm"
+title = "Close pane?"
+placement = "popup"
+width = 68
+height = 11
+command = ["/usr/bin/python3", "close.py", "--prompt"]
