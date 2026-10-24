@@ -5,12 +5,16 @@ The managed `../config.toml` binds Cmd+W (forwarded as Ctrl+W by Ghostty) to
 `me.confirm-close.close`.
 
 An idle shell closes immediately. A detected agent or foreground job opens a
-68×11 Herdr terminal popup with padded content, centered buttons, and
+68×12 Herdr terminal popup showing the pane title and running job, with padded
+content, centered buttons, and
 **Confirm** selected initially. **Left/Right**
 switches between Confirm and Cancel; **Enter/Return** activates the selection.
 **Y** closes directly; **N**, **Esc**, or any other key keeps the pane. The popup
 disappears when its command exits and does not change the pane layout.
 No dependencies beyond macOS's Python standard library.
+
+The title prefers the pane's label, then its title or terminal title, and falls
+back to its pane ID. Long titles are shortened to fit the popup.
 
 The existing micro/xlent Ctrl+W passthrough and pane → tab → workspace close
 cascade are preserved. Confirmation targets the original terminal even if

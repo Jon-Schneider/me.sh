@@ -28,6 +28,7 @@ class ShortcutsTests(unittest.TestCase):
         self.agent = None
         self.process_info = None
         self.terminal_id = "term-original"
+        self.pane_titles = {}
         self.tab_count = 1
         self.pane_count = 1
         self.fail_method = None
@@ -77,7 +78,8 @@ class ShortcutsTests(unittest.TestCase):
             }}
         if method == "pane.get":
             return {"pane": {"pane_id": "w1:p1", "terminal_id": self.terminal_id,
-                             "workspace_id": "w1", "tab_id": "w1:t1", "agent": self.agent}}
+                             "workspace_id": "w1", "tab_id": "w1:t1", "agent": self.agent,
+                             **self.pane_titles}}
         if method == "workspace.get":
             return {"workspace": {"tab_count": self.tab_count}}
         if method == "pane.list":
@@ -203,6 +205,7 @@ class ShortcutsTests(unittest.TestCase):
                     "placement": "popup", "env": {
                         "ME_CONFIRM_PANE_ID": "w1:p1", "ME_CONFIRM_TERMINAL_ID": "term-original",
                         "ME_CONFIRM_JOB": app,
+                        "ME_CONFIRM_TITLE": "w1:p1",
                     },
                 }))
                 self.assertFalse(any(method.endswith(".close") for method, _ in self.calls))
@@ -211,6 +214,20 @@ class ShortcutsTests(unittest.TestCase):
         self.agent = "codex"
         self.successful("close-focused.sh")
         self.assertEqual(self.calls[-1][1]["env"]["ME_CONFIRM_JOB"], "codex")
+
+    def test_popup_title_prefers_label_then_terminal_title(self):
+        self.apps = ["codex"]
+        for titles, expected in [
+            ({"label": "Fix close confirmation", "terminal_title_stripped": "Codex"}, "Fix close confirmation"),
+            ({"title": "Build scripts", "terminal_title_stripped": "Codex"}, "Build scripts"),
+            ({"label": None, "terminal_title_stripped": "Run tests", "terminal_title": "● Run tests"}, "Run tests"),
+            ({"terminal_title": "Server logs"}, "Server logs"),
+            ({}, "w1:p1"),
+        ]:
+            with self.subTest(titles=titles):
+                self.pane_titles = titles
+                self.successful("close-focused.sh")
+                self.assertEqual(self.calls[-1][1]["env"]["ME_CONFIRM_TITLE"], expected)
 
     def test_missing_process_metadata_prompts(self):
         self.process_info = {}
@@ -224,7 +241,7 @@ class ShortcutsTests(unittest.TestCase):
 
     def run_prompt(self, key, **extra_env):
         master, slave = pty.openpty()
-        fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack("HHHH", 9, 66, 0, 0))
+        fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack("HHHH", 10, 66, 0, 0))
         environment = dict(os.environ, TERM="xterm-256color", HERDR_SOCKET_PATH=self.path,
                            ME_CONFIRM_PANE_ID="w1:p1", ME_CONFIRM_TERMINAL_ID="term-original",
                            ME_CONFIRM_JOB="python3", HERDR_ACTIVE_PANE_ID="w2:p2")
@@ -266,6 +283,17 @@ class ShortcutsTests(unittest.TestCase):
                 self.calls.clear()
                 code, _ = self.run_prompt(key)
                 self.assertEqual(code, 0)
+                self.assertEqual(self.calls, [])
+
+    def test_popup_displays_title_and_clips_long_unicode_titles(self):
+        for title, expected in [("Fix close confirmation", b"Fix close confirmation"),
+                                ("Pane\nTitle\x07", b"Pane Title"),
+                                ("界" * 100, "界".encode())]:
+            with self.subTest(title=title):
+                code, output = self.run_prompt(b"n", ME_CONFIRM_TITLE=title)
+                self.assertEqual(code, 0)
+                self.assertIn(expected, output)
+                self.assertIn(b"python3 is still running.", output)
                 self.assertEqual(self.calls, [])
 
     def test_popup_return_and_keypad_enter_confirm(self):

@@ -17,5 +17,5 @@ id = "confirm"
 title = "Close pane?"
 placement = "popup"
 width = 68
-height = 11
+height = 12
 command = ["/usr/bin/python3", "close.py", "--prompt"]

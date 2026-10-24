@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import sys
+import unicodedata
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from herdr_api import api
@@ -59,9 +60,29 @@ def request_close():
                 "ME_CONFIRM_PANE_ID": pane_id,
                 "ME_CONFIRM_TERMINAL_ID": pane["terminal_id"],
                 "ME_CONFIRM_JOB": job,
+                "ME_CONFIRM_TITLE": (pane.get("label") or pane.get("title")
+                                     or pane.get("terminal_title_stripped")
+                                     or pane.get("terminal_title") or pane_id),
             })
     else:
         close_target(pane_id, pane["terminal_id"])
+
+
+def fit_line(text, width):
+    """Keep titles on one line and clip by terminal cells, including CJK."""
+    result = []
+    cells = 0
+    for char in " ".join(text.split()):
+        if not char.isprintable():
+            continue
+        size = 0 if unicodedata.combining(char) else (2 if unicodedata.east_asian_width(char) in "WF" else 1)
+        if cells + size > width:
+            while result and cells > width - 1:
+                cells -= result.pop()[1]
+            return "".join(char for char, _ in result) + "…"
+        result.append((char, size))
+        cells += size
+    return "".join(char for char, _ in result)
 
 
 def confirmation_ui(screen):
@@ -83,23 +104,25 @@ def confirmation_ui(screen):
     selected = 0
     # Strip terminal controls from process names before displaying them.
     job = "".join(c for c in os.environ["ME_CONFIRM_JOB"] if c.isprintable())
+    title = os.environ.get("ME_CONFIRM_TITLE") or os.environ["ME_CONFIRM_PANE_ID"]
     while True:
         screen.erase()
         rows, cols = screen.getmaxyx()
         padding = 4 if cols >= 40 else 2
         for row, text, style in [
             (1, "Close this pane?", heading_style),
-            (3, job + " is still running.", curses.A_NORMAL),
-            (7, "Left/Right select  Enter choose  y close / n / Esc keep", curses.A_DIM),
+            (3, title, curses.A_BOLD),
+            (4, job + " is still running.", curses.A_NORMAL),
+            (8, "Left/Right select  Enter choose  y close / n / Esc keep", curses.A_DIM),
         ]:
             if row < rows and cols > padding * 2:
-                screen.addnstr(row, padding, text, cols - padding * 2, style)
+                screen.addstr(row, padding, fit_line(text, cols - padding * 2), style)
         labels = ("  Confirm  ", "  Cancel  ")
         col = max(padding, (cols - sum(map(len, labels)) - 4) // 2)
         for index, label in enumerate(labels):
-            if rows > 5 and col < cols - padding:
+            if rows > 6 and col < cols - padding:
                 style = selected_style if index == selected else button_style
-                screen.addnstr(5, col, label, cols - col - padding, style)
+                screen.addnstr(6, col, label, cols - col - padding, style)
             col += len(label) + 4
         screen.refresh()
         key = screen.get_wch()
