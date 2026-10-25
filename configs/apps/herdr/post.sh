@@ -21,6 +21,7 @@ set -euo pipefail
 #   rendered by the tab_bar_right command entry in config.toml.
 # - me.confirm-close: confirms Cmd+W on running agents/jobs in a native
 #   Herdr terminal popup; idle shells close immediately.
+# - me.codex-retry: sends go 30s after a stopped Codex model capacity error.
 if command -v herdr > /dev/null; then
   # Third-party plugins installed when missing.
   third_party_plugins=(
@@ -39,12 +40,14 @@ if command -v herdr > /dev/null; then
   herdr plugin unlink herdr-caffeinate 2> /dev/null || true
 
   # Plugin ids live in each manifest; extract them so the loop stays dumb.
-  for plugin_dir in plugin plugin-move-space plugin-active-cwd plugin-active-tab-title plugin-caffeinate plugin-confirm-close; do
+  for plugin_dir in plugin plugin-move-space plugin-active-cwd plugin-active-tab-title plugin-caffeinate plugin-confirm-close plugin-codex-retry; do
     plugin_id="$(sed -n 's/^id *= *"\(.*\)"/\1/p' "$ME_UNIT_DIR/$plugin_dir/herdr-plugin.toml")"
     herdr plugin unlink "$plugin_id" 2> /dev/null || true
     herdr plugin link "$ME_UNIT_DIR/$plugin_dir"
   done
   herdr config check && herdr server reload-config || true
+  # Linking/reloading does not run startup hooks on an already-running server.
+  herdr plugin action invoke me.codex-retry.start
 fi
 
 # Legacy cleanup: remove the pre-plugin launchd watcher if present.
