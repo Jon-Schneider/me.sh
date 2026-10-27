@@ -64,7 +64,7 @@ __pycache__
 
 # env
 .env
-.dirrc
+.dirrc.local
 
 .worktrees
 
