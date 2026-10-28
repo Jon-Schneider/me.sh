@@ -1,1 +1,3 @@
-symlinks: []
+symlinks:
+  - src: activate-or-open-app
+    dest: $HOME/bin/activate-or-open-app

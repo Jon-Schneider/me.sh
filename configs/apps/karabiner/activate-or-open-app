@@ -1,0 +1,29 @@
+#!/bin/bash
+set -euo pipefail
+
+if [[ $# -ne 2 || -z "$1" || "$2" != /*.app ]]; then
+	printf 'Usage: %s BUNDLE_ID /absolute/path/to/Application.app\n' "$0" >&2
+	exit 2
+fi
+
+# Activating the existing process avoids the TestFlight validation performed
+# when opening its app bundle. Only launch the bundle if no process exists.
+activation="$(/usr/bin/osascript -l JavaScript - "$1" <<'JXA'
+ObjC.import('AppKit');
+
+function run(args) {
+    const apps = $.NSRunningApplication
+        .runningApplicationsWithBundleIdentifier(args[0]);
+    if (apps.count < 1) return 'not-running';
+
+    if (!apps.objectAtIndex(0).activateWithOptions(0)) {
+        throw new Error('Could not activate ' + args[0]);
+    }
+    return 'activated';
+}
+JXA
+)"
+
+if [[ "$activation" == 'not-running' ]]; then
+	exec /usr/bin/open "$2"
+fi
