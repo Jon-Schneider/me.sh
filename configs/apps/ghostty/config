@@ -64,7 +64,9 @@ keybind = super+shift+alt+enter=unbind
 # action wraps pane.zoom with an in-process tab-title resync, so the ⛶
 # marker in the tab bar tracks every press (bare pane.zoom --toggle is
 # silent when the focused pane is unchanged).
+# Herdr owns pane splitting; disable both Ghostty split shortcuts.
 keybind = cmd+d=unbind
+keybind = cmd+shift+d=unbind
 keybind = cmd+z=unbind
 keybind = cmd+r=unbind
 keybind = cmd+shift+r=unbind
