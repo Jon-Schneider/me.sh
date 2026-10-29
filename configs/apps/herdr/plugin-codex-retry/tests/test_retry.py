@@ -74,6 +74,29 @@ class DetectionTests(unittest.TestCase):
     def test_typed_input_is_preserved(self):
         self.assertFalse(retry.capacity_error(SCREEN.replace("› Ask Codex to do anything", "› My next task")))
 
+    def test_subagent_completion_notice_does_not_clear_capacity_error(self):
+        text = ("■ Selected model is at capacity. Please try a\ndifferent model.\n\n"
+                "• Completed `/root/verify_ask_mac`\n\n"
+                "• Completed `/root/check/second_pass`\n\n"
+                "› Ask Codex to do anything\n")
+        self.assertTrue(retry.capacity_error(text))
+
+    def test_response_or_prompt_after_subagent_notice_clears_error(self):
+        for tail in ("• Completed the task", "• The check passed", "› go",
+                     "■ Authentication failed", "• Completed `/root/check` and fixed it"):
+            with self.subTest(tail=tail):
+                text = (MESSAGE + "\n• Completed `/root/verify_ask_mac`\n"
+                        + tail + "\n› Ask Codex to do anything\n")
+                self.assertFalse(retry.capacity_error(text))
+
+    def test_empty_composer_does_not_consume_footer(self):
+        self.assertTrue(retry.capacity_error(
+            MESSAGE + "\n\n› \n\n  GPT-6.1-Sol high · Context 17% used\n"))
+
+    def test_multiline_typed_input_is_preserved(self):
+        self.assertFalse(retry.capacity_error(
+            MESSAGE + "\n\n› \n  My next task\n\n  GPT-6.1-Sol high\n"))
+
 
 class MonitorTests(unittest.TestCase):
     def setUp(self):
@@ -104,6 +127,15 @@ class MonitorTests(unittest.TestCase):
         self.server.screens["p1"] = "• Done\n› Ask Codex to do anything"
         self.step(60)
         self.assertEqual(self.server.prompts, [])
+
+    def test_subagent_notice_during_delay_does_not_cancel_retry(self):
+        self.step(0)
+        self.server.screens["p1"] = SCREEN.replace(
+            "\n\n› Ask", "\n\n• Completed `/root/verify_ask_mac`\n\n› Ask")
+        self.step(20)
+        self.step(30)
+        self.step(60)
+        self.assertEqual(self.server.prompts, [("p1", "go")])
 
     def test_repeated_capacity_failure_gets_another_30_seconds(self):
         self.step(0)

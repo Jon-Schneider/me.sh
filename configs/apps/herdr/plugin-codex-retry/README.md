@@ -5,6 +5,8 @@ Local Herdr plug-in `me.codex-retry`. When an idle Codex pane shows
 and submit the literal prompt `go` to that pane. The square/error icon is
 optional, and the message can wrap across lines. Detection runs every two
 seconds, so submission normally occurs 30–32 seconds after the error appears.
+Subagent completion notices printed after the capacity error do not cancel
+the retry; a new parent response or submitted prompt still does.
 
 Each pane has its own timer. Before sending, the plug-in rechecks the error,
 empty prompt, session identity, lifecycle sequence, and foreground process.

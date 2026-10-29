@@ -22,7 +22,11 @@ CAPACITY = re.compile(
     r"^[^\w\n›•\"'`]*Selected\s+model\s+is\s+at\s+capacity\."
     r"\s+Please\s+try\s+a\s+different\s+model\.", re.MULTILINE | re.IGNORECASE
 )
-COMPOSER = re.compile(r"^\s*›\s*(.*?)\s*$", re.MULTILINE)
+COMPOSER = re.compile(r"^[ \t]*›[ \t]*(.*?)[ \t]*$", re.MULTILINE)
+SUBAGENT_COMPLETED = re.compile(
+    r"^[ \t]*•[ \t]+Completed[ \t]+`/root(?:/[a-z0-9_]+)+`[ \t]*$",
+    re.MULTILINE,
+)
 
 
 def capacity_error(text):
@@ -41,9 +45,18 @@ def capacity_error(text):
     composer = composers[-1]
     if composer.group(1) not in ("", "Ask Codex to do anything"):
         return False
+    # A blank first line can still contain a typed continuation. The composer
+    # is separated from the footer by a blank line in Codex's screen output.
+    if not composer.group(1):
+        following = text[end + composer.end():].splitlines()
+        if len(following) > 1 and following[1].strip():
+            return False
     tail = text[end:end + composer.start()]
-    # A new response, submitted prompt, or ongoing turn supersedes the error.
-    return not re.search(r"(?m)^\s*[•›]|\bWorking\s*\(", tail)
+    # Subagents can finish after the parent turn fails. Their completion
+    # notices do not mean the parent resumed; actual responses still do.
+    tail = SUBAGENT_COMPLETED.sub("", tail)
+    # A new response, submitted prompt, error, or ongoing turn supersedes it.
+    return not re.search(r"(?m)^[ \t]*[•›■]|\bWorking\s*\(", tail)
 
 
 def identity(agent):
