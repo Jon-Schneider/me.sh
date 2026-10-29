@@ -304,6 +304,18 @@ class ShortcutsTests(unittest.TestCase):
                 self.assertEqual(code, 0)
                 self.assertEqual(self.calls[-1], ("workspace.close", {"workspace_id": "w1"}))
 
+    def test_popup_mouse_buttons_and_outside_click(self):
+        for keys, closes in [
+            (b"\x1b[M 5'", True),   # Confirm's first cell (X10 mouse report).
+            (b"\x1b[M D'", False),  # Cancel's first cell.
+            (b"\x1b[M !!n", False),  # Outside either button.
+        ]:
+            with self.subTest(keys=keys):
+                self.calls.clear()
+                code, _ = self.run_prompt(keys)
+                self.assertEqual(code, 0)
+                self.assertEqual(any(method.endswith(".close") for method, _ in self.calls), closes)
+
     def test_popup_arrows_select_buttons_before_enter(self):
         for keys, closes in [
             (b"\x1bOC\r", False),             # Right selects Cancel.

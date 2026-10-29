@@ -89,6 +89,8 @@ def confirmation_ui(screen):
     curses.curs_set(0)
     curses.set_escdelay(25)
     screen.keypad(True)
+    curses.mousemask(curses.BUTTON1_CLICKED | curses.BUTTON1_PRESSED)
+    curses.mouseinterval(0)
     heading_style = curses.A_BOLD
     selected_style = curses.A_REVERSE | curses.A_BOLD
     button_style = curses.A_BOLD
@@ -119,15 +121,23 @@ def confirmation_ui(screen):
                 screen.addstr(row, padding, fit_line(text, cols - padding * 2), style)
         labels = ("  Confirm  ", "  Cancel  ")
         col = max(padding, (cols - sum(map(len, labels)) - 4) // 2)
+        button_bounds = []
         for index, label in enumerate(labels):
             if rows > 6 and col < cols - padding:
                 style = selected_style if index == selected else button_style
                 screen.addnstr(6, col, label, cols - col - padding, style)
+                button_bounds.append((index, col, min(col + len(label), cols - padding)))
             col += len(label) + 4
         screen.refresh()
         key = screen.get_wch()
         if key in (curses.KEY_LEFT, curses.KEY_RIGHT):
             selected = 1 - selected
+        elif key == curses.KEY_MOUSE:
+            _, x, y, _, state = curses.getmouse()
+            if y == 6 and state & (curses.BUTTON1_CLICKED | curses.BUTTON1_PRESSED):
+                for index, start, end in button_bounds:
+                    if start <= x < end:
+                        return index == 0
         elif key in ("\n", "\r", curses.KEY_ENTER):
             return selected == 0
         elif key != curses.KEY_RESIZE:

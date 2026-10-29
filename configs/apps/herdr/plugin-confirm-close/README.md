@@ -9,6 +9,7 @@ An idle shell closes immediately. A detected agent or foreground job opens a
 content, centered buttons, and
 **Confirm** selected initially. **Left/Right**
 switches between Confirm and Cancel; **Enter/Return** activates the selection.
+Click either button to activate it with the mouse.
 **Y** closes directly; **N**, **Esc**, or any other key keeps the pane. The popup
 disappears when its command exits and does not change the pane layout.
 No dependencies beyond macOS's Python standard library.
