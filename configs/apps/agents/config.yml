@@ -24,6 +24,8 @@ symlinks:
     dest: $HOME/.agents/skills/claude-review
   - src: Skills/codex-review
     dest: $HOME/.claude/skills/codex-review
+  - src: Skills/concept
+    dest: $HOME/.agents/skills/concept
   - src: Skills/hate-review
     dest:
       - $HOME/.agents/skills/hate-review

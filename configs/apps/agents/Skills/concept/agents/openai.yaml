@@ -1,0 +1,6 @@
+interface:
+  display_name: "Concept"
+  short_description: "Create concepts of a design requested by the user"
+  default_prompt: "Use $concept to created design concepts requested by the user."
+policy:
+  allow_implicit_invocation: false
