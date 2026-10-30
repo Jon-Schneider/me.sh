@@ -21,7 +21,7 @@ set -euo pipefail
 #   rendered by the tab_bar_right command entry in config.toml.
 # - me.confirm-close: confirms Cmd+W on running agents/jobs in a native
 #   Herdr terminal popup; idle shells close immediately.
-# - me.codex-retry: sends go 30s after a stopped Codex model capacity error.
+# - me.codex-retry: sends go 30s after a stopped Codex capacity/Bad Request error.
 if command -v herdr > /dev/null; then
   # Third-party plugins installed when missing.
   third_party_plugins=(

@@ -14,6 +14,7 @@ retry = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(retry)
 
 MESSAGE = "Selected model is at capacity. Please try a different model."
+BAD_REQUEST = '■ {"detail":"Bad Request"}'
 SCREEN = "› Previous task\n\n■ " + MESSAGE + "\n\n› Ask Codex to do anything\n? for shortcuts\n"
 
 
@@ -58,28 +59,54 @@ class DetectionTests(unittest.TestCase):
         for prefix in ("■ ", "", "⚠ ", "◆ "):
             for message in (MESSAGE, MESSAGE.replace(" ", "\n")):
                 with self.subTest(prefix=prefix, message=message):
-                    self.assertTrue(retry.capacity_error(prefix + message + "\n\n› Ask Codex to do anything"))
+                    self.assertTrue(retry.retryable_error(prefix + message + "\n\n› Ask Codex to do anything"))
+
+    def test_bad_request_error_with_json_spacing_and_wrapping(self):
+        for message in (BAD_REQUEST, '■ { "detail" : "Bad Request" }',
+                        '■ {\n  "detail":\n"Bad Request"\n}'):
+            with self.subTest(message=message):
+                self.assertTrue(retry.retryable_error(
+                    message + "\n\n› Ask Codex to do anything"))
+
+    def test_bad_request_in_tool_output_or_quotes_is_not_a_failure(self):
+        for message in ('{"detail":"Bad Request"}', '• ' + BAD_REQUEST,
+                        '> ' + BAD_REQUEST, "`" + BAD_REQUEST + "`",
+                        BAD_REQUEST + ' extra output', '■ {"detail":"Unauthorized"}'):
+            with self.subTest(message=message):
+                self.assertFalse(retry.retryable_error(
+                    message + "\n\n› Ask Codex to do anything"))
+
+    def test_latest_error_of_either_kind_must_still_be_current(self):
+        for first, last in (("■ " + MESSAGE, BAD_REQUEST),
+                            (BAD_REQUEST, "■ " + MESSAGE)):
+            with self.subTest(last=last):
+                text = first + "\n› go\n" + last
+                self.assertTrue(retry.retryable_error(text + "\n› Ask Codex to do anything"))
+                for tail in ("• Done", "› go", "■ Authentication failed",
+                             "• Working (5s • esc to interrupt)"):
+                    self.assertFalse(retry.retryable_error(
+                        text + "\n" + tail + "\n› Ask Codex to do anything"))
 
     def test_normal_completion_and_other_errors(self):
         for text in ("• Done", "■ Authentication failed", "■ You've hit your usage limit"):
-            self.assertFalse(retry.capacity_error(text + "\n› Ask Codex to do anything"))
+            self.assertFalse(retry.retryable_error(text + "\n› Ask Codex to do anything"))
 
     def test_quoted_message_is_not_a_failure(self):
-        self.assertFalse(retry.capacity_error('• The server said "' + MESSAGE + '"\n› Ask Codex to do anything'))
+        self.assertFalse(retry.retryable_error('• The server said "' + MESSAGE + '"\n› Ask Codex to do anything'))
 
     def test_old_error_followed_by_new_response_or_prompt(self):
         for tail in ("• Completed the task", "› go", "• Working (5s • esc to interrupt)"):
-            self.assertFalse(retry.capacity_error(MESSAGE + "\n" + tail + "\n› Ask Codex to do anything"))
+            self.assertFalse(retry.retryable_error(MESSAGE + "\n" + tail + "\n› Ask Codex to do anything"))
 
     def test_typed_input_is_preserved(self):
-        self.assertFalse(retry.capacity_error(SCREEN.replace("› Ask Codex to do anything", "› My next task")))
+        self.assertFalse(retry.retryable_error(SCREEN.replace("› Ask Codex to do anything", "› My next task")))
 
     def test_subagent_completion_notice_does_not_clear_capacity_error(self):
         text = ("■ Selected model is at capacity. Please try a\ndifferent model.\n\n"
                 "• Completed `/root/verify_ask_mac`\n\n"
                 "• Completed `/root/check/second_pass`\n\n"
                 "› Ask Codex to do anything\n")
-        self.assertTrue(retry.capacity_error(text))
+        self.assertTrue(retry.retryable_error(text))
 
     def test_response_or_prompt_after_subagent_notice_clears_error(self):
         for tail in ("• Completed the task", "• The check passed", "› go",
@@ -87,14 +114,14 @@ class DetectionTests(unittest.TestCase):
             with self.subTest(tail=tail):
                 text = (MESSAGE + "\n• Completed `/root/verify_ask_mac`\n"
                         + tail + "\n› Ask Codex to do anything\n")
-                self.assertFalse(retry.capacity_error(text))
+                self.assertFalse(retry.retryable_error(text))
 
     def test_empty_composer_does_not_consume_footer(self):
-        self.assertTrue(retry.capacity_error(
+        self.assertTrue(retry.retryable_error(
             MESSAGE + "\n\n› \n\n  GPT-6.1-Sol high · Context 17% used\n"))
 
     def test_multiline_typed_input_is_preserved(self):
-        self.assertFalse(retry.capacity_error(
+        self.assertFalse(retry.retryable_error(
             MESSAGE + "\n\n› \n  My next task\n\n  GPT-6.1-Sol high\n"))
 
 
@@ -118,6 +145,30 @@ class MonitorTests(unittest.TestCase):
         self.step(30)
         self.step(60)
         self.assertEqual(self.server.prompts, [("p1", "go")])
+
+    def test_bad_request_uses_same_timer_and_deduplication(self):
+        self.server.screens["p1"] = SCREEN.replace("■ " + MESSAGE, BAD_REQUEST)
+        self.step(0)
+        self.step(29.9)
+        self.assertEqual(self.server.prompts, [])
+        self.step(30)
+        self.step(60)
+        self.assertEqual(self.server.prompts, [("p1", "go")])
+        self.server.agents[0]["state_change_seq"] += 2
+        self.step(62)
+        self.step(91)
+        self.assertEqual(len(self.server.prompts), 1)
+        self.step(92)
+        self.assertEqual(self.server.prompts, [("p1", "go"), ("p1", "go")])
+
+    def test_bad_request_typed_input_cancels_retry(self):
+        self.server.screens["p1"] = SCREEN.replace("■ " + MESSAGE, BAD_REQUEST)
+        self.step(0)
+        self.server.screens["p1"] = self.server.screens["p1"].replace(
+            "› Ask Codex to do anything", "› hold on")
+        self.step(30)
+        self.assertEqual(self.server.prompts, [])
+        self.assertFalse(self.monitor.pending)
 
     def test_manual_resume_cancels_pending_retry(self):
         self.step(0)

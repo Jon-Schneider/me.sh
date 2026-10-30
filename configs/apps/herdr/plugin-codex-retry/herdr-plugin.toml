@@ -1,8 +1,8 @@
 id = "me.codex-retry"
-name = "Codex Capacity Retry"
+name = "Codex Error Retry"
 version = "1.0.0"
 min_herdr_version = "0.9.4"
-description = "Send go after Codex has been stopped at a model capacity error for 30 seconds"
+description = "Send go after Codex has been stopped at a capacity or Bad Request error for 30 seconds"
 platforms = ["macos"]
 
 [[startup]]
@@ -22,12 +22,12 @@ command = ["/usr/bin/python3", "retry.py"]
 
 [[actions]]
 id = "start"
-title = "Codex capacity retry: start watcher"
+title = "Codex error retry: start watcher"
 contexts = ["global", "workspace", "pane"]
 command = ["/usr/bin/python3", "retry.py"]
 
 [[actions]]
 id = "status"
-title = "Codex capacity retry: status"
+title = "Codex error retry: status"
 contexts = ["global", "workspace", "pane"]
 command = ["/usr/bin/python3", "retry.py", "--status"]

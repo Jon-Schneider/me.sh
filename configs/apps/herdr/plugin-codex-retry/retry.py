@@ -1,4 +1,4 @@
-"""Retry a stopped foreground Codex session 30 seconds after a capacity error."""
+"""Retry a stopped foreground Codex session 30 seconds after a known error."""
 
 from __future__ import annotations
 
@@ -18,9 +18,12 @@ from herdr_api import api
 PLUGIN_ID = "me.codex-retry"
 DELAY = 30
 POLL_SECONDS = 2
-CAPACITY = re.compile(
+RETRYABLE_ERROR = re.compile(
     r"^[^\w\n›•\"'`]*Selected\s+model\s+is\s+at\s+capacity\."
-    r"\s+Please\s+try\s+a\s+different\s+model\.", re.MULTILINE | re.IGNORECASE
+    r"\s+Please\s+try\s+a\s+different\s+model\."
+    # JSON is common in tool output, so require Codex's error marker here.
+    r'|^[ \t]*■[ \t]*\{\s*"detail"\s*:\s*"Bad Request"\s*\}[ \t]*$',
+    re.MULTILINE | re.IGNORECASE,
 )
 COMPOSER = re.compile(r"^[ \t]*›[ \t]*(.*?)[ \t]*$", re.MULTILINE)
 SUBAGENT_COMPLETED = re.compile(
@@ -29,13 +32,13 @@ SUBAGENT_COMPLETED = re.compile(
 )
 
 
-def capacity_error(text):
+def retryable_error(text):
     """Require the last response to be the error and an empty Codex composer.
 
     Ignore the decoration before the error; whitespace includes terminal wraps.
     Anchoring at a line start excludes ordinary quoted errors and tool output.
     """
-    matches = list(CAPACITY.finditer(text))
+    matches = list(RETRYABLE_ERROR.finditer(text))
     if not matches:
         return False
     end = matches[-1].end()
@@ -101,7 +104,7 @@ class Monitor:
             self.attempted = {}
 
     def screen_has_error(self, pane):
-        return capacity_error(self.call(
+        return retryable_error(self.call(
             "pane.read", pane_id=pane, source="detection", lines=80
         )["read"]["text"])
 
@@ -141,7 +144,7 @@ class Monitor:
                 save(self.path / "attempted.json", self.attempted)
                 self.call("agent.prompt", target=pane, text="go")
                 print(time.strftime("%Y-%m-%dT%H:%M:%S"), pane,
-                      "sent go after model capacity error", flush=True)
+                      "sent go after retryable Codex error", flush=True)
             except (OSError, ValueError, KeyError, RuntimeError) as error:
                 # Unknown state cancels this timer; a later healthy observation
                 # must start a fresh 30 seconds. Other panes remain independent.
