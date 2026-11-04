@@ -19,3 +19,7 @@
 ## Testing
 
 * The `axe` CLI tool is available for driving the iOS simulator. Run `axe --help` to see options.
+
+## Terminal Output Styleguide
+
+* References to issues and PRs should always be provided as anchor text links so they are readable and clickable.
