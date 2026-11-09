@@ -222,6 +222,75 @@ with Path({str(events)!r}).open('a') as log:
         self.assertEqual(self.git("log", "-1", "--format=%B").stdout.decode().strip(), message.read_text().strip())
         self.assertEqual(self.git("config", "core.hooksPath").stdout, b"custom hooks\n")
 
+    def staged_patch(self):
+        tree = self.git("write-tree").stdout.decode().strip()
+        patch = self.directory / "reviewed-staged.patch"
+        patch.write_bytes(self.git("diff", "--binary", "--full-index", self.base, tree, "--").stdout)
+        return patch, tree
+
+    def test_recovers_reviewed_formatter_staging_without_adopting_worktree_edits(self):
+        self.write("a.txt", "mine  \n")
+        original = self.patch("a.txt")
+        self.hook("pre-commit", """from pathlib import Path
+import subprocess
+path = Path('a.txt')
+if not subprocess.run(['git', 'diff', '--quiet', '--', str(path)]).returncode:
+    path.write_text(path.read_text().replace('  \\n', '\\n'))
+    subprocess.run(['git', 'add', '--', str(path)], check=True)
+""")
+        self.assert_rejected(self.commit(original), "staged tree changed unexpectedly")
+        self.assert_head_unchanged()
+        patch, tree = self.staged_patch()
+        self.write("a.txt", "mine\nsomeone else's later edit\n")
+        self.write("b.txt", "someone else's file\n")
+        self.assert_success(self.commit(patch, extra=("--reviewed-staged-tree", tree)))
+        self.assertEqual(self.git("show", "HEAD:a.txt").stdout, b"mine\n")
+        self.assertEqual(self.git("show", "HEAD:b.txt").stdout, b"other\n")
+        self.assertEqual((self.repo / "a.txt").read_text(), "mine\nsomeone else's later edit\n")
+        self.assertEqual((self.repo / "b.txt").read_text(), "someone else's file\n")
+        self.assert_index_clean()
+
+    def test_recovery_refuses_staging_changed_after_review(self):
+        self.write("a.txt", "mine\n")
+        self.git("add", "a.txt")
+        patch, tree = self.staged_patch()
+        self.write("b.txt", "another agent\n")
+        self.git("add", "b.txt")
+        before = self.git("write-tree").stdout
+        self.assert_rejected(self.commit(patch, extra=("--reviewed-staged-tree", tree)), "index changed since staged review")
+        self.assertEqual(self.git("write-tree").stdout, before)
+        self.assert_head_unchanged()
+
+    def test_recovery_refuses_patch_that_omits_staged_changes(self):
+        self.write("a.txt", "mine\n")
+        patch = self.patch("a.txt")
+        self.write("b.txt", "unreviewed\n")
+        self.git("add", "a.txt", "b.txt")
+        tree = self.git("write-tree").stdout.decode().strip()
+        self.assert_rejected(self.commit(patch, extra=("--reviewed-staged-tree", tree)), "does not match the entire staged tree")
+        self.assertEqual(self.git("write-tree").stdout.decode().strip(), tree)
+        self.assert_head_unchanged()
+
+    def test_recovery_refuses_head_changed_after_review(self):
+        self.write("a.txt", "mine\n")
+        self.git("add", "a.txt")
+        patch, tree = self.staged_patch()
+        self.git("commit", "--allow-empty", "--only", "-qm", "Concurrent empty commit")
+        head = self.git("rev-parse", "HEAD").stdout
+        self.assert_rejected(self.commit(patch, extra=("--reviewed-staged-tree", tree)), "HEAD changed since staged review")
+        self.assertEqual(self.git("write-tree").stdout.decode().strip(), tree)
+        self.assertEqual(self.git("rev-parse", "HEAD").stdout, head)
+
+    def test_recovery_still_guards_hooks_that_stage_extra_work(self):
+        self.write("a.txt", "mine\n")
+        self.git("add", "a.txt")
+        patch, tree = self.staged_patch()
+        self.write("b.txt", "extra\n")
+        self.hook("pre-commit", "import subprocess\nsubprocess.run(['git', 'add', 'b.txt'], check=True)\n")
+        self.assert_rejected(self.commit(patch, extra=("--reviewed-staged-tree", tree)), "staged tree changed unexpectedly")
+        self.assertEqual(self.git("diff", "--cached", "--name-only").stdout, b"a.txt\nb.txt\n")
+        self.assert_head_unchanged()
+
     def test_new_binary_deletion_mode_and_rename_patches(self):
         self.git("mv", "b.txt", "renamed.txt")
         self.git("reset", "-q", "HEAD", "--", "b.txt", "renamed.txt")

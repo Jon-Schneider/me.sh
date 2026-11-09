@@ -135,7 +135,8 @@ def rollback(git: Git, patch: bytes, head: str, branch: str, expected_tree: str)
         print(f"Cleanup left the index for inspection: {error}", file=sys.stderr)
 
 
-def transact(git: Git, git_dir: Path, branch: str, base: str, patch: bytes, message: bytes) -> None:
+def transact(git: Git, git_dir: Path, branch: str, base: str, patch: bytes, message: bytes,
+             reviewed_staged_tree: str | None = None) -> None:
     check_cancellation()
     if git.branch() != branch:
         raise TransactionError("The current branch changed while waiting; review again before retrying.")
@@ -147,9 +148,14 @@ def transact(git: Git, git_dir: Path, branch: str, base: str, patch: bytes, mess
     head_tree = git.value("rev-parse", f"{head}^{{tree}}")
     if git.run("ls-files", "--unmerged").stdout:
         raise TransactionError("The index has unresolved conflicts; left untouched.")
-    if git.value("write-tree") != head_tree:
+    starting_tree = reviewed_staged_tree or head_tree
+    if git.value("write-tree") != starting_tree:
+        if reviewed_staged_tree:
+            raise TransactionError("The index changed since staged review; left untouched. Review again before retrying.")
         raise TransactionError("The index already contains staged changes; left untouched.")
     base = git.value("rev-parse", "--verify", f"{base}^{{commit}}")
+    if reviewed_staged_tree and base != head:
+        raise TransactionError("HEAD changed since staged review; left untouched. Rebuild and review the patch.")
     ancestor = git.run("merge-base", "--is-ancestor", base, head, check=False)
     if ancestor.returncode:
         raise TransactionError("The patch base is not an ancestor of HEAD; rebuild and review the patch.")
@@ -171,12 +177,15 @@ def transact(git: Git, git_dir: Path, branch: str, base: str, patch: bytes, mess
         git.run("read-tree", head, env=preview_env)
         git.run("apply", "--cached", "--whitespace=nowarn", "-", data=patch, env=preview_env)
         expected_tree = git.value("write-tree", env=preview_env)
+        if reviewed_staged_tree and expected_tree != reviewed_staged_tree:
+            raise TransactionError("The reviewed patch does not match the entire staged tree; left untouched.")
         hooks = directory / "hooks"
         hooks.mkdir()
         hook_env = install_hook_guards(git, hooks, head, branch, expected_tree)
         check_cancellation()
-        assert_snapshot(git, head, branch, head_tree)
-        git.run("apply", "--cached", "--whitespace=nowarn", "-", data=patch)
+        assert_snapshot(git, head, branch, starting_tree)
+        if not reviewed_staged_tree:
+            git.run("apply", "--cached", "--whitespace=nowarn", "-", data=patch)
         try:
             assert_snapshot(git, head, branch, expected_tree)
             check_cancellation()
@@ -198,6 +207,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--repo", type=Path, default=Path.cwd(), help="Worktree directory (default: current directory)")
     parser.add_argument("--patch", type=Path, required=True, help="Reviewed Git patch, including binary data when needed")
     parser.add_argument("--base", required=True, help="Full HEAD commit ID captured before preparing the patch")
+    parser.add_argument("--reviewed-staged-tree", help="Exact tree ID reviewed after this transaction's hook changed staging")
     messages = parser.add_mutually_exclusive_group(required=True)
     messages.add_argument("--message", help="Commit message")
     messages.add_argument("--message-file", type=Path, help="File containing the commit message")
@@ -207,6 +217,8 @@ def parse_args() -> argparse.Namespace:
         parser.error("--timeout must be finite and nonnegative")
     if not re.fullmatch(r"[0-9a-fA-F]{40}|[0-9a-fA-F]{64}", args.base):
         parser.error("--base must be a full captured commit ID, not a moving ref such as HEAD")
+    if args.reviewed_staged_tree and not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", args.reviewed_staged_tree):
+        parser.error("--reviewed-staged-tree must be a full tree ID captured before staged review")
     return args
 
 
@@ -231,7 +243,7 @@ def main() -> int:
     with (git_dir / "patch-commit.lock").open("a+b") as lock:
         acquire_lock(lock, args.timeout)
         git.lock_fd = lock.fileno()
-        transact(git, git_dir, branch, args.base, patch, message)
+        transact(git, git_dir, branch, args.base, patch, message, args.reviewed_staged_tree)
     return 0
 
 
